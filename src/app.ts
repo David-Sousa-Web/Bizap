@@ -19,6 +19,7 @@ import { deleteProjectRoute } from './modules/project/routes/delete-project.rout
 import { updateFlowMessageRoute } from './modules/project/routes/update-flow-message.route.js'
 import { createNumberRoute } from './modules/number/routes/create-number.route.js'
 import { listNumbersRoute } from './modules/number/routes/list-numbers.route.js'
+import { listTemplatesRoute } from './modules/template/routes/list-templates.route.js'
 
 export function buildApp() {
   const app = fastify()
@@ -94,6 +95,8 @@ export function buildApp() {
 
   app.register(createNumberRoute)
   app.register(listNumbersRoute)
+
+  app.register(listTemplatesRoute)
 
   return app
 }

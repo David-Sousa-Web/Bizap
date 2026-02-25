@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 export const createProjectBodySchema = z.object({
   name: z.string().min(1),
-  image: z.string().url().optional(),
   phoneNumber: z.string().min(1),
   agency: z.string().optional(),
   templateSid: z.string().min(1),
@@ -11,7 +10,6 @@ export const createProjectBodySchema = z.object({
 
 export const updateProjectBodySchema = z.object({
   name: z.string().min(1).optional(),
-  image: z.string().url().optional(),
   phoneNumber: z.string().min(1).optional(),
   agency: z.string().optional(),
   templateSid: z.string().min(1).optional(),

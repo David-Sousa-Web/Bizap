@@ -16,7 +16,7 @@ export class PrismaProjectRepository implements ProjectRepository {
     return prisma.project.findMany({ where: { userId } })
   }
 
-  async update(id: string, data: Partial<UpdateProjectBody & { flowMessage: string }>): Promise<Project> {
+  async update(id: string, data: Partial<UpdateProjectBody & { flowMessage: string; image: string }>): Promise<Project> {
     return prisma.project.update({ where: { id }, data })
   }
 

@@ -1,5 +1,6 @@
 import fastify from 'fastify'
 import fastifyCors from '@fastify/cors'
+import fastifyMultipart from '@fastify/multipart'
 import fastifyJwt from '@fastify/jwt'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
@@ -22,6 +23,7 @@ import { listNumbersRoute } from './modules/number/routes/list-numbers.route.js'
 import { listTemplatesRoute } from './modules/template/routes/list-templates.route.js'
 import { sendMediaRoute } from './modules/media/routes/send-media.route.js'
 import { twilioWebhookRoute } from './modules/webhook/routes/twilio-webhook.route.js'
+import { uploadProjectImageRoute } from './modules/project/routes/upload-project-image.route.js'
 
 export function buildApp() {
   const app = fastify()
@@ -30,6 +32,7 @@ export function buildApp() {
   app.setSerializerCompiler(serializerCompiler)
 
   app.register(fastifyCors, { origin: '*' })
+  app.register(fastifyMultipart, { limits: { fileSize: 5 * 1024 * 1024 } })
 
   app.register(fastifyJwt, { secret: env.JWT_SECRET })
 
@@ -96,6 +99,7 @@ export function buildApp() {
   app.register(updateProjectRoute)
   app.register(deleteProjectRoute)
   app.register(updateFlowMessageRoute)
+  app.register(uploadProjectImageRoute)
 
   app.register(createNumberRoute)
   app.register(listNumbersRoute)

@@ -21,6 +21,7 @@ import { createNumberRoute } from './modules/number/routes/create-number.route.j
 import { listNumbersRoute } from './modules/number/routes/list-numbers.route.js'
 import { listTemplatesRoute } from './modules/template/routes/list-templates.route.js'
 import { sendMediaRoute } from './modules/media/routes/send-media.route.js'
+import { twilioWebhookRoute } from './modules/webhook/routes/twilio-webhook.route.js'
 
 export function buildApp() {
   const app = fastify()
@@ -68,10 +69,12 @@ export function buildApp() {
       })
     }
 
-    if (error.validation) {
+    const fastifyError = error as { validation?: unknown; message?: string }
+
+    if (fastifyError.validation) {
       return reply.status(400).send({
         success: false,
-        message: error.message,
+        message: fastifyError.message ?? 'Validation error',
         data: null,
       })
     }
@@ -100,6 +103,8 @@ export function buildApp() {
   app.register(listTemplatesRoute)
 
   app.register(sendMediaRoute)
+
+  app.register(twilioWebhookRoute)
 
   return app
 }

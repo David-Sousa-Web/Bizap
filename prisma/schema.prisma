@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  projects Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id           String   @id @default(uuid())
+  name         String
+  image        String?
+  phoneNumber  String   @map("phone_number")
+  agency       String?
+  templateSid  String   @map("template_sid")
+  flowMessage  String   @map("flow_message") @db.Text
+  apiKey       String   @unique @map("api_key")
+  userId       String   @map("user_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  numbers       Number[]
+  mediaRequests MediaRequest[]
+
+  @@map("projects")
+}
+
+model Number {
+  id        String   @id @default(uuid())
+  name      String
+  number    String
+  projectId String   @map("project_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mediaRequests MediaRequest[]
+
+  @@map("numbers")
+}
+
+enum MediaRequestStatus {
+  PENDING
+  TEMPLATE_SENT
+  CONFIRMED
+  MEDIA_SENT
+  FAILED
+}
+
+model MediaRequest {
+  id        String             @id @default(uuid())
+  mediaUrl  String             @map("media_url")
+  status    MediaRequestStatus @default(PENDING)
+  numberId  String             @map("number_id")
+  projectId String             @map("project_id")
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+
+  number  Number  @relation(fields: [numberId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("media_requests")
+}

@@ -10,6 +10,7 @@ import {
 } from 'fastify-type-provider-zod'
 import { env } from './env.js'
 import { ApplicationError } from './utils/errors.js'
+import { loginRoute } from './modules/auth/routes/login.route.js'
 
 export function buildApp() {
   const app = fastify()
@@ -73,6 +74,8 @@ export function buildApp() {
       data: null,
     })
   })
+
+  app.register(loginRoute)
 
   return app
 }

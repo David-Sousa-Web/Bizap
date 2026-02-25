@@ -17,6 +17,8 @@ import { getProjectRoute } from './modules/project/routes/get-project.route.js'
 import { updateProjectRoute } from './modules/project/routes/update-project.route.js'
 import { deleteProjectRoute } from './modules/project/routes/delete-project.route.js'
 import { updateFlowMessageRoute } from './modules/project/routes/update-flow-message.route.js'
+import { createNumberRoute } from './modules/number/routes/create-number.route.js'
+import { listNumbersRoute } from './modules/number/routes/list-numbers.route.js'
 
 export function buildApp() {
   const app = fastify()
@@ -89,6 +91,9 @@ export function buildApp() {
   app.register(updateProjectRoute)
   app.register(deleteProjectRoute)
   app.register(updateFlowMessageRoute)
+
+  app.register(createNumberRoute)
+  app.register(listNumbersRoute)
 
   return app
 }

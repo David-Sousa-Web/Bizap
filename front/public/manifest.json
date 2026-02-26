@@ -1,10 +1,10 @@
 {
-  "name": "WebApp Comfort Bridgerton",
-  "short_name": "Comfort Bridgerton",
+  "name": "WebApp Bizap",
+  "short_name": "Bizap",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#FFF",
-  "theme_color": "#FFF",
+  "background_color": "#F1F0F6",
+  "theme_color": "#F1F0F6",
   "icons": [
     {
       "src": "favicon.ico",

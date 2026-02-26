@@ -8,12 +8,16 @@ Você é um engenheiro de software sênior especializado em desenvolvimento full
 
 ### Frontend
 - **Core**: React 19, TypeScript
-- **Estilização**: Tailwind CSS
-- **Componentes UI**: shadcn/ui
+- **Build**: Vite
+- **Estilização**: Tailwind CSS v4 (via `@tailwindcss/vite`)
+- **Componentes UI**: shadcn/ui (Radix UI + Base UI como primitivos)
+- **Ícones**: Lucide React
 - **Roteamento**: React Router DOM
+- **Estado do Servidor**: TanStack React Query (cache, mutations, invalidação)
+- **Requisições HTTP**: Axios (instância configurada com interceptors)
 - **Formulários**: React Hook Form + Zod
 - **Inputs com Máscara**: react-number-format
-- **Requisições HTTP**: Axios
+- **Datas**: date-fns
 - **Notificações/Toasts**: Sonner
 
 ### Backend
@@ -58,44 +62,133 @@ Você é um engenheiro de software sênior especializado em desenvolvimento full
 
 ```
 src/
-├── components/        # Componentes reutilizáveis globais
-│   └── ui/            # Componentes do shadcn/ui
-├── contexts/          # Context API (AuthContext, ThemeContext, etc.)
-├── features/          # Módulos/features da aplicação
+├── components/           # Componentes reutilizáveis globais
+│   ├── ui/               # Componentes do shadcn/ui (não editar manualmente)
+│   └── [ComponentName].tsx  # Componentes compostos (Header, Sidebar, DataTable, etc.)
+├── contexts/             # Context API (apenas estado global de UI: Auth, Theme)
+├── features/             # Módulos/features da aplicação (auto-contidos)
 │   └── [feature]/
 │       ├── components/   # Componentes específicos da feature
-│       ├── hooks/        # Hooks específicos da feature
-│       └── index.tsx     # Componente principal da feature
-├── hooks/             # Custom hooks globais
-├── lib/               # Utilitários e configurações (axios, etc.)
-├── pages/             # Páginas/rotas da aplicação
-├── routes/            # Configuração de rotas (React Router DOM)
-├── services/          # Camada de serviços (API calls)
-├── types/             # Types e interfaces globais
-└── utils/             # Funções utilitárias puras
+│       ├── hooks/        # Hooks da feature (useQuery, useMutation wrappers)
+│       ├── schemas/      # Schemas Zod da feature (validação de forms)
+│       ├── types.ts      # Types específicos da feature
+│       └── index.tsx     # Re-exporta o que for necessário
+├── hooks/                # Custom hooks globais reutilizáveis
+├── lib/                  # Configurações de libs externas (axios, queryClient, etc.)
+├── pages/                # Páginas/rotas — apenas composição (importa features e layout)
+├── routes/               # Configuração de rotas, guards, layouts
+├── services/             # Camada de serviços (funções puras de chamada HTTP)
+├── types/                # Types e interfaces globais (ApiResponse, User, etc.)
+├── utils/                # Funções utilitárias puras (formatadores, helpers)
 ```
 
-### 2.2 Separação de Responsabilidades
-- **Custom Hooks**: Toda a lógica de negócio (chamadas de API, tratamento de erro, formatação de dados, gerenciamento de estado complexo) deve ficar em Custom Hooks.
-- **Componentes**: Devem ser focados em UI e composição. O componente principal da feature une a lógica (hooks) com a apresentação.
-- **Services**: Centralize chamadas de API em arquivos de serviço. Não faça chamadas axios diretamente nos componentes.
+### 2.2 Separação de Responsabilidades (3 Camadas)
 
-### 2.3 Estilização
-- Use **exclusivamente** Tailwind CSS para estilos.
-- Priorize componentes da biblioteca **shadcn/ui** sempre que possível.
-- Para toasts/notificações, use a biblioteca **Sonner**.
-- Evite CSS inline ou arquivos CSS separados.
+A comunicação com a API segue obrigatoriamente 3 camadas: **Services → Hooks → Components**.
 
-### 2.4 Formulários
+- **Services** (`src/services/`): Funções puras que chamam a API via Axios. Não usam hooks, não gerenciam estado. Um arquivo por domínio (`projectService.ts`, `authService.ts`). Cada função retorna diretamente `response.data`.
+- **Hooks** (`src/features/[feature]/hooks/` ou `src/hooks/`): Usam TanStack Query (`useQuery`, `useMutation`) chamando as funções dos services. Gerenciam cache, loading, error, invalidação. São o ponto de entrada para toda lógica de dados.
+- **Componentes/Páginas**: Consomem hooks. Focam exclusivamente em UI, composição e interação do usuário. Nunca importam services diretamente.
+
+```
+[Componente] → useProjects() → projectService.list() → axios.get('/projects')
+```
+
+**Regra absoluta**: Nunca faça chamadas axios/fetch diretamente em componentes ou páginas.
+
+### 2.3 Estado do Servidor (TanStack React Query)
+
+TanStack Query é a **única** forma de gerenciar dados vindos da API. Não use `useState` + `useEffect` para fetch de dados.
+
+**Query Keys**: Use arrays consistentes e hierárquicos para cache granular:
+```typescript
+['projects']                        // lista
+['projects', projectId]             // detalhe
+['projects', projectId, 'numbers']  // sub-recurso
+```
+
+**Padrões obrigatórios**:
+- `useQuery` para leitura (GET). Sempre defina `queryKey` e `queryFn`.
+- `useMutation` para escrita (POST/PUT/DELETE). Sempre invalide queries relacionadas no `onSuccess`.
+- Configure `staleTime` adequado por tipo de dado (dados estáticos: alto, dados dinâmicos: baixo).
+- Use `enabled` para queries condicionais (ex: buscar projeto só quando `projectId` existir).
+- Use `select` para transformar dados antes de entregar ao componente.
+
+**QueryClient**: Configure uma instância global em `src/lib/queryClient.ts` com defaults sensatos:
+```typescript
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,   // 5 min
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+```
+
+### 2.4 Cliente HTTP (Axios)
+
+Configure uma instância Axios centralizada em `src/lib/api.ts`:
+
+- `baseURL` vindo de `env.VITE_API_BASE_URL`.
+- `timeout` vindo de `env.VITE_API_TIMEOUT_MS`.
+- **Request interceptor**: injeta o token JWT automaticamente no header `Authorization: Bearer <token>`.
+- **Response interceptor**: trata status 401 (limpa token, redireciona para login). Erros de rede devem gerar mensagens amigáveis.
+- Nunca crie instâncias axios avulsas. Todos os services importam a instância `api` de `src/lib/api.ts`.
+
+### 2.5 Autenticação e Roteamento
+
+**AuthContext** (`src/contexts/AuthContext.tsx`):
+- Gerencia estado do usuário autenticado, funções `login()`, `logout()` e flag `isAuthenticated`.
+- Integra com `tokenStorage` para persistência do token.
+- Ao inicializar, verifica se há token válido salvo e restaura a sessão.
+- Provê um hook `useAuth()` para consumo nos componentes.
+
+**Rotas** (`src/routes/`):
+- Defina rotas com `createBrowserRouter` do React Router DOM.
+- Separe rotas **públicas** (login) e **protegidas** (dashboard, projetos, etc.).
+- Implemente um componente `ProtectedRoute` que verifica `isAuthenticated` e redireciona para `/login` se não autenticado.
+- Use **layouts aninhados** para compartilhar Sidebar/Header entre páginas protegidas.
+- Use `React.lazy()` + `Suspense` para code-splitting de todas as páginas.
+
+### 2.6 Estilização
+- Use **exclusivamente** Tailwind CSS para estilos. Não crie arquivos `.css` além do `index.css` global.
+- Priorize componentes do **shadcn/ui** sempre que possível. Antes de criar um componente do zero, verifique se já existe no shadcn.
+- Use **Sonner** para toasts/notificações. Não crie sistemas de notificação customizados.
+- Use **Lucide React** para ícones. Não misture com outras bibliotecas de ícones.
+- Use a função `cn()` de `src/lib/utils.ts` para merge condicional de classes.
+- Evite classes Tailwind duplicadas ou conflitantes — `tailwind-merge` resolve isso via `cn()`.
+
+### 2.7 Formulários
 - Use sempre **React Hook Form** + **Zod** para validação.
-- Crie schemas Zod reutilizáveis em arquivos separados.
-- Use `react-number-format` para inputs que precisam de máscara (CPF, telefone, moeda).
+- Crie schemas Zod em arquivos separados dentro da feature (`features/[feature]/schemas/`).
+- Use `@hookform/resolvers/zod` para integrar Zod com React Hook Form.
+- Use `react-number-format` para inputs com máscara (telefone, CPF, moeda). Integre via `Controller` do React Hook Form.
+- Schemas Zod que são compartilhados entre frontend e backend devem espelhar a mesma estrutura (não precisa ser o mesmo arquivo, mas a mesma shape).
+- Sempre exiba mensagens de erro de validação inline abaixo do campo.
 
-### 2.5 Performance
-- Use `React.memo()` para componentes que recebem props estáveis.
-- Use `useMemo` e `useCallback` quando apropriado (não prematuramente).
-- Implemente lazy loading para rotas e componentes pesados.
-- Evite re-renders desnecessários.
+### 2.8 Tratamento de Erros
+- Erros de API devem ser tratados nos hooks (via `onError` do useMutation ou error boundary do useQuery).
+- Exiba erros ao usuário com toasts (Sonner) para ações (mutations) e com componentes inline para listagens (queries).
+- Nunca exiba stack traces, mensagens técnicas ou status codes para o usuário final.
+- Implemente um `ErrorBoundary` global para capturar erros inesperados de renderização.
+- Tipar erros da API usando a interface `ApiResponse` do backend para extrair `message` de forma segura.
+
+### 2.9 Datas
+- Use **date-fns** para toda manipulação e formatação de datas. Nunca use `new Date().toLocaleDateString()` manualmente.
+- Importe apenas as funções necessárias do date-fns (tree-shakeable).
+- Use o locale `pt-BR` quando formatar datas para exibição.
+- Crie helpers em `src/utils/` para formatos recorrentes (ex: `formatDateBR`, `formatRelativeDate`).
+
+### 2.10 Performance
+- Use `React.lazy()` + `Suspense` para code-splitting de todas as páginas/rotas.
+- Prefira TanStack Query para cache de dados — não reimplemente cache manualmente.
+- Use `useMemo` e `useCallback` apenas quando houver cálculos pesados ou para estabilizar referências passadas como dependência de hooks/children memoizados.
+- Evite criar objetos e arrays inline em props (causa re-render em children memoizados).
+- Para listas grandes, considere virtualização (`@tanstack/react-virtual`).
+- Importe componentes shadcn/ui e funções date-fns de forma granular (não importe tudo).
+- Imagens: use `loading="lazy"` e defina `width`/`height` para evitar layout shift.
 
 ---
 

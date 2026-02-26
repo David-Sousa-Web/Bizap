@@ -1,0 +1,108 @@
+---
+description: Regras para desenvolvimento backend Fastify — arquitetura, rotas, Prisma, autenticação, logging
+globs: back/**
+alwaysApply: false
+---
+
+# Backend (Fastify)
+
+## 1. Arquitetura e Organização
+
+```
+src/
+├── controllers/       # Handlers das rotas (lógica de request/response)
+│   └── [module]/
+├── services/          # Lógica de negócio
+│   └── [module]/
+├── repositories/      # Acesso a dados (Prisma queries)
+├── routes/            # Definição de rotas e schemas
+├── middleware/        # Middlewares (auth, validation, etc.)
+├── lib/               # Utilitários (prisma client, logger, helpers)
+├── scheduler/         # Jobs agendados (node-cron)
+├── env.ts             # Validação de variáveis de ambiente
+└── server.ts          # Configuração e inicialização do servidor
+```
+
+## 2. Padrão de Responses
+Todas as respostas da API devem seguir o padrão:
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  message: string | null;
+  data: T | null;
+}
+```
+
+## 3. Validação de Rotas
+- **Sempre** defina schemas Zod para `body`, `params`, `querystring` e `response`.
+- Use `fastify-type-provider-zod` para integração automática.
+- Defina schemas de response para todos os status codes possíveis.
+
+Exemplo de rota:
+```typescript
+app.withTypeProvider<ZodTypeProvider>().post('/users', {
+  schema: {
+    tags: ['Users'],
+    summary: 'Criar usuário',
+    description: 'Cadastra um novo usuário no sistema',
+    body: createUserSchema,
+    response: {
+      201: successResponseSchema,
+      400: errorResponseSchema,
+      409: conflictResponseSchema
+    }
+  }
+}, createUserController)
+```
+
+## 4. Variáveis de Ambiente
+- **Sempre** valide variáveis de ambiente no startup usando Zod.
+- Use um arquivo `env.ts` centralizado.
+- Nunca acesse `process.env` diretamente fora do `env.ts`.
+- Mantenha um `.env.example` atualizado.
+
+```typescript
+// env.ts
+import 'dotenv/config'
+import { z } from 'zod'
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().int().positive().default(3333),
+  DATABASE_URL: z.string().min(1, 'DATABASE_URL é obrigatório'),
+  JWT_SECRET: z.string().min(1, 'JWT_SECRET é obrigatório'),
+})
+
+const parsed = envSchema.safeParse(process.env)
+
+if (!parsed.success) {
+  const issues = parsed.error.issues
+    .map((i) => `${i.path.join('.')}: ${i.message}`)
+    .join('\n')
+  throw new Error(`Falha ao validar variáveis de ambiente:\n${issues}`)
+}
+
+export const env = parsed.data
+```
+
+## 5. Banco de Dados (Prisma)
+- Use migrations para todas as alterações de schema.
+- Defina indexes para campos frequentemente consultados.
+- Use `@@map()` para nomear tabelas em snake_case.
+- Sempre use transações para operações que modificam múltiplas tabelas.
+- Implemente soft delete quando apropriado.
+
+## 6. Autenticação e Segurança
+- Use JWT para autenticação stateless.
+- Implemente middlewares de autenticação reutilizáveis.
+- Nunca exponha informações sensíveis em responses.
+- Valide e sanitize todos os inputs.
+- Use HTTPS em produção.
+- Configure CORS apropriadamente.
+
+## 7. Logging
+- Implemente um logger estruturado (não use `console.log` em produção).
+- Logge todas as requisições HTTP com método, path, status e duração.
+- Logge erros com stack trace e contexto.
+- Use níveis de log apropriados (info, warn, error, debug).

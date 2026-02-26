@@ -1,7 +1,8 @@
-import { ComponentExample } from "@/components/component-example";
 
-export function App() {
-return <ComponentExample />;
+export default function App() {
+    return (
+        <div>
+            <h1>App Bizap</h1>
+        </div>
+    );
 }
-
-export default App;

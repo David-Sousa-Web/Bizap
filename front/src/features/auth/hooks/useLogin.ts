@@ -16,7 +16,7 @@ export function useLogin() {
     onSuccess: (response) => {
       if (response.data?.token) {
         login(response.data.token)
-        navigate("/", { replace: true })
+        navigate("/dashboard", { replace: true })
       }
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {

@@ -3,10 +3,19 @@ import { lazy } from "react"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
 import { SuspenseWrapper } from "@/components/SuspenseWrapper"
 
+const HomePage = lazy(() => import("@/pages/HomePage"))
 const LoginPage = lazy(() => import("@/pages/LoginPage"))
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"))
 
 export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <SuspenseWrapper>
+        <HomePage />
+      </SuspenseWrapper>
+    ),
+  },
   {
     path: "/login",
     element: (
@@ -19,7 +28,7 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: "/",
+        path: "/dashboard",
         element: (
           <SuspenseWrapper>
             <DashboardPage />

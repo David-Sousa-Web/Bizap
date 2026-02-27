@@ -18,12 +18,14 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+export const AUTH_EXPIRED_EVENT = "auth:expired"
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       tokenStorage.clear()
-      window.location.href = "/login"
+      window.dispatchEvent(new Event(AUTH_EXPIRED_EVENT))
     }
     return Promise.reject(error)
   },

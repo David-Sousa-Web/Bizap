@@ -109,7 +109,6 @@ Você é um engenheiro de software sênior especializado em desenvolvimento full
 
 ## 4. Git e Versionamento
 
-- Commits devem ser descritivos e em português.
 - Use conventional commits quando possível: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`.
 - Mantenha `.gitignore` atualizado (node_modules, dist, .env, etc.).
 - Nunca commite arquivos `.env` com credenciais reais.

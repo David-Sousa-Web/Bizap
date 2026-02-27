@@ -1,6 +1,7 @@
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2, LogIn } from "lucide-react"
+import { Loader2, LogIn, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -16,6 +17,7 @@ import { useLogin } from "@/features/auth/hooks/useLogin"
 
 export function LoginForm() {
   const mutation = useLogin()
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -55,13 +57,31 @@ export function LoginForm() {
 
           <Field data-invalid={!!errors.password}>
             <FieldLabel htmlFor="password">Senha</FieldLabel>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••"
-              autoComplete="current-password"
-              {...register("password")}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••"
+                autoComplete="current-password"
+                className="pr-10"
+                {...register("password")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+                <span className="sr-only">
+                  {showPassword ? "Ocultar senha" : "Mostrar senha"}
+                </span>
+              </button>
+            </div>
             <FieldError>{errors.password?.message}</FieldError>
           </Field>
 

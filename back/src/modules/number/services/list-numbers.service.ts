@@ -5,6 +5,9 @@ import type { NumberRepository } from '../repositories/number-repository.js'
 export async function listNumbersService(
   projectId: string,
   userId: string,
+  page: number,
+  limit: number,
+  search: string | undefined,
   repository: NumberRepository,
 ) {
   const project = await prisma.project.findUnique({
@@ -15,12 +18,15 @@ export async function listNumbersService(
     throw new ApplicationError('Project not found', 404)
   }
 
-  const numbers = await repository.findAllByProjectId(projectId)
+  const result = await repository.findAllByProjectId(projectId, page, limit, search)
 
-  return numbers.map((number) => ({
-    id: number.id,
-    name: number.name,
-    number: number.number,
-    projectId: number.projectId,
-  }))
+  return {
+    items: result.items.map((number) => ({
+      id: number.id,
+      name: number.name,
+      number: number.number,
+      projectId: number.projectId,
+    })),
+    meta: result.meta,
+  }
 }

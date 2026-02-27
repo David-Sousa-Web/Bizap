@@ -26,6 +26,12 @@ export const listNumbersResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
   data: z.array(numberResponseDataSchema),
+  meta: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
 })
 
 export type CreateNumberBody = z.infer<typeof createNumberBodySchema>

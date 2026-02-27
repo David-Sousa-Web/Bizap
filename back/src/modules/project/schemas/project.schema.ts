@@ -48,6 +48,12 @@ export const listProjectsResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
   data: z.array(projectResponseDataSchema),
+  meta: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
 })
 
 export const deleteProjectResponseSchema = z.object({

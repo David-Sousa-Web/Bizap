@@ -14,4 +14,10 @@ export const listTemplatesResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
   data: z.array(templateDataSchema),
+  meta: z.object({
+    page: z.number(),
+    limit: z.number(),
+    total: z.number(),
+    totalPages: z.number(),
+  }),
 })

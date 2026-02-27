@@ -38,10 +38,10 @@ function resolveEligibility(type: string, approved: boolean) {
   }
 }
 
-export async function listTemplatesService() {
+export async function listTemplatesService(page: number, limit: number, search?: string) {
   const templates = await twilioClient.content.v1.contentAndApprovals.list()
 
-  return templates.map((template) => {
+  const mapped = templates.map((template) => {
     const approvals = template.approvalRequests as ApprovalRequests | undefined
     const whatsapp = approvals?.whatsapp
     const types = template.types as Record<string, Record<string, unknown>> | undefined
@@ -60,4 +60,22 @@ export async function listTemplatesService() {
       userInitiated: eligibility.userInitiated,
     }
   })
+
+  const filtered = search
+    ? mapped.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()))
+    : mapped
+
+  const total = filtered.length
+  const start = (page - 1) * limit
+  const items = filtered.slice(start, start + limit)
+
+  return {
+    items,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  }
 }

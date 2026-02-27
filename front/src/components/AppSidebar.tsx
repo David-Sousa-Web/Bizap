@@ -32,8 +32,8 @@ import {
 
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Templates", path: "/templates", icon: FileText },
   { label: "Projetos", path: "/projetos", icon: FolderKanban },
+  { label: "Templates", path: "/templates", icon: FileText },
 ] as const
 
 export function AppSidebar() {

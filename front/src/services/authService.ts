@@ -10,9 +10,14 @@ export interface LoginResponse {
   token: string
 }
 
-export const authService = {
-  login: (data: LoginRequest) =>
-    api
-      .post<ApiResponse<LoginResponse>>("/auth/login", data)
-      .then((res) => res.data),
+async function login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+  const response = await api.post<ApiResponse<LoginResponse>>(
+    "/auth/login",
+    data,
+  )
+  return response.data
 }
+
+export const authService = Object.freeze({ login })
+
+export type AuthService = typeof authService

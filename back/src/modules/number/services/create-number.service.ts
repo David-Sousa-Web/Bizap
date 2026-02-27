@@ -6,5 +6,12 @@ export async function createNumberService(
   projectId: string,
   repository: NumberRepository,
 ) {
-  return repository.create({ ...data, projectId })
+  const number = await repository.create({ ...data, projectId })
+
+  return {
+    id: number.id,
+    name: number.name,
+    number: number.number,
+    projectId: number.projectId,
+  }
 }

@@ -10,7 +10,7 @@ export const loginResponseSchema = z.object({
   message: z.string(),
   data: z.object({
     token: z.string(),
-  }).nullable(),
+  }),
 })
 
 export type LoginBody = z.infer<typeof loginBodySchema>

@@ -15,5 +15,12 @@ export async function listNumbersService(
     throw new ApplicationError('Project not found', 404)
   }
 
-  return repository.findAllByProjectId(projectId)
+  const numbers = await repository.findAllByProjectId(projectId)
+
+  return numbers.map((number) => ({
+    id: number.id,
+    name: number.name,
+    number: number.number,
+    projectId: number.projectId,
+  }))
 }

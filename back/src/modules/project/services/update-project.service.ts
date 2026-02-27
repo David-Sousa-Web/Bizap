@@ -18,5 +18,16 @@ export async function updateProjectService(
     throw new ApplicationError('Project not found', 404)
   }
 
-  return repository.update(id, data)
+  const updated = await repository.update(id, data)
+
+  return {
+    id: updated.id,
+    name: updated.name,
+    image: updated.image,
+    phoneNumber: updated.phoneNumber,
+    agency: updated.agency,
+    templateSid: updated.templateSid,
+    flowMessage: updated.flowMessage,
+    apiKey: updated.apiKey,
+  }
 }

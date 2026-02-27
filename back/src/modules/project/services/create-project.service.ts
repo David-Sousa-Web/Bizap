@@ -15,5 +15,14 @@ export async function createProjectService(
     userId,
   })
 
-  return project
+  return {
+    id: project.id,
+    name: project.name,
+    image: project.image,
+    phoneNumber: project.phoneNumber,
+    agency: project.agency,
+    templateSid: project.templateSid,
+    flowMessage: project.flowMessage,
+    apiKey: project.apiKey,
+  }
 }

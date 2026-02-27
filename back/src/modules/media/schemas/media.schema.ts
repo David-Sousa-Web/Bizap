@@ -18,8 +18,7 @@ export const sendMediaResponseSchema = z.object({
     status: z.string(),
     numberId: z.string(),
     projectId: z.string(),
-    createdAt: z.string(),
-  }).nullable(),
+  }),
 })
 
 export type SendMediaBody = z.infer<typeof sendMediaBodySchema>

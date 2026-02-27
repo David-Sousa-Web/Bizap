@@ -41,5 +41,14 @@ export async function uploadProjectImageService(
 
   const updated = await repository.update(projectId, { image: imageUrl })
 
-  return updated
+  return {
+    id: updated.id,
+    name: updated.name,
+    image: updated.image,
+    phoneNumber: updated.phoneNumber,
+    agency: updated.agency,
+    templateSid: updated.templateSid,
+    flowMessage: updated.flowMessage,
+    apiKey: updated.apiKey,
+  }
 }

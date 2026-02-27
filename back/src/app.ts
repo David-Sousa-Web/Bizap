@@ -5,8 +5,8 @@ import fastifyJwt from '@fastify/jwt'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUi from '@fastify/swagger-ui'
 import {
-  serializerCompiler,
   validatorCompiler,
+  serializerCompiler,
   jsonSchemaTransform,
 } from 'fastify-type-provider-zod'
 import { env } from './env.js'

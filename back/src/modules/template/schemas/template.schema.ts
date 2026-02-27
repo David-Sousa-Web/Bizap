@@ -10,5 +10,5 @@ const templateDataSchema = z.object({
 export const listTemplatesResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  data: z.array(templateDataSchema).nullable(),
+  data: z.array(templateDataSchema),
 })

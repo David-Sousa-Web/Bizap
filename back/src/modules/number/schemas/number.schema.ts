@@ -14,19 +14,18 @@ const numberResponseDataSchema = z.object({
   name: z.string(),
   number: z.string(),
   projectId: z.string(),
-  createdAt: z.string(),
 })
 
 export const singleNumberResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  data: numberResponseDataSchema.nullable(),
+  data: numberResponseDataSchema,
 })
 
 export const listNumbersResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  data: z.array(numberResponseDataSchema).nullable(),
+  data: z.array(numberResponseDataSchema),
 })
 
 export type CreateNumberBody = z.infer<typeof createNumberBodySchema>

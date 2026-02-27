@@ -36,19 +36,18 @@ const projectResponseDataSchema = z.object({
   templateSid: z.string(),
   flowMessage: z.string(),
   apiKey: z.string(),
-  createdAt: z.string(),
 })
 
 export const singleProjectResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  data: projectResponseDataSchema.nullable(),
+  data: projectResponseDataSchema,
 })
 
 export const listProjectsResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  data: z.array(projectResponseDataSchema).nullable(),
+  data: z.array(projectResponseDataSchema),
 })
 
 export const deleteProjectResponseSchema = z.object({

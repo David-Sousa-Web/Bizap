@@ -17,5 +17,16 @@ export async function updateFlowMessageService(
     throw new ApplicationError('Project not found', 404)
   }
 
-  return repository.update(projectId, { flowMessage })
+  const updated = await repository.update(projectId, { flowMessage })
+
+  return {
+    id: updated.id,
+    name: updated.name,
+    image: updated.image,
+    phoneNumber: updated.phoneNumber,
+    agency: updated.agency,
+    templateSid: updated.templateSid,
+    flowMessage: updated.flowMessage,
+    apiKey: updated.apiKey,
+  }
 }

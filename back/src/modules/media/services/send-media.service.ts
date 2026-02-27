@@ -45,5 +45,11 @@ export async function sendMediaService(
     throw new ApplicationError('Failed to send template via Twilio', 502)
   }
 
-  return { ...mediaRequest, status: 'TEMPLATE_SENT' }
+  return {
+    id: mediaRequest.id,
+    mediaUrl: mediaRequest.mediaUrl,
+    status: 'TEMPLATE_SENT',
+    numberId: mediaRequest.numberId,
+    projectId: mediaRequest.projectId,
+  }
 }

@@ -19,6 +19,13 @@ const STATUS_VARIANT: Record<
   unsubmitted: "secondary",
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  approved: "Aprovado",
+  pending: "Pendente",
+  rejected: "Rejeitado",
+  unsubmitted: "Não enviado",
+}
+
 function extractBodyText(body: Record<string, unknown> | null): string {
   if (!body) return ""
   if (typeof body.body === "string") return body.body
@@ -51,7 +58,7 @@ export function TemplateList({ templates }: TemplateListProps) {
               <Badge
                 variant={STATUS_VARIANT[template.whatsappStatus] ?? "outline"}
               >
-                {template.whatsappStatus}
+                {STATUS_LABEL[template.whatsappStatus] ?? template.whatsappStatus}
               </Badge>
             </TableCell>
             <TableCell className="hidden max-w-xs truncate md:table-cell">

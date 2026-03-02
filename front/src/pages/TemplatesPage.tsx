@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { AlertCircle, ChevronLeft, ChevronRight, FileText, Search } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircle, ChevronLeft, ChevronRight, FileText, RefreshCw, Search } from "lucide-react"
+import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -17,51 +17,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { TemplateList } from "@/features/templates/components/TemplateList"
+import { TemplatesTableSkeleton } from "@/features/templates/components/TemplatesTableSkeleton"
 import { useTemplates } from "@/features/templates/hooks/useTemplates"
 import { useDebounce } from "@/hooks/useDebounce"
-
-function TemplatesTableSkeleton() {
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nome</TableHead>
-          <TableHead>Tipo</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="hidden md:table-cell">Conteúdo</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <TableRow key={i}>
-            <TableCell>
-              <Skeleton className="h-4 w-40" />
-            </TableCell>
-            <TableCell>
-              <Skeleton className="h-5 w-16" />
-            </TableCell>
-            <TableCell>
-              <Skeleton className="h-5 w-20" />
-            </TableCell>
-            <TableCell className="hidden md:table-cell">
-              <Skeleton className="h-4 w-64" />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-}
 
 export default function TemplatesPage() {
   const [search, setSearch] = useState("")
@@ -70,7 +29,7 @@ export default function TemplatesPage() {
 
   const debouncedSearch = useDebounce(search)
 
-  const { data: response, isLoading, isError } = useTemplates({
+  const { data: response, isLoading, isError, refetch } = useTemplates({
     page,
     limit,
     search: debouncedSearch || undefined,
@@ -114,6 +73,12 @@ export default function TemplatesPage() {
             Não foi possível carregar a lista de templates. Tente novamente mais
             tarde.
           </AlertDescription>
+          <AlertAction>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <RefreshCw />
+              Tentar novamente
+            </Button>
+          </AlertAction>
         </Alert>
       )}
 

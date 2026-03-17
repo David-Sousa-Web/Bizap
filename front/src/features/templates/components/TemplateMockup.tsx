@@ -1,0 +1,216 @@
+import type { Template } from "@/features/templates/types"
+
+interface TemplateMockupProps {
+  template: Template
+}
+
+export function TemplateMockup({ template }: TemplateMockupProps) {
+  // Safe extraction of body
+  let bodyContent = ""
+  let components: Record<string, unknown>[] = []
+  
+  if (template.body) {
+    if (typeof template.body.body === "string") {
+      bodyContent = template.body.body
+    } else {
+      bodyContent = JSON.stringify(template.body)
+    }
+  }
+
+  // Se o backend retorna os "components" (ex: buttons) na variavel body
+  if (template.body && Array.isArray((template.body as Record<string, unknown>).components)) {
+    components = (template.body as Record<string, unknown>).components as Record<string, unknown>[]
+  } else if (template.body && Array.isArray((template.body as Record<string, unknown>).buttons)) {
+    components = (template.body as Record<string, unknown>).buttons as Record<string, unknown>[]
+  }
+
+  // Apenas para evitar lint error enquanto não usamos components ativamente no mockup dummy
+  void components;
+
+  const renderContent = () => {
+    const type = template.type.toLowerCase()
+
+    // Render baseado no tipo, similar ao HTML de referência
+    if (type.includes("text")) {
+      return (
+        <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <p className="whitespace-pre-wrap">{bodyContent || "Texto sem conteúdo"}</p>
+          <div className="text-right text-[10px] text-gray-400 mt-1">10:00</div>
+        </div>
+      )
+    }
+
+    if (type.includes("media")) {
+      return (
+        <div className="bg-white rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-hidden">
+          <div className="w-full h-32 bg-blue-100 flex items-center justify-center text-3xl">
+            🖼️
+          </div>
+          <div className="p-3">
+            <p className="whitespace-pre-wrap">{bodyContent || "Mídia"}</p>
+            <div className="text-right text-[10px] text-gray-400 mt-1">10:00</div>
+          </div>
+        </div>
+      )
+    }
+
+    if (type.includes("list")) {
+      return (
+        <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="font-bold mb-1">Menu de Lista</div>
+          <p className="whitespace-pre-wrap">{bodyContent}</p>
+          <div className="mt-3 border-t pt-2 text-center text-blue-500 font-bold cursor-pointer">
+            ☰ Ver Opções
+          </div>
+        </div>
+      )
+    }
+
+    if (type.includes("reply") || type.includes("quick")) {
+      return (
+        <div className="flex flex-col gap-1 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm">
+            <p className="whitespace-pre-wrap">{bodyContent}</p>
+          </div>
+          <div className="flex flex-col gap-1 w-[90%] mt-1">
+            <div className="bg-white text-blue-500 font-bold p-2 text-center rounded-lg shadow-sm cursor-pointer border border-gray-100">
+              Resposta 1
+            </div>
+            <div className="bg-white text-blue-500 font-bold p-2 text-center rounded-lg shadow-sm cursor-pointer border border-gray-100">
+              Resposta 2
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (type.includes("call-to-action") || type.includes("cta")) {
+      return (
+        <div className="flex flex-col gap-1 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm">
+            <p className="whitespace-pre-wrap">{bodyContent}</p>
+          </div>
+          <div className="flex flex-col gap-1 w-[90%] mt-1">
+            <div className="bg-white text-blue-500 font-bold p-2 text-center rounded-lg shadow-sm cursor-pointer border border-gray-100 flex justify-center items-center gap-2">
+              <span>🌐</span> Acessar Link
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (type.includes("location")) {
+      return (
+        <div className="bg-white rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-hidden">
+          <div className="w-full h-32 bg-emerald-100 flex items-center justify-center text-3xl relative">
+            🗺️
+            <div className="absolute inset-0 flex items-center justify-center text-2xl">📍</div>
+          </div>
+          <div className="p-3">
+            <p className="whitespace-pre-wrap p-1">{bodyContent || "Localização"}</p>
+            <div className="text-right text-[10px] text-gray-400 mt-1">10:00</div>
+          </div>
+        </div>
+      )
+    }
+
+    if (type.includes("card")) {
+      return (
+        <div className="bg-white rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-hidden border border-gray-200">
+          <div className="h-24 bg-gray-100 flex items-center justify-center text-3xl">🖼️</div>
+          <div className="p-3">
+            <p className="font-bold text-base mb-1">Título do Card</p>
+            <p className="text-xs text-gray-500 whitespace-pre-wrap">{bodyContent}</p>
+          </div>
+          <div className="border-t border-gray-100 flex flex-col">
+            <div className="p-2 text-center text-blue-500 font-bold text-sm cursor-pointer border-b border-gray-100 hover:bg-gray-50">
+              Ação 1
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (type.includes("auth")) {
+      return (
+        <div className="flex flex-col gap-1 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm">
+            <div className="font-bold mb-1">Código de Segurança</div>
+            <p className="whitespace-pre-wrap">{bodyContent}</p>
+          </div>
+          <div className="w-[90%] bg-white rounded-lg shadow-sm border border-gray-100 mt-1 text-center hover:bg-gray-50">
+            <div className="p-2 text-blue-500 font-bold text-sm flex justify-center items-center gap-2 cursor-pointer">
+              <span>📋</span> Copiar Código
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (type.includes("catalog")) {
+      return (
+        <div className="flex flex-col gap-1 w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm">
+            <div className="font-bold mb-1">Catálogo</div>
+            <p className="whitespace-pre-wrap">{bodyContent || "Veja nosso catálogo"}</p>
+          </div>
+          <div className="w-[90%] bg-white rounded-lg shadow-sm border border-gray-100 mt-1 flex items-center p-2 cursor-pointer hover:bg-gray-50">
+            <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-xl mr-3">🛍️</div>
+            <div className="grow">
+              <div className="font-bold text-sm text-blue-500">Ver Catálogo</div>
+            </div>
+            <div className="text-gray-400 font-bold">›</div>
+          </div>
+        </div>
+      )
+    }
+
+    if (type.includes("carousel")) {
+      return (
+        <div className="flex gap-2 overflow-x-auto w-full custom-scrollbar pb-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="bg-white rounded-lg shadow-sm min-w-[80%] shrink-0 border border-gray-200 overflow-hidden">
+            <div className="h-20 bg-blue-50 flex items-center justify-center text-2xl">📱</div>
+            <div className="p-3">
+              <p className="whitespace-pre-wrap text-sm">{bodyContent || "Item do carrossel"}</p>
+            </div>
+            <div className="border-t text-center text-blue-500 font-bold text-xs p-2 hover:bg-gray-50 cursor-pointer">
+              Opção
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm min-w-[80%] shrink-0 border border-gray-200 overflow-hidden opacity-60">
+            <div className="h-20 bg-gray-50 flex items-center justify-center text-2xl">💻</div>
+            <div className="p-3">
+              <p className="text-sm">Outro item...</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Fallback default
+    return (
+      <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <p className="whitespace-pre-wrap">{bodyContent || "Conteúdo não especificado"}</p>
+        <div className="text-right text-[10px] text-gray-400 mt-1">10:00</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center p-4">
+      <div className="w-[280px] h-[500px] border-8 border-slate-900 rounded-[36px] bg-[#e5e5ea] relative overflow-hidden shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)]">
+        {/* Mockup Header */}
+        <div className="bg-slate-800 text-white p-3 text-center text-xs font-semibold flex justify-between items-center h-[60px]">
+          <span className="text-slate-300 cursor-pointer hover:text-white transition-colors">◀ Voltar</span>
+          <span className="truncate max-w-[120px]">Sua Empresa</span>
+          <span className="text-slate-300">⚙️</span>
+        </div>
+        
+        {/* Mockup Screen */}
+        <div className="h-[calc(100%-60px)] overflow-y-auto p-4 flex flex-col gap-3 bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-size-[10px_10px]">
+          {renderContent()}
+        </div>
+      </div>
+    </div>
+  )
+}

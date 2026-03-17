@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twilio: Explorador de Tipos de Templates</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f4f6;
+            /* Neutral warm light gray */
+            color: #121c2d;
+            /* Twilio dark text */
+        }
+
+        /* Twilio brand colors for accents */
+        .text-twilio-red {
+            color: #F22F46;
+        }
+
+        .bg-twilio-red {
+            background-color: #F22F46;
+        }
+
+        .border-twilio-red {
+            border-color: #F22F46;
+        }
+
+        .text-twilio-blue {
+            color: #030B5D;
+        }
+
+        .bg-twilio-blue {
+            background-color: #030B5D;
+        }
+
+        /* Chart Container Requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for lists */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Mobile Mockup Styles */
+        .mobile-mockup {
+            width: 280px;
+            height: 500px;
+            border: 8px solid #121c2d;
+            border-radius: 36px;
+            background-color: #e5e5ea;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-screen {
+            height: calc(100% - 60px);
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+
+        .message-bubble {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px 8px 8px 0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            max-width: 90%;
+            font-size: 0.875rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <!-- Chosen Palette: Twilio Classic Theme (Warm Neutral Background #f4f4f6, Crimson Red #F22F46, Deep Blue #030B5D, and crisp white cards) -->
+    <!-- Application Structure Plan: Dashboard layout designed for immediate comprehension. Top KPIs provide a macro view. The core interaction is a side-by-side "Selection -> Visualization" layout: users select a Content API template type from a list, and see a simulated rendering on a mobile phone mockup. This makes abstract API types concrete. Finally, a data section below uses charts to explain usage distribution and performance metrics, turning documentation into actionable intelligence. -->
+    <!-- Visualization & Content Choices:
+         - Mobile Phone Mockup (HTML/CSS): To demonstrate 'twilio/text', 'twilio/list-picker', etc. Goal: Inform/Visualize. Justification: Seeing the template rendered is better than reading its JSON schema.
+         - Doughnut Chart (Chart.js): WhatsApp Category Distribution. Goal: Proportions. Justification: Clearly shows the Meta/WhatsApp requirement triad (Utility, Marketing, Auth).
+         - Bar Chart (Chart.js): Engagement by Template Type. Goal: Compare. Justification: Highlights the value of rich templates (buttons/lists) over plain text.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visuals rely on HTML, CSS, Unicode emojis, and Canvas (Chart.js). -->
+</head>
+
+<body class="antialiased flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-twilio-blue text-white py-6 px-8 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold flex items-center gap-3">
+                    <span class="text-twilio-red text-4xl">☁️</span> API de Templates Twilio
+                </h1>
+                <p class="text-blue-200 mt-1 text-sm">Explorador Interativo de Tipos e Casos de Uso (Content API &
+                    WhatsApp)</p>
+            </div>
+            <nav class="flex gap-4">
+                <button onclick="document.getElementById('content-api').scrollIntoView({behavior: 'smooth'})"
+                    class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded text-sm transition font-semibold">Tipos de
+                    Conteúdo</button>
+                <button onclick="document.getElementById('analytics').scrollIntoView({behavior: 'smooth'})"
+                    class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded text-sm transition font-semibold">Análise &
+                    Uso</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full flex flex-col gap-8">
+
+        <!-- Context/Intro Section -->
+        <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h2 class="text-xl font-bold mb-3 text-gray-800">Sobre os Templates na Twilio</h2>
+            <p class="text-gray-600 leading-relaxed text-sm">
+                Na Twilio, especialmente ao utilizar canais como o <strong>WhatsApp</strong>, as mensagens iniciadas
+                pela empresa devem usar <em>Templates</em> pré-aprovados. A Twilio padroniza isso através da
+                <strong>Content API</strong>, permitindo que você crie templates ricos uma única vez e os distribua em
+                vários canais. Explore abaixo as categorias estruturais (exigidas pela Meta) e os formatos ricos
+                disponíveis.
+            </p>
+
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div class="p-4 bg-gray-50 rounded-lg border-l-4 border-twilio-red">
+                    <div class="text-xs text-gray-500 font-bold uppercase tracking-wider">Categorias WhatsApp</div>
+                    <div class="text-2xl font-black text-gray-800 mt-1">3 <span
+                            class="text-sm font-normal text-gray-500">Tipos Oficiais</span></div>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg border-l-4 border-twilio-blue">
+                    <div class="text-xs text-gray-500 font-bold uppercase tracking-wider">Content API Formats</div>
+                    <div class="text-2xl font-black text-gray-800 mt-1">8+ <span
+                            class="text-sm font-normal text-gray-500">Estruturas</span></div>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg border-l-4 border-green-500">
+                    <div class="text-xs text-gray-500 font-bold uppercase tracking-wider">Canais Suportados</div>
+                    <div class="text-2xl font-black text-gray-800 mt-1">Omnichannel</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Explorer Section -->
+        <section id="content-api" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- List of Types -->
+            <div class="lg:col-span-2 flex flex-col">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Tipos de Templates (Content API)</h2>
+                    <p class="text-gray-500 text-sm mt-1">Selecione um tipo para visualizar a estrutura e o exemplo
+                        renderizado.</p>
+                </div>
+
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex-grow flex flex-col">
+                    <div id="template-list" class="flex-grow overflow-y-auto custom-scrollbar p-2 h-[400px]">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Preview -->
+            <div class="flex flex-col items-center justify-start lg:pt-12">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Pré-visualização</h3>
+                <div class="mobile-mockup">
+                    <div
+                        class="bg-gray-800 text-white p-3 text-center text-xs font-semibold flex justify-between items-center">
+                        <span>◀ Voltar</span>
+                        <span>Sua Empresa</span>
+                        <span>⚙️</span>
+                    </div>
+                    <div id="mobile-screen" class="mobile-screen">
+                        <!-- Content rendered by JS based on selection -->
+                        <div class="text-center text-gray-400 text-xs mt-10">Selecione um template...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics / Data Visualization Section -->
+        <section id="analytics" class="mt-8">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Análise de Uso e Categorias</h2>
+                <p class="text-gray-500 text-sm mt-1">Distribuição exigida pelo WhatsApp e taxas de engajamento por
+                    formato.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Chart 1: WhatsApp Categories -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+                    <h3 class="font-bold text-gray-800 mb-2">Categorias de Uso (Regras da Meta)</h3>
+                    <p class="text-xs text-gray-500 mb-6 text-center">Proporção global típica de envio de templates
+                        aprovados.</p>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 bg-gray-50 p-3 rounded w-full">
+                        <strong>Autenticação:</strong> OTPs e senhas.<br>
+                        <strong>Utilidade:</strong> Pós-venda, atualizações de envio.<br>
+                        <strong>Marketing:</strong> Promoções, avisos de estoque.
+                    </div>
+                </div>
+
+                <!-- Chart 2: Engagement by Type -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
+                    <h3 class="font-bold text-gray-800 mb-2">Engajamento por Formato (Content API)</h3>
+                    <p class="text-xs text-gray-500 mb-6 text-center">Taxa média de conversão/clique com base em
+                        elementos ricos.</p>
+                    <div class="chart-container">
+                        <canvas id="engagementChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 bg-gray-50 p-3 rounded w-full">
+                        Templates com <strong>Botões de Resposta Rápida</strong> e <strong>Call-to-Action</strong> geram
+                        até 3x mais interação do que textos simples.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 py-6 text-center text-sm mt-auto">
+        <p>Desenvolvido para análise estrutural dos tipos de Templates Twilio. Dados de engajamento são ilustrativos.
+        </p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data Storage: Template Types
+        const templateTypes = [
+            {
+                id: 'twilio-text',
+                type: 'twilio/text',
+                name: 'Texto Simples',
+                icon: '📝',
+                desc: 'Apenas texto. O formato mais básico, suporta variáveis {{1}}, {{2}}.',
+                details: 'Usado para notificações simples que não requerem interação estruturada ou mídia.',
+                mockupHtml: `
+                    <div class="message-bubble">
+                        Olá João! Seu agendamento para amanhã às 14h está confirmado.
+                        <div class="text-right text-[10px] text-gray-400 mt-1">10:00</div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-media',
+                type: 'twilio/media',
+                name: 'Mídia (Imagem/Vídeo/Doc)',
+                icon: '🖼️',
+                desc: 'Mensagem contendo uma URL de mídia acompanhada ou não de texto.',
+                details: 'Excelente para envio de faturas (PDF), catálogos (Imagens) ou tutoriais em vídeo.',
+                mockupHtml: `
+                    <div class="message-bubble !p-1">
+                        <div class="w-full h-32 bg-blue-100 rounded-t-md flex items-center justify-center text-2xl">📸</div>
+                        <div class="p-2">
+                            Confira nosso novo catálogo de verão!
+                            <div class="text-right text-[10px] text-gray-400 mt-1">10:05</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-list-picker',
+                type: 'twilio/list-picker',
+                name: 'Menu de Lista',
+                icon: '📋',
+                desc: 'Abre um menu interativo com até 10 opções selecionáveis.',
+                details: 'Ideal para fluxos de FAQ, menus de suporte ou seleção de departamentos.',
+                mockupHtml: `
+                    <div class="message-bubble">
+                        <div class="font-bold mb-1">Menu Principal</div>
+                        Como podemos te ajudar hoje? Escolha uma opção abaixo.
+                        <div class="mt-3 border-t pt-2 text-center text-blue-500 font-bold cursor-pointer">
+                            ☰ Ver Opções
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-reply-button',
+                type: 'twilio/quick-reply',
+                name: 'Botões de Resposta Rápida',
+                icon: '🔘',
+                desc: 'Até 3 botões na tela para respostas imediatas.',
+                details: 'Aumenta imensamente a taxa de resposta em pesquisas (NPS) ou confirmações simples (Sim/Não).',
+                mockupHtml: `
+                    <div class="message-bubble">
+                        Você confirma o recebimento do seu pedido #9982?
+                    </div>
+                    <div class="flex flex-col gap-1 w-[90%]">
+                        <div class="bg-white text-blue-500 font-bold p-2 text-center rounded-lg shadow-sm cursor-pointer border border-gray-100">👍 Sim, recebi</div>
+                        <div class="bg-white text-blue-500 font-bold p-2 text-center rounded-lg shadow-sm cursor-pointer border border-gray-100">👎 Ainda não</div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-call-to-action',
+                type: 'twilio/call-to-action',
+                name: 'Call-to-Action (URL/Tel)',
+                icon: '🔗',
+                desc: 'Botões que abrem sites externos ou disparam chamadas telefônicas.',
+                details: 'Usado frequentemente em campanhas de marketing para direcionar tráfego ou vendas.',
+                mockupHtml: `
+                    <div class="message-bubble">
+                        <div class="w-full h-24 bg-red-100 rounded-md flex items-center justify-center text-2xl mb-2">🎁</div>
+                        Sua promoção de aniversário chegou! 20% OFF.
+                    </div>
+                    <div class="flex flex-col gap-1 w-[90%]">
+                        <div class="bg-white text-blue-500 font-bold p-2 text-center rounded-lg shadow-sm cursor-pointer border border-gray-100">🌐 Comprar Agora</div>
+                        <div class="bg-white text-blue-500 font-bold p-2 text-center rounded-lg shadow-sm cursor-pointer border border-gray-100">📞 Ligar para Vendas</div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-location',
+                type: 'twilio/location',
+                name: 'Localização',
+                icon: '📍',
+                desc: 'Envia um pino no mapa com coordenadas.',
+                details: 'Útil para confirmar endereços de entrega ou enviar a localização da loja física mais próxima.',
+                mockupHtml: `
+                    <div class="message-bubble !p-1">
+                        <div class="w-full h-32 bg-green-100 rounded-t-md flex items-center justify-center text-2xl relative">
+                            🗺️
+                            <div class="absolute inset-0 flex items-center justify-center">📍</div>
+                        </div>
+                        <div class="p-2">
+                            <div class="font-bold">Nossa Loja Matriz</div>
+                            Av. Paulista, 1000 - SP
+                            <div class="text-right text-[10px] text-gray-400 mt-1">10:15</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-card',
+                type: 'twilio/card',
+                name: 'Card (Cartão)',
+                icon: '📇',
+                desc: 'Um cartão estruturado contendo mídia, título, subtítulo e botões de ação.',
+                details: 'Excelente para exibir um único produto, serviço ou alerta com imagem de destaque e ações claras.',
+                mockupHtml: `
+                    <div class="message-bubble !p-0 overflow-hidden w-[90%]">
+                        <div class="h-24 bg-gray-200 flex items-center justify-center text-3xl">🏜️</div>
+                        <div class="p-3">
+                            <div class="font-bold text-base">Pacote Férias</div>
+                            <div class="text-xs text-gray-500 mt-1">7 dias em Cancún com tudo incluso.</div>
+                        </div>
+                        <div class="border-t border-gray-100 flex flex-col">
+                            <div class="p-2 text-center text-blue-500 font-bold text-sm cursor-pointer border-b border-gray-100 hover:bg-gray-50">Reservar Agora</div>
+                            <div class="p-2 text-center text-blue-500 font-bold text-sm cursor-pointer hover:bg-gray-50">Ver Detalhes</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-catalog',
+                type: 'twilio/catalog',
+                name: 'Catálogo (Catalog)',
+                icon: '🛍️',
+                desc: 'Exibe produtos do catálogo do WhatsApp Business para seleção direta.',
+                details: 'Permite que os clientes naveguem pelo seu inventário e adicionem itens ao carrinho sem sair do WhatsApp.',
+                mockupHtml: `
+                    <div class="message-bubble w-[90%]">
+                        <div class="font-bold mb-1">Catálogo de Produtos</div>
+                        Confira nossa nova coleção diretamente aqui!
+                    </div>
+                    <div class="w-[90%] bg-white rounded-lg shadow-sm border border-gray-100 mt-1 flex items-center p-2 cursor-pointer hover:bg-gray-50">
+                        <div class="h-10 w-10 bg-gray-200 rounded flex items-center justify-center text-xl mr-3">👗</div>
+                        <div class="flex-grow">
+                            <div class="font-bold text-sm text-blue-500">Ver Catálogo</div>
+                        </div>
+                        <div class="text-gray-400 font-bold">›</div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-carousel',
+                type: 'twilio/carousel',
+                name: 'Carrossel (Carousel)',
+                icon: '🎠',
+                desc: 'Uma lista rolável horizontalmente contendo múltiplos cartões (Cards).',
+                details: 'Ideal para exibir opções lado a lado, como diferentes planos de assinatura, produtos recomendados ou categorias.',
+                mockupHtml: `
+                    <div class="flex gap-2 overflow-hidden w-[95%]">
+                        <div class="message-bubble !p-0 min-w-[80%] flex-shrink-0 border border-gray-200">
+                            <div class="h-20 bg-blue-100 flex items-center justify-center text-2xl">📱</div>
+                            <div class="p-2">
+                                <div class="font-bold text-sm">Smartphone X</div>
+                                <div class="text-xs text-gray-500">R$ 2.999</div>
+                            </div>
+                            <div class="border-t text-center text-blue-500 font-bold text-xs p-2 hover:bg-gray-50 cursor-pointer">Comprar</div>
+                        </div>
+                        <div class="message-bubble !p-0 min-w-[80%] flex-shrink-0 border border-gray-200 opacity-60">
+                            <div class="h-20 bg-green-100 flex items-center justify-center text-2xl">💻</div>
+                            <div class="p-2">
+                                <div class="font-bold text-sm">Laptop Pro</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'whatsapp-card',
+                type: 'whatsapp/card',
+                name: 'WhatsApp Card',
+                icon: '💳',
+                desc: 'Formato específico do WhatsApp para exibir informações ricas ou alertas de status.',
+                details: 'Muitas vezes mapeado pelo twilio/card, pode ter renderizações nativas otimizadas para o aplicativo do WhatsApp.',
+                mockupHtml: `
+                    <div class="message-bubble !p-0 overflow-hidden w-[90%] border-l-4 border-green-500">
+                        <div class="p-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="font-bold text-base">Atualização de Conta</div>
+                                    <div class="text-xs text-gray-500 mt-1">Seu plano foi atualizado para Premium.</div>
+                                </div>
+                                <div class="text-2xl">⭐</div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-2 text-center text-blue-500 font-bold text-sm cursor-pointer border-t border-gray-100 hover:bg-gray-100">Acessar Benefícios</div>
+                    </div>
+                `
+            },
+            {
+                id: 'twilio-authentication',
+                type: 'twilio/authentication',
+                name: 'Autenticação (Auth)',
+                icon: '🔐',
+                desc: 'Template restrito do WhatsApp para envio de OTPs e senhas de uso único.',
+                details: 'Inclui botões nativos como "Copiar Código" ou integração de preenchimento automático (Autofill) no SO.',
+                mockupHtml: `
+                    <div class="message-bubble w-[90%]">
+                        <div class="font-bold mb-1">Código de Segurança</div>
+                        Seu código de verificação é <strong>482-910</strong>. Não compartilhe.
+                    </div>
+                    <div class="w-[90%] bg-white rounded-lg shadow-sm border border-gray-100 mt-1 text-center hover:bg-gray-50">
+                        <div class="p-2 text-blue-500 font-bold text-sm flex justify-center items-center gap-2 cursor-pointer">
+                            <span>📋</span> Copiar Código
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 'whatsapp-flows',
+                type: 'whatsapp/flow',
+                name: 'WhatsApp Flows',
+                icon: '🛤️',
+                desc: 'Abre um formulário ou aplicativo interativo diretamente na tela do WhatsApp.',
+                details: 'O recurso mais avançado: permite agendamentos, customização de produtos e pesquisas complexas sem sair do chat.',
+                mockupHtml: `
+                    <div class="message-bubble w-[90%]">
+                        <div class="font-bold mb-1">Pesquisa de Satisfação</div>
+                        Gostaríamos de saber sua opinião sobre o atendimento. Leva só 1 minuto!
+                    </div>
+                    <div class="w-[90%] bg-white rounded-lg shadow-sm border border-gray-100 mt-1 text-center hover:bg-gray-50">
+                        <div class="p-2 text-blue-500 font-bold text-sm flex justify-center items-center gap-2 cursor-pointer">
+                            <span>📝</span> Preencher Pesquisa
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        // State Management
+        let activeTemplateId = null;
+
+        // Core Logic: Render Template List
+        function renderTemplateList() {
+            const container = document.getElementById('template-list');
+            container.innerHTML = '';
+
+            templateTypes.forEach(tpl => {
+                const isActive = activeTemplateId === tpl.id;
+                const el = document.createElement('div');
+                el.className = `p-4 border-b border-gray-100 cursor-pointer transition-colors duration-200 flex items-start gap-4 hover:bg-red-50 ${isActive ? 'bg-red-50 border-l-4 border-twilio-red' : 'border-l-4 border-transparent'}`;
+                el.onclick = () => selectTemplate(tpl.id);
+
+                el.innerHTML = `
+                    <div class="text-3xl bg-white rounded shadow-sm w-12 h-12 flex items-center justify-center flex-shrink-0">${tpl.icon}</div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-gray-800">${tpl.name}</h4>
+                            <span class="text-[10px] font-mono bg-gray-200 text-gray-700 px-2 py-0.5 rounded">${tpl.type}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">${tpl.desc}</p>
+                        ${isActive ? `<p class="text-xs text-twilio-blue mt-2 p-2 bg-blue-50 rounded border border-blue-100">${tpl.details}</p>` : ''}
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        // Core Logic: Handle Selection and update Mobile Mockup
+        function selectTemplate(id) {
+            activeTemplateId = id;
+            renderTemplateList(); // Re-render to update active styling
+
+            const selected = templateTypes.find(t => t.id === id);
+            const screen = document.getElementById('mobile-screen');
+
+            // Clear current screen
+            screen.innerHTML = '';
+
+            // Append new mockup with a slight delay for visual effect
+            setTimeout(() => {
+                screen.innerHTML = selected.mockupHtml;
+            }, 50);
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial selection
+            selectTemplate('twilio-reply-button');
+
+            // --- Render Charts (Chart.js) ---
+
+            // 1. Doughnut Chart: WhatsApp Categories
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctxCategory, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Utilidade (Pós-venda, Alertas)', 'Marketing (Promoções)', 'Autenticação (OTPs)'],
+                    datasets: [{
+                        data: [50, 35, 15],
+                        backgroundColor: [
+                            '#030B5D', // Twilio Blue
+                            '#F22F46', // Twilio Red
+                            '#121c2d'  // Dark
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } },
+                        tooltip: {
+                            callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.raw}% dos envios` }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // 2. Bar Chart: Engagement Rates
+            const ctxEngagement = document.getElementById('engagementChart').getContext('2d');
+            new Chart(ctxEngagement, {
+                type: 'bar',
+                data: {
+                    labels: ['Texto Simples', 'Mídia', 'Menu (List)', 'Resposta Rápida', 'Call-to-Action'],
+                    datasets: [{
+                        label: 'Taxa de Interação (%)',
+                        data: [12, 18, 45, 65, 40],
+                        backgroundColor: [
+                            '#e2e8f0',
+                            '#cbd5e1',
+                            '#94a3b8',
+                            '#F22F46', // Highlight highest
+                            '#030B5D'
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: { label: (ctx) => ` Engajamento: ${ctx.raw}%` }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

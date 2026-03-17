@@ -1,4 +1,6 @@
+import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -24,6 +26,8 @@ import {
   Info,
   CheckCircle2,
 } from "lucide-react"
+
+import { TemplatePreviewModal } from "./TemplatePreviewModal"
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   approved: {
@@ -77,7 +81,10 @@ interface TemplateListProps {
 }
 
 export function TemplateList({ templates }: TemplateListProps) {
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
+
   return (
+    <>
     <Table>
       <TableHeader>
         <TableRow>
@@ -141,13 +148,32 @@ export function TemplateList({ templates }: TemplateListProps) {
                   )}
                 </div>
               </TableCell>
-              <TableCell className="hidden max-w-xs truncate md:table-cell text-muted-foreground">
-                {extractBodyText(template.body)}
+              <TableCell className="hidden md:table-cell text-muted-foreground">
+                <div className="relative group flex items-center justify-start h-full">
+                  <div className="truncate max-w-[200px] xl:max-w-[300px] group-hover:opacity-0 transition-opacity">
+                    {extractBodyText(template.body)}
+                  </div>
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setPreviewTemplate(template)}
+                    >
+                      Ver conteúdo
+                    </Button>
+                  </div>
+                </div>
               </TableCell>
             </TableRow>
           )
         })}
       </TableBody>
     </Table>
+    <TemplatePreviewModal
+      template={previewTemplate}
+      isOpen={!!previewTemplate}
+      onClose={() => setPreviewTemplate(null)}
+    />
+    </>
   )
 }

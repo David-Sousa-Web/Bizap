@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,7 @@ import {
 import type { Template } from "@/features/templates/types"
 import { TemplateMockup } from "./TemplateMockup"
 import { TEMPLATE_TYPES_INFO } from "../constants"
-import { Info } from "lucide-react"
+import { Info, Puzzle } from "lucide-react"
 import { getTypeConfig } from "../utils"
 
 interface TemplatePreviewModalProps {
@@ -22,8 +23,14 @@ export function TemplatePreviewModal({
   isOpen,
   onClose,
 }: TemplatePreviewModalProps) {
-  const typeInfo = template ? TEMPLATE_TYPES_INFO.find(
-    info => template.type.toLowerCase().includes(info.type.toLowerCase())
+  const [displayTemplate, setDisplayTemplate] = useState<Template | null>(template);
+
+  if (template && template !== displayTemplate) {
+    setDisplayTemplate(template);
+  }
+
+  const typeInfo = displayTemplate ? TEMPLATE_TYPES_INFO.find(
+    info => displayTemplate.type.toLowerCase().includes(info.type.toLowerCase())
   ) : null;
 
   return (
@@ -35,8 +42,8 @@ export function TemplatePreviewModal({
             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 absolute top-6 left-1/2 -translate-x-1/2 md:relative md:top-auto md:left-auto md:translate-x-0">
               Pré-visualização
             </h2>
-            {template ? (
-              <TemplateMockup template={template} />
+            {displayTemplate ? (
+              <TemplateMockup template={displayTemplate} />
             ) : (
               <div className="h-[500px] flex items-center justify-center text-muted-foreground w-full">
                 Nenhum template selecionado.
@@ -50,18 +57,18 @@ export function TemplatePreviewModal({
               <DialogTitle className="text-2xl font-bold flex items-center gap-3">
                 <span className="bg-slate-50 border border-slate-100 rounded-lg p-2 shadow-sm w-12 h-12 flex items-center justify-center shrink-0 text-slate-700">
                   {(() => {
-                    const ConfigIcon = template ? getTypeConfig(template.type).icon : null;
-                    return ConfigIcon ? <ConfigIcon className="w-6 h-6" /> : <span className="text-3xl">🧩</span>;
+                    const ConfigIcon = displayTemplate ? getTypeConfig(displayTemplate.type).icon : null;
+                    return ConfigIcon ? <ConfigIcon className="w-6 h-6" /> : <Puzzle className="w-6 h-6 text-slate-400" />;
                   })()}
                 </span>
-                <span className="text-gray-900">{typeInfo?.name || template?.type}</span>
+                <span className="text-gray-900">{typeInfo?.name || displayTemplate?.type}</span>
               </DialogTitle>
               <DialogDescription className="mt-2 text-sm">
-                Nome do Template: <strong className="text-gray-700">{template?.name}</strong>
+                Nome do Template: <strong className="text-gray-700">{displayTemplate?.name}</strong>
               </DialogDescription>
               <div className="mt-1">
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200">
-                  {template?.type}
+                  {displayTemplate?.type}
                 </span>
               </div>
             </DialogHeader>

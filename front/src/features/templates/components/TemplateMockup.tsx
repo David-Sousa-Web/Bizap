@@ -1,4 +1,18 @@
 import type { Template } from "@/features/templates/types"
+import { 
+  ImageIcon, 
+  Menu, 
+  Globe, 
+  MapIcon, 
+  MapPin, 
+  Copy, 
+  ShoppingBag, 
+  Smartphone, 
+  Laptop, 
+  ChevronRight, 
+  ChevronLeft, 
+  Settings 
+} from "lucide-react"
 
 interface TemplateMockupProps {
   template: Template
@@ -43,8 +57,8 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
     if (type.includes("media")) {
       return (
         <div className="bg-white rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-hidden">
-          <div className="w-full h-32 bg-blue-100 flex items-center justify-center text-3xl">
-            🖼️
+          <div className="w-full h-32 bg-blue-100 flex items-center justify-center">
+            <ImageIcon className="w-8 h-8 text-blue-400" />
           </div>
           <div className="p-3">
             <p className="whitespace-pre-wrap">{bodyContent || "Mídia"}</p>
@@ -59,8 +73,8 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
         <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="font-bold mb-1">Menu de Lista</div>
           <p className="whitespace-pre-wrap">{bodyContent}</p>
-          <div className="mt-3 border-t pt-2 text-center text-blue-500 font-bold cursor-pointer">
-            ☰ Ver Opções
+          <div className="mt-3 border-t pt-2 flex items-center justify-center text-blue-500 font-bold cursor-pointer">
+            <Menu className="w-4 h-4 mr-2" /> Ver Opções
           </div>
         </div>
       )
@@ -92,7 +106,7 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
           </div>
           <div className="flex flex-col gap-1 w-[90%] mt-1">
             <div className="bg-white text-blue-500 font-bold p-2 text-center rounded-lg shadow-sm cursor-pointer border border-gray-100 flex justify-center items-center gap-2">
-              <span>🌐</span> Acessar Link
+              <Globe className="w-4 h-4" /> Acessar Link
             </div>
           </div>
         </div>
@@ -102,9 +116,11 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
     if (type.includes("location")) {
       return (
         <div className="bg-white rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-hidden">
-          <div className="w-full h-32 bg-emerald-100 flex items-center justify-center text-3xl relative">
-            🗺️
-            <div className="absolute inset-0 flex items-center justify-center text-2xl">📍</div>
+          <div className="w-full h-32 bg-emerald-100 flex items-center justify-center relative">
+            <MapIcon className="w-8 h-8 text-emerald-300" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <MapPin className="w-6 h-6 text-emerald-600 fill-emerald-100" />
+            </div>
           </div>
           <div className="p-3">
             <p className="whitespace-pre-wrap p-1">{bodyContent || "Localização"}</p>
@@ -117,7 +133,9 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
     if (type.includes("card")) {
       return (
         <div className="bg-white rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm w-[90%] text-sm animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-hidden border border-gray-200">
-          <div className="h-24 bg-gray-100 flex items-center justify-center text-3xl">🖼️</div>
+          <div className="h-24 bg-gray-100 flex items-center justify-center">
+            <ImageIcon className="w-8 h-8 text-gray-400" />
+          </div>
           <div className="p-3">
             <p className="font-bold text-base mb-1">Título do Card</p>
             <p className="text-xs text-gray-500 whitespace-pre-wrap">{bodyContent}</p>
@@ -140,7 +158,7 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
           </div>
           <div className="w-[90%] bg-white rounded-lg shadow-sm border border-gray-100 mt-1 text-center hover:bg-gray-50">
             <div className="p-2 text-blue-500 font-bold text-sm flex justify-center items-center gap-2 cursor-pointer">
-              <span>📋</span> Copiar Código
+              <Copy className="w-4 h-4" /> Copiar Código
             </div>
           </div>
         </div>
@@ -155,11 +173,15 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
             <p className="whitespace-pre-wrap">{bodyContent || "Veja nosso catálogo"}</p>
           </div>
           <div className="w-[90%] bg-white rounded-lg shadow-sm border border-gray-100 mt-1 flex items-center p-2 cursor-pointer hover:bg-gray-50">
-            <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-xl mr-3">🛍️</div>
+            <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center mr-3">
+              <ShoppingBag className="w-5 h-5 text-gray-500" />
+            </div>
             <div className="grow">
               <div className="font-bold text-sm text-blue-500">Ver Catálogo</div>
             </div>
-            <div className="text-gray-400 font-bold">›</div>
+            <div className="text-gray-400 font-bold">
+              <ChevronRight className="w-5 h-5" />
+            </div>
           </div>
         </div>
       )
@@ -169,7 +191,9 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
       return (
         <div className="flex gap-2 overflow-x-auto w-full custom-scrollbar pb-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="bg-white rounded-lg shadow-sm min-w-[80%] shrink-0 border border-gray-200 overflow-hidden">
-            <div className="h-20 bg-blue-50 flex items-center justify-center text-2xl">📱</div>
+            <div className="h-20 bg-blue-50 flex items-center justify-center">
+               <Smartphone className="w-6 h-6 text-blue-400" />
+            </div>
             <div className="p-3">
               <p className="whitespace-pre-wrap text-sm">{bodyContent || "Item do carrossel"}</p>
             </div>
@@ -178,7 +202,9 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm min-w-[80%] shrink-0 border border-gray-200 overflow-hidden opacity-60">
-            <div className="h-20 bg-gray-50 flex items-center justify-center text-2xl">💻</div>
+            <div className="h-20 bg-gray-50 flex items-center justify-center">
+               <Laptop className="w-6 h-6 text-gray-400" />
+            </div>
             <div className="p-3">
               <p className="text-sm">Outro item...</p>
             </div>
@@ -201,9 +227,11 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
       <div className="w-[280px] h-[500px] border-8 border-slate-900 rounded-[36px] bg-[#e5e5ea] relative overflow-hidden shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1)]">
         {/* Mockup Header */}
         <div className="bg-slate-800 text-white p-3 text-center text-xs font-semibold flex justify-between items-center h-[60px]">
-          <span className="text-slate-300 cursor-pointer hover:text-white transition-colors">◀ Voltar</span>
+          <span className="text-slate-300 flex items-center cursor-pointer hover:text-white transition-colors">
+            <ChevronLeft className="w-4 h-4 mr-1" /> Voltar
+          </span>
           <span className="truncate max-w-[120px]">Sua Empresa</span>
-          <span className="text-slate-300">⚙️</span>
+          <span className="text-slate-300"><Settings className="w-4 h-4" /></span>
         </div>
         
         {/* Mockup Screen */}

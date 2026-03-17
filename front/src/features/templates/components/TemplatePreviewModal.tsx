@@ -9,6 +9,7 @@ import type { Template } from "@/features/templates/types"
 import { TemplateMockup } from "./TemplateMockup"
 import { TEMPLATE_TYPES_INFO } from "../constants"
 import { Info } from "lucide-react"
+import { getTypeConfig } from "../utils"
 
 interface TemplatePreviewModalProps {
   template: Template | null
@@ -47,8 +48,11 @@ export function TemplatePreviewModal({
           <div className="w-full md:w-1/2 p-6 flex flex-col justify-center bg-white border-t md:border-t-0 md:border-l border-slate-100">
             <DialogHeader className="mb-6 text-left">
               <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-                <span className="text-3xl bg-slate-50 border border-slate-100 rounded-lg p-2 shadow-sm w-12 h-12 flex items-center justify-center shrink-0">
-                  {typeInfo?.icon || '🧩'}
+                <span className="bg-slate-50 border border-slate-100 rounded-lg p-2 shadow-sm w-12 h-12 flex items-center justify-center shrink-0 text-slate-700">
+                  {(() => {
+                    const ConfigIcon = template ? getTypeConfig(template.type).icon : null;
+                    return ConfigIcon ? <ConfigIcon className="w-6 h-6" /> : <span className="text-3xl">🧩</span>;
+                  })()}
                 </span>
                 <span className="text-gray-900">{typeInfo?.name || template?.type}</span>
               </DialogTitle>

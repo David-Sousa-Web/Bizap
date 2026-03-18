@@ -1,9 +1,11 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
   FolderKanban,
+  Plus,
   RefreshCw,
   Search,
 } from "lucide-react"
@@ -30,6 +32,7 @@ import { useProjects } from "@/features/projects/hooks/useProjects"
 import { useDebounce } from "@/hooks/useDebounce"
 
 export default function ProjectsPage() {
+  const navigate = useNavigate()
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(12)
@@ -63,7 +66,13 @@ export default function ProjectsPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Projetos</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">Projetos</h1>
+          <Button size="sm" onClick={() => navigate("/projetos/novo")}>
+            <Plus className="size-4" />
+            Novo Projeto
+          </Button>
+        </div>
         <div className="relative w-full sm:max-w-xs">
           <Search className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" />
           <Input

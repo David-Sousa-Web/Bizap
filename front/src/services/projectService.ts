@@ -1,6 +1,6 @@
 import { api } from "@/lib/api"
-import type { PaginatedApiResponse, PaginationParams } from "@/types/api"
-import type { Project } from "@/features/projects/types"
+import type { ApiResponse, PaginatedApiResponse, PaginationParams } from "@/types/api"
+import type { CreateProjectPayload, Project } from "@/features/projects/types"
 
 async function list(
   params?: PaginationParams,
@@ -12,6 +12,27 @@ async function list(
   return response.data
 }
 
-export const projectService = Object.freeze({ list })
+async function create(
+  data: CreateProjectPayload,
+): Promise<ApiResponse<Project>> {
+  const response = await api.post<ApiResponse<Project>>("/projects", data)
+  return response.data
+}
+
+async function uploadImage(
+  projectId: string,
+  file: File,
+): Promise<ApiResponse<Project>> {
+  const formData = new FormData()
+  formData.append("file", file)
+  const response = await api.post<ApiResponse<Project>>(
+    `/projects/${projectId}/image`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  )
+  return response.data
+}
+
+export const projectService = Object.freeze({ list, create, uploadImage })
 
 export type ProjectService = typeof projectService

@@ -8,3 +8,11 @@ export interface Project {
   flowMessage: string
   apiKey: string
 }
+
+export interface CreateProjectPayload {
+  name: string
+  phoneNumber: string
+  agency?: string
+  templateSid: string
+  flowMessage: string
+}

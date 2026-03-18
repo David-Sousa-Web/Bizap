@@ -14,11 +14,14 @@ import {
   Settings 
 } from "lucide-react"
 
+import type { ReactNode } from "react"
+
 interface TemplateMockupProps {
   template: Template
+  children?: ReactNode
 }
 
-export function TemplateMockup({ template }: TemplateMockupProps) {
+export function TemplateMockup({ template, children }: TemplateMockupProps) {
   // Safe extraction of body
   let bodyContent = ""
   let components: Record<string, unknown>[] = []
@@ -237,6 +240,7 @@ export function TemplateMockup({ template }: TemplateMockupProps) {
         {/* Mockup Screen */}
         <div className="h-[calc(100%-60px)] overflow-y-auto p-4 flex flex-col gap-3 bg-[radial-gradient(#d1d5db_1px,transparent_1px)] bg-size-[10px_10px]">
           {renderContent()}
+          {children}
         </div>
       </div>
     </div>

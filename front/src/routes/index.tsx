@@ -10,6 +10,7 @@ const DashboardPage = lazy(() => import("@/pages/DashboardPage"))
 const TemplatesPage = lazy(() => import("@/pages/TemplatesPage"))
 const ProjectsPage = lazy(() => import("@/pages/ProjectsPage"))
 const CreateProjectPage = lazy(() => import("@/pages/CreateProjectPage"))
+const ProjectDetailsPage = lazy(() => import("@/pages/ProjectDetailsPage"))
 
 export const router = createBrowserRouter([
   {
@@ -55,6 +56,14 @@ export const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <CreateProjectPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: "/projetos/:id",
+            element: (
+              <SuspenseWrapper>
+                <ProjectDetailsPage />
               </SuspenseWrapper>
             ),
           },

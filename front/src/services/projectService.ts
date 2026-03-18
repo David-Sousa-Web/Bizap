@@ -19,6 +19,16 @@ async function create(
   return response.data
 }
 
+async function getById(id: string): Promise<ApiResponse<Project>> {
+  const response = await api.get<ApiResponse<Project>>(`/projects/${id}`)
+  return response.data
+}
+
+async function remove(id: string): Promise<ApiResponse<void>> {
+  const response = await api.delete<ApiResponse<void>>(`/projects/${id}`)
+  return response.data
+}
+
 async function uploadImage(
   projectId: string,
   file: File,
@@ -33,6 +43,12 @@ async function uploadImage(
   return response.data
 }
 
-export const projectService = Object.freeze({ list, create, uploadImage })
+export const projectService = Object.freeze({
+  list,
+  create,
+  getById,
+  remove,
+  uploadImage,
+})
 
 export type ProjectService = typeof projectService

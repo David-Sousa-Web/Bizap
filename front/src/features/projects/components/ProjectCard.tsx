@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Phone, Building2 } from "lucide-react"
@@ -18,7 +19,8 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <Card className="transition-colors hover:bg-accent/40">
+    <Link to={`/projetos/${project.id}`}>
+      <Card className="transition-colors hover:bg-accent/40 cursor-pointer h-full">
       <CardContent className="flex items-center gap-4">
         <Avatar size="lg" className="size-12">
           {project.image && (
@@ -49,6 +51,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </div>
       </CardContent>
-    </Card>
+      </Card>
+    </Link>
   )
 }

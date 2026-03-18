@@ -13,6 +13,12 @@ export interface CreateProjectPayload {
   name: string
   phoneNumber: string
   agency?: string
-  templateSid: string
   flowMessage: string
+}
+
+export interface ProjectNumber {
+  id: string
+  name: string
+  number: string
+  projectId: string
 }

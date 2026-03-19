@@ -136,25 +136,52 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
 
           <div className="flex flex-col gap-4 w-full pt-2">
             {isEditing ? (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field data-invalid={!!errors.name} className="sm:col-span-2">
-                    <FieldLabel htmlFor="name">Nome do Projeto <span className="text-destructive">*</span></FieldLabel>
-                    <Input id="name" placeholder="Ex: Campanha Dia das Mães" {...register("name")} />
+              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 w-full">
+                <div className="pr-8">
+                  <Field data-invalid={!!errors.name}>
+                    <Input 
+                      id="name" 
+                      placeholder="Nome do Projeto *" 
+                      className="text-2xl font-bold tracking-tight h-auto px-3 py-1.5 w-full bg-background" 
+                      {...register("name")} 
+                    />
                     <FieldError>{errors.name?.message}</FieldError>
                   </Field>
+                  <p className="text-sm text-muted-foreground mt-2 px-1 block">
+                    ID: <span className="font-mono">{project.id}</span>
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-border/50 pt-6">
+                  <div className="flex flex-col gap-1.5">
+                    <Field data-invalid={!!errors.phoneNumber} className="space-y-2">
+                      <FieldLabel htmlFor="phoneNumber" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Phone className="size-4" /> Telefone (WhatsApp) <span className="text-destructive">*</span>
+                      </FieldLabel>
+                      <Input 
+                        id="phoneNumber" 
+                        placeholder="+55 11 99999-9999" 
+                        className="text-base font-semibold bg-background" 
+                        {...register("phoneNumber")} 
+                      />
+                      <FieldError>{errors.phoneNumber?.message}</FieldError>
+                    </Field>
+                  </div>
                   
-                  <Field data-invalid={!!errors.phoneNumber}>
-                    <FieldLabel htmlFor="phoneNumber">Telefone (WhatsApp) <span className="text-destructive">*</span></FieldLabel>
-                    <Input id="phoneNumber" placeholder="+55 11 99999-9999" {...register("phoneNumber")} />
-                    <FieldError>{errors.phoneNumber?.message}</FieldError>
-                  </Field>
-                  
-                  <Field data-invalid={!!errors.agency}>
-                    <FieldLabel htmlFor="agency">Agência (Opcional)</FieldLabel>
-                    <Input id="agency" placeholder="Nome da agência" {...register("agency")} />
-                    <FieldError>{errors.agency?.message}</FieldError>
-                  </Field>
+                  <div className="flex flex-col gap-1.5">
+                    <Field data-invalid={!!errors.agency} className="space-y-2">
+                      <FieldLabel htmlFor="agency" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Building2 className="size-4" /> Agência
+                      </FieldLabel>
+                      <Input 
+                        id="agency" 
+                        placeholder="Nome da agência" 
+                        className="text-base font-semibold bg-background" 
+                        {...register("agency")} 
+                      />
+                      <FieldError>{errors.agency?.message}</FieldError>
+                    </Field>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 pt-2">
@@ -186,28 +213,32 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                 </div>
               </form>
             ) : (
-              <>
+              <div className="flex flex-col gap-8 w-full">
                 <div className="pr-8">
-                  <h2 className="text-xl font-bold tracking-tight">{project.name}</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    ID do Projeto: <span className="font-mono">{project.id}</span>
+                  <h2 className="text-2xl font-bold tracking-tight">{project.name}</h2>
+                  <p className="text-sm text-muted-foreground mt-1 cursor-text select-text block">
+                    ID: <span className="font-mono">{project.id}</span>
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm mt-2">
-                  <div className="flex items-center gap-2 bg-muted/40 px-3 py-2 rounded-lg border border-border/50">
-                    <Phone className="size-4 text-primary shrink-0" />
-                    <span className="font-medium">{project.phoneNumber}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-border/50 pt-6">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <Phone className="size-4" /> Telefone (WhatsApp)
+                    </span>
+                    <span className="text-base font-semibold">{project.phoneNumber}</span>
                   </div>
                   
-                  {project.agency && (
-                    <div className="flex items-center gap-2 bg-muted/40 px-3 py-2 rounded-lg border border-border/50">
-                      <Building2 className="size-4 text-primary shrink-0" />
-                      <span className="font-medium">{project.agency}</span>
-                    </div>
-                  )}
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <Building2 className="size-4" /> Agência
+                    </span>
+                    <span className="text-base font-semibold">
+                      {project.agency ? project.agency : "Não informada"}
+                    </span>
+                  </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </CardContent>

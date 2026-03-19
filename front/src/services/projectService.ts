@@ -1,6 +1,10 @@
 import { api } from "@/lib/api"
 import type { ApiResponse, PaginatedApiResponse, PaginationParams } from "@/types/api"
-import type { CreateProjectPayload, Project } from "@/features/projects/types"
+import type {
+  CreateProjectPayload,
+  UpdateProjectPayload,
+  Project,
+} from "@/features/projects/types"
 
 async function list(
   params?: PaginationParams,
@@ -21,6 +25,14 @@ async function create(
 
 async function getById(id: string): Promise<ApiResponse<Project>> {
   const response = await api.get<ApiResponse<Project>>(`/projects/${id}`)
+  return response.data
+}
+
+async function update(
+  id: string,
+  data: UpdateProjectPayload,
+): Promise<ApiResponse<Project>> {
+  const response = await api.put<ApiResponse<Project>>(`/projects/${id}`, data)
   return response.data
 }
 
@@ -47,6 +59,7 @@ export const projectService = Object.freeze({
   list,
   create,
   getById,
+  update,
   remove,
   uploadImage,
 })

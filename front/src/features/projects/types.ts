@@ -23,3 +23,10 @@ export interface ProjectNumber {
   number: string
   projectId: string
 }
+
+export interface UpdateProjectPayload {
+  name?: string
+  phoneNumber?: string
+  agency?: string
+  templateSid?: string
+}

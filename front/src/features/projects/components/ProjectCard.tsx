@@ -89,8 +89,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[180px]">
             <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation()
+              onSelect={(e) => {
+                e.preventDefault()
                 navigate(`/projetos/${project.id}`)
               }}
             >
@@ -101,8 +101,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation()
+              onSelect={(e) => {
+                e.preventDefault()
                 navigate(`/projetos/${project.id}?tab=template`)
               }}
             >
@@ -110,8 +110,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
               Editar Template
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation()
+              onSelect={(e) => {
+                e.preventDefault()
                 navigate(`/projetos/${project.id}?tab=mensagem`)
               }}
             >
@@ -119,8 +119,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
               Editar Mensagem
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation()
+              onSelect={(e) => {
+                e.preventDefault()
                 navigate(`/projetos/${project.id}?tab=numeros`)
               }}
             >
@@ -131,10 +131,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem
-              // className="text-destructive focus:bg-destructive focus:text-destructive-foreground focus:dark:text-destructive-foreground"
               variant="destructive"
-              onClick={(e) => {
-                e.stopPropagation()
+              onSelect={(e) => {
+                e.preventDefault()
                 navigate(`/projetos/${project.id}?tab=avancado`)
               }}
             >

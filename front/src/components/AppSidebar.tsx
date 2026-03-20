@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LogOut,
 } from "lucide-react"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import { useAuth } from "@/hooks/useAuth"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -93,6 +94,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
+        <ThemeToggle />
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>

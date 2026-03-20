@@ -3,6 +3,7 @@ import type { ApiResponse, PaginatedApiResponse, PaginationParams } from "@/type
 import type {
   CreateProjectPayload,
   UpdateProjectPayload,
+  UpdateFlowMessagePayload,
   Project,
 } from "@/features/projects/types"
 
@@ -41,6 +42,17 @@ async function remove(id: string): Promise<ApiResponse<void>> {
   return response.data
 }
 
+async function updateFlowMessage(
+  id: string,
+  data: UpdateFlowMessagePayload,
+): Promise<ApiResponse<Project>> {
+  const response = await api.put<ApiResponse<Project>>(
+    `/projects/${id}/response-message`,
+    data,
+  )
+  return response.data
+}
+
 async function uploadImage(
   projectId: string,
   file: File,
@@ -61,6 +73,7 @@ export const projectService = Object.freeze({
   getById,
   update,
   remove,
+  updateFlowMessage,
   uploadImage,
 })
 

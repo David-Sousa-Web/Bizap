@@ -24,7 +24,7 @@ export function FlowMessageStep() {
       <div className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Mensagem de resposta</h2>
         <p className="text-sm text-muted-foreground">
-          Escreva a mensagem que será enviada como resposta automática após o 
+          Escreva a mensagem que será enviada como resposta automática após o
           usuário interagir com o template inicial.
         </p>
       </div>

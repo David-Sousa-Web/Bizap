@@ -1,5 +1,13 @@
+import { useState } from "react"
+import { AlertCircle, Pencil, X, Check, Loader2 } from "lucide-react"
+import { toast } from "sonner"
+
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { TemplateMockup } from "@/features/templates/components/TemplateMockup"
-import { AlertCircle } from "lucide-react"
+import { useUpdateFlowMessage } from "@/features/projects/hooks/useUpdateFlowMessage"
+
 import type { Project } from "@/features/projects/types"
 import type { Template } from "@/features/templates/types"
 
@@ -9,7 +17,39 @@ interface FlowMessageTabProps {
 }
 
 export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [tempMessage, setTempMessage] = useState(project.flowMessage)
+  
+  const updateMessage = useUpdateFlowMessage()
   const selectedTemplate = templates.find((t) => t.sid === project.templateSid)
+
+  async function handleSave() {
+    if (tempMessage.trim() === project.flowMessage.trim()) {
+      setIsEditing(false)
+      return
+    }
+
+    if (!tempMessage.trim()) {
+      toast.error("A mensagem não pode ficar vazia.")
+      return
+    }
+
+    try {
+      await updateMessage.mutateAsync({
+        id: project.id,
+        data: { flowMessage: tempMessage },
+      })
+      toast.success("Mensagem de resposta atualizada!")
+      setIsEditing(false)
+    } catch {
+      toast.error("Erro ao atualizar mensagem.")
+    }
+  }
+
+  function handleCancel() {
+    setTempMessage(project.flowMessage)
+    setIsEditing(false)
+  }
 
   if (!selectedTemplate) {
     return (
@@ -24,33 +64,98 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-6">
-          <h3 className="font-semibold">Mensagem de Resposta</h3>
-          <p className="text-xs text-muted-foreground mt-1 px-4">
-            Como sua mensagem automática aparecerá logo após a interação do usuário.
+    <div className="flex flex-col gap-6 p-6 animate-in fade-in slide-in-from-bottom-2 duration-300 relative bg-card rounded-xl border">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight">Mensagem de Resposta</h2>
+          <p className="text-sm text-muted-foreground">
+            Como sua mensagem automática aparecerá após a interação do usuário.
           </p>
         </div>
-        
-        <div className="pointer-events-none">
-          <TemplateMockup template={selectedTemplate}>
-            {/* Simulated User Response */}
-            <div className="flex w-full justify-end animate-in fade-in slide-in-from-bottom-2 duration-300 mt-2">
-              <div className="bg-[#dcf8c6] p-2 rounded-t-lg rounded-bl-lg rounded-br-none shadow-sm max-w-[85%] text-sm">
-                <p className="whitespace-pre-wrap text-slate-800">Interação do usuário</p>
-                <div className="text-right text-[10px] text-emerald-700/60 mt-1">10:01</div>
-              </div>
-            </div>
+      </div>
 
-            {/* Simulated Bot Flow Message */}
-            <div className="flex flex-col gap-1 w-full animate-in fade-in slide-in-from-bottom-2 duration-300 mt-1">
-              <div className="bg-white p-3 rounded-t-lg rounded-br-lg rounded-bl-none shadow-sm max-w-[90%] text-sm">
-                <p className="whitespace-pre-wrap">{project.flowMessage}</p>
-                <div className="text-right text-[10px] text-gray-400 mt-1">10:02</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Lado Esquerdo: Input de texto */}
+        <div className="flex flex-col gap-5">
+          {isEditing ? (
+            <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="flowMessage">
+                  Mensagem <span className="text-destructive">*</span>
+                </Label>
+                <Textarea
+                  id="flowMessage"
+                  placeholder="Digite a mensagem de resposta automática..."
+                  className="min-h-[220px] resize-none"
+                  value={tempMessage}
+                  onChange={(e) => setTempMessage(e.target.value)}
+                  disabled={updateMessage.isPending}
+                />
+                <p className="text-[13px] text-muted-foreground">
+                  A mensagem será exibida na sequência, como uma resposta do bot à interação do usuário.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <Button variant="outline" size="sm" onClick={handleCancel} disabled={updateMessage.isPending}>
+                  <X className="mr-2 size-4" /> Cancelar
+                </Button>
+                <Button size="sm" onClick={handleSave} disabled={updateMessage.isPending}>
+                  {updateMessage.isPending ? (
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                  ) : (
+                    <Check className="mr-2 size-4" />
+                  )}
+                  Salvar Mensagem
+                </Button>
               </div>
             </div>
-          </TemplateMockup>
+          ) : (
+            <div className="flex flex-col gap-4 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between">
+                <p className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Conteúdo Configurado
+                </p>
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                  <Pencil className="mr-2 size-3.5" /> Editar Texto
+                </Button>
+              </div>
+              <div className="bg-slate-50 border border-slate-100 rounded-xl p-5 min-h-[200px]">
+                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700">
+                  {project.flowMessage}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Lado Direito: Preview */}
+        <div className="flex flex-col gap-2 relative">
+          <p className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 lg:text-center">
+            Simulação Visual
+          </p>
+          <div className="flex justify-center items-center w-full min-h-[400px]">
+            <div className="scale-[0.70] origin-top border shadow-2xl rounded-[3rem] overflow-hidden -mt-4 bg-muted/20">
+              <TemplateMockup template={selectedTemplate}>
+                {/* Simulated User Response */}
+                <div className="flex w-full justify-end mt-2">
+                  <div className="bg-[#dcf8c6] p-2.5 rounded-t-xl rounded-bl-xl rounded-br-sm shadow-sm max-w-[85%] text-[15px]">
+                    <p className="whitespace-pre-wrap text-slate-800">Interação do usuário</p>
+                    <div className="text-right text-[11px] text-emerald-700/60 mt-1">10:01</div>
+                  </div>
+                </div>
+
+                {/* Simulated Bot Flow Message */}
+                <div className="flex flex-col gap-1 w-full mt-1.5 transition-all duration-300">
+                  <div className="bg-white p-3.5 rounded-t-xl rounded-br-xl rounded-bl-sm shadow-sm max-w-[90%] text-[15px]">
+                    <p className="whitespace-pre-wrap text-slate-700">
+                      {(isEditing ? tempMessage : project.flowMessage) || <span className="text-slate-400 italic">(Vazio)</span>}
+                    </p>
+                    <div className="text-right text-[11px] text-slate-400 mt-1">10:02</div>
+                  </div>
+                </div>
+              </TemplateMockup>
+            </div>
+          </div>
         </div>
       </div>
     </div>

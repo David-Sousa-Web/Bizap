@@ -30,3 +30,7 @@ export interface UpdateProjectPayload {
   agency?: string
   templateSid?: string
 }
+
+export interface UpdateFlowMessagePayload {
+  flowMessage: string
+}

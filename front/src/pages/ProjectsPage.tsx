@@ -66,7 +66,7 @@ export default function ProjectsPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
+        <div className="w-full flex justify-between items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">Projetos</h1>
           <Button size="sm" onClick={() => navigate("/projetos/novo")}>
             <Plus className="size-4" />

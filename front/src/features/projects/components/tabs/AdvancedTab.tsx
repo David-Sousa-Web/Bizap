@@ -52,7 +52,7 @@ export function AdvancedTab({ project }: AdvancedTabProps) {
             Credenciais de API
           </CardTitle>
           <CardDescription>
-            Use a API Key abaixo para integrar sua aplicação externa (ex: disparo via backend do cliente) 
+            Use a API Key abaixo para integrar sua aplicação externa (ex: disparo via backend do cliente)
             com este projeto no formato de Autenticação Bearer.
           </CardDescription>
         </CardHeader>
@@ -87,11 +87,11 @@ export function AdvancedTab({ project }: AdvancedTabProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm font-medium mb-4">
-            Ao excluir este projeto, você perderá a API Key e as configurações atreladas. 
+            Ao excluir este projeto, você perderá a API Key e as configurações atreladas.
             Todas interações no chat pararão de funcionar para este escopo instantaneamente.
           </p>
         </CardContent>
-        <CardFooter className="bg-destructive/5 justify-start">
+        <CardFooter className="justify-start">
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">Excluir Projeto de forma Permanente</Button>
@@ -100,18 +100,18 @@ export function AdvancedTab({ project }: AdvancedTabProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Você tem absoluta certeza?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Esta ação não pode ser desfeita. Isto excluirá permanentemente o projeto 
+                  Esta ação não pode ser desfeita. Isto excluirá permanentemente o projeto
                   <strong> {project.name} </strong> e removerá todos os dados do banco.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Sair e Manter</AlertDialogCancel>
-                <AlertDialogAction 
+                <AlertDialogAction
                   onClick={(e) => {
-                    e.preventDefault(); 
+                    e.preventDefault();
                     if (!deleteProject.isPending) handleDelete();
                   }}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  variant="destructive"
                   disabled={deleteProject.isPending}
                 >
                   {deleteProject.isPending ? (

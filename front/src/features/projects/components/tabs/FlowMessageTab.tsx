@@ -19,7 +19,7 @@ interface FlowMessageTabProps {
 export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [tempMessage, setTempMessage] = useState(project.flowMessage)
-  
+
   const updateMessage = useUpdateFlowMessage()
   const selectedTemplate = templates.find((t) => t.sid === project.templateSid)
 
@@ -133,8 +133,8 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
           <p className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-2 lg:text-center">
             Simulação Visual
           </p>
-          <div className="flex justify-center items-center w-full min-h-[400px]">
-            <div className="scale-[0.70] origin-top border shadow-2xl rounded-[3rem] overflow-hidden -mt-4 bg-muted/20">
+          <div className="flex justify-center items-center w-full max-h-[500px]">
+            <div className="scale-80 origin-top translate-y-2 border shadow-2xl rounded-[3rem] overflow-hidden bg-muted/20">
               <TemplateMockup template={selectedTemplate}>
                 {/* Simulated User Response */}
                 <div className="flex w-full justify-end mt-2">

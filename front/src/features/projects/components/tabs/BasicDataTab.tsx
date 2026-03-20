@@ -186,18 +186,6 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
 
                 <div className="flex justify-end items-center gap-2 pt-2">
                   <Button
-                    type="submit"
-                    disabled={updateProject.isPending}
-                    size="sm"
-                  >
-                    {updateProject.isPending ? (
-                      <Loader2 className="size-4 mr-2 animate-spin" />
-                    ) : (
-                      <Check className="size-4 mr-2" />
-                    )}
-                    Salvar
-                  </Button>
-                  <Button
                     type="button"
                     variant="outline"
                     onClick={() => {
@@ -209,6 +197,19 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                   >
                     <X className="size-4 mr-2" />
                     Cancelar
+                  </Button>
+
+                  <Button
+                    type="submit"
+                    disabled={updateProject.isPending}
+                    size="sm"
+                  >
+                    {updateProject.isPending ? (
+                      <Loader2 className="size-4 mr-2 animate-spin" />
+                    ) : (
+                      <Check className="size-4 mr-2" />
+                    )}
+                    Salvar
                   </Button>
                 </div>
               </form>

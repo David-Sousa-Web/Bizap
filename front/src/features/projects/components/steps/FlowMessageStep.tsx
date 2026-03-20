@@ -55,7 +55,7 @@ export function FlowMessageStep() {
             Simulação Visual
           </p>
           {selectedTemplate ? (
-            <div className="flex justify-center items-center w-full max-h-[500px] pointer-events-none">
+            <div className="flex justify-center items-center w-full max-h-[500px]">
               <div className="scale-80 origin-top translate-y-2 border shadow-2xl rounded-[3rem] overflow-hidden bg-muted/20">
                 <TemplateMockup template={selectedTemplate}>
                   {/* Simulated User Response */}

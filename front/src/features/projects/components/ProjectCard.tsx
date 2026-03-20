@@ -1,7 +1,25 @@
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Phone, Building2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Phone,
+  Building2,
+  Info,
+  LayoutTemplate,
+  MessageSquare,
+  Users,
+  Trash2,
+  MoreHorizontal,
+} from "lucide-react"
+
 import type { Project } from "@/features/projects/types"
 
 function getInitials(name: string): string {
@@ -18,40 +36,114 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  return (
-    <Link to={`/projetos/${project.id}`}>
-      <Card className="transition-colors hover:bg-accent/40 cursor-pointer h-full">
-      <CardContent className="flex items-center gap-4">
-        <Avatar size="lg" className="size-12">
-          {project.image && (
-            <AvatarImage src={project.image} alt={project.name} />
-          )}
-          <AvatarFallback className="text-base font-semibold">
-            {getInitials(project.name)}
-          </AvatarFallback>
-        </Avatar>
+  const navigate = useNavigate()
 
-        <div className="flex flex-col gap-1 overflow-hidden">
-          <span className="truncate text-sm font-semibold leading-none">
+  return (
+    <Card
+      onClick={() => navigate(`/projetos/${project.id}`)}
+      className="relative transition-colors hover:bg-accent/40 cursor-pointer py-0"
+    >
+      <CardContent className="flex flex-col gap-3 p-4">
+        <div className="flex items-center gap-3">
+          <Avatar size="lg" className="size-11 shrink-0">
+            {project.image && (
+              <AvatarImage src={project.image} alt={project.name} />
+            )}
+            <AvatarFallback className="text-[13px] font-semibold">
+              {getInitials(project.name)}
+            </AvatarFallback>
+          </Avatar>
+
+          <span className="truncate text-[15px] font-semibold leading-none pr-8 flex-1">
             {project.name}
           </span>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Phone className="size-3 shrink-0" />
-              {project.phoneNumber}
+        <div className="flex flex-col gap-1.5 text-[13px] text-muted-foreground ml-1">
+          <span className="flex items-center gap-2">
+            <Phone className="size-3.5 shrink-0" />
+            {project.phoneNumber}
+          </span>
+
+          {project.agency && (
+            <span className="flex items-center gap-2">
+              <Building2 className="size-3.5 shrink-0" />
+              {project.agency}
             </span>
-
-            {project.agency && (
-              <span className="flex items-center gap-1">
-                <Building2 className="size-3 shrink-0" />
-                {project.agency}
-              </span>
-            )}
-          </div>
+          )}
         </div>
       </CardContent>
-      </Card>
-    </Link>
+
+      <div className="absolute top-2 right-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground hover:text-foreground"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal className="size-4" />
+              <span className="sr-only">Ações</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[180px]">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/projetos/${project.id}`)
+              }}
+            >
+              <Info className="mr-2 size-4" />
+              Informações
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/projetos/${project.id}?tab=template`)
+              }}
+            >
+              <LayoutTemplate className="mr-2 size-4" />
+              Editar Template
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/projetos/${project.id}?tab=mensagem`)
+              }}
+            >
+              <MessageSquare className="mr-2 size-4" />
+              Editar Mensagem
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/projetos/${project.id}?tab=numeros`)
+              }}
+            >
+              <Users className="mr-2 size-4" />
+              Ver Números
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            <DropdownMenuItem
+              // className="text-destructive focus:bg-destructive focus:text-destructive-foreground focus:dark:text-destructive-foreground"
+              variant="destructive"
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/projetos/${project.id}?tab=avancado`)
+              }}
+            >
+              <Trash2 className="mr-2 size-4" />
+              Excluir
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </Card>
   )
 }

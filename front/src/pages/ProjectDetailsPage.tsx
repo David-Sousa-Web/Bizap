@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, useSearchParams } from "react-router-dom"
 import { ArrowLeft, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -14,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get("tab") || "dados"
 
   const { data: projectResponse, isLoading, isError } = useProject(id)
   const project = projectResponse?.data
@@ -68,9 +70,13 @@ export default function ProjectDetailsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="dados" className="w-full">
+      <Tabs 
+        value={activeTab} 
+        onValueChange={(value) => setSearchParams({ tab: value })} 
+        className="w-full"
+      >
         <div className="flex items-center justify-between">
-          <TabsList className="grid w-full grid-cols-2 md:inline-flex md:grid-cols-none md:w-auto h-auto p-1 bg-muted/50 rounded-lg">
+          <TabsList className="grid w-full grid-cols-2 lg:inline-flex lg:grid-cols-none lg:w-auto h-auto p-1 bg-muted/50 rounded-lg">
             <TabsTrigger value="dados" className="py-2.5">Dados</TabsTrigger>
             <TabsTrigger value="template" className="py-2.5">Template</TabsTrigger>
             <TabsTrigger value="mensagem" className="py-2.5">Mensagem</TabsTrigger>

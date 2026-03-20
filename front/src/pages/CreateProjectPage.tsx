@@ -141,12 +141,12 @@ export default function CreateProjectPage() {
         <h1 className="text-2xl font-bold tracking-tight">Novo Projeto</h1>
       </div>
 
-      <div className="mx-auto w-full max-w-2xl">
+      <div className="mx-auto w-full max-w-4xl">
         <WizardStepper steps={STEPS} currentStep={currentStep} />
       </div>
 
       <FormProvider {...form}>
-        <div className="mx-auto w-full max-w-2xl">
+        <div className="mx-auto w-full max-w-4xl">
           {currentStep === 0 && <BasicDataStep />}
           {currentStep === 1 && <TemplateSelectionStep />}
           {currentStep === 2 && <FlowMessageStep />}

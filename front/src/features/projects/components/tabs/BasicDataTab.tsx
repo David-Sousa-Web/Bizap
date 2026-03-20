@@ -31,7 +31,7 @@ function getInitials(name: string): string {
 export function BasicDataTab({ project }: BasicDataTabProps) {
   const [isEditing, setIsEditing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  
+
   const updateProject = useUpdateProject()
   const uploadImage = useUploadProjectImage()
 
@@ -91,10 +91,10 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
       <Card>
         <CardContent className="flex flex-col sm:flex-row items-start gap-6 p-6 relative">
           {!isEditing && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute top-4 right-4" 
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-4 right-4"
               onClick={() => setIsEditing(true)}
               title="Editar dados"
             >
@@ -103,7 +103,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
           )}
 
           {/* Avatar com Upload (Sempre clicável) */}
-          <div 
+          <div
             className="relative group cursor-pointer shrink-0"
             onClick={() => fileInputRef.current?.click()}
             title="Trocar imagem do projeto"
@@ -116,7 +116,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                 {getInitials(project.name)}
               </AvatarFallback>
             </Avatar>
-            
+
             <div className="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               {uploadImage.isPending ? (
                 <Loader2 className="size-6 text-white animate-spin" />
@@ -124,9 +124,9 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                 <Camera className="size-6 text-white" />
               )}
             </div>
-            
-            <input 
-              type="file" 
+
+            <input
+              type="file"
               ref={fileInputRef}
               onChange={handleImageUpload}
               className="hidden"
@@ -139,11 +139,11 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
               <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 w-full">
                 <div className="pr-8">
                   <Field data-invalid={!!errors.name}>
-                    <Input 
-                      id="name" 
-                      placeholder="Nome do Projeto *" 
-                      className="text-2xl font-bold tracking-tight h-auto px-3 py-1.5 w-full bg-background" 
-                      {...register("name")} 
+                    <Input
+                      id="name"
+                      placeholder="Nome do Projeto *"
+                      className="text-2xl font-bold tracking-tight h-auto px-3 py-1.5 w-full bg-background"
+                      {...register("name")}
                     />
                     <FieldError>{errors.name?.message}</FieldError>
                   </Field>
@@ -158,35 +158,35 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                       <FieldLabel htmlFor="phoneNumber" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <Phone className="size-4" /> Telefone (WhatsApp) <span className="text-destructive">*</span>
                       </FieldLabel>
-                      <Input 
-                        id="phoneNumber" 
-                        placeholder="+55 11 99999-9999" 
-                        className="text-base font-semibold bg-background" 
-                        {...register("phoneNumber")} 
+                      <Input
+                        id="phoneNumber"
+                        placeholder="+55 11 99999-9999"
+                        className="text-base font-semibold bg-background"
+                        {...register("phoneNumber")}
                       />
                       <FieldError>{errors.phoneNumber?.message}</FieldError>
                     </Field>
                   </div>
-                  
+
                   <div className="flex flex-col gap-1.5">
                     <Field data-invalid={!!errors.agency} className="space-y-2">
                       <FieldLabel htmlFor="agency" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <Building2 className="size-4" /> Agência
                       </FieldLabel>
-                      <Input 
-                        id="agency" 
-                        placeholder="Nome da agência" 
-                        className="text-base font-semibold bg-background" 
-                        {...register("agency")} 
+                      <Input
+                        id="agency"
+                        placeholder="Nome da agência"
+                        className="text-base font-semibold bg-background"
+                        {...register("agency")}
                       />
                       <FieldError>{errors.agency?.message}</FieldError>
                     </Field>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-2">
-                  <Button 
-                    type="submit" 
+                <div className="flex justify-end items-center gap-2 pt-2">
+                  <Button
+                    type="submit"
                     disabled={updateProject.isPending}
                     size="sm"
                   >
@@ -197,9 +197,9 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                     )}
                     Salvar
                   </Button>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => {
                       reset()
                       setIsEditing(false)
@@ -228,7 +228,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                     </span>
                     <span className="text-base font-semibold">{project.phoneNumber}</span>
                   </div>
-                  
+
                   <div className="flex flex-col gap-1.5">
                     <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Building2 className="size-4" /> Agência

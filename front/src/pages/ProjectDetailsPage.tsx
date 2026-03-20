@@ -79,7 +79,7 @@ export default function ProjectDetailsPage() {
           </TabsList>
         </div>
 
-        <div className="mt-6 w-full max-w-4xl">
+        <div className="mt-6 w-full">
           <TabsContent value="dados" className="m-0 border-0 p-0 focus-visible:ring-0">
             <BasicDataTab project={project} />
           </TabsContent>

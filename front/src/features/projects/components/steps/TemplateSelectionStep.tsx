@@ -1,14 +1,16 @@
 import { useState } from "react"
 import { useFormContext } from "react-hook-form"
-import { Check, Eye } from "lucide-react"
+import { Check, Eye, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTemplates } from "@/features/templates/hooks/useTemplates"
 import { TemplateMockup } from "@/features/templates/components/TemplateMockup"
 import { TemplatePreviewModal } from "@/features/templates/components/TemplatePreviewModal"
 import { getTypeConfig } from "@/features/templates/utils"
+import { useDebounce } from "@/hooks/useDebounce"
 import type { Template } from "@/features/templates/types"
 import type { CreateProjectFormData } from "@/features/projects/schemas/createProjectSchema"
 
@@ -16,9 +18,19 @@ export function TemplateSelectionStep() {
   const { setValue, watch, formState: { errors } } = useFormContext<CreateProjectFormData>()
   const selectedSid = watch("templateSid")
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("")
 
-  const { data: response, isLoading } = useTemplates({ limit: 100 })
+  const debouncedSearch = useDebounce(search, 500)
+
+  const { data: response, isLoading } = useTemplates({
+    page,
+    limit: 12,
+    ...(debouncedSearch ? { search: debouncedSearch } : {})
+  })
+
   const templates = response?.data ?? []
+  const meta = response?.meta
 
   function handleSelect(template: Template) {
     setValue("templateSid", template.sid, { shouldValidate: true })
@@ -37,6 +49,20 @@ export function TemplateSelectionStep() {
             {errors.templateSid.message}
           </p>
         )}
+      </div>
+
+      <div className="relative w-full max-w-sm mb-2">
+        <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Pesquisar template..."
+          className="pl-9 bg-background"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(1)
+          }}
+        />
       </div>
 
       {isLoading && (
@@ -123,6 +149,38 @@ export function TemplateSelectionStep() {
               </Card>
             )
           })}
+        </div>
+      )}
+
+      {meta && meta.totalPages > 1 && (
+        <div className="flex sm:flex-row flex-col items-center justify-between border-t border-border/50 pt-5 mt-4 gap-4">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
+            Mostrando <span className="font-medium">{(meta.page - 1) * meta.limit + 1}</span> a{' '}
+            <span className="font-medium">{Math.min(meta.page * meta.limit, meta.total)}</span>{' '}
+            de <span className="font-medium">{meta.total}</span> templates
+          </p>
+          <div className="flex items-center space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page <= 1 || isLoading}
+            >
+              <ChevronLeft className="size-4 mr-1" />
+              Anterior
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+              disabled={page >= meta.totalPages || isLoading}
+            >
+              Próximo
+              <ChevronRight className="size-4 ml-1" />
+            </Button>
+          </div>
         </div>
       )}
 

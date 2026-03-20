@@ -1,9 +1,10 @@
 import { useState } from "react"
-import { AlertCircle, Puzzle, Info, Check, Eye, RefreshCw, Loader2, X } from "lucide-react"
+import { AlertCircle, Puzzle, Info, Check, Eye, RefreshCw, Loader2, X, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -11,6 +12,8 @@ import { TemplateMockup } from "@/features/templates/components/TemplateMockup"
 import { TemplatePreviewModal } from "@/features/templates/components/TemplatePreviewModal"
 import { TEMPLATE_TYPES_INFO } from "@/features/templates/constants"
 import { getTypeConfig } from "@/features/templates/utils"
+import { useTemplates } from "@/features/templates/hooks/useTemplates"
+import { useDebounce } from "@/hooks/useDebounce"
 
 import type { Project } from "@/features/projects/types"
 import type { Template } from "@/features/templates/types"
@@ -25,6 +28,20 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [tempSelectedSid, setTempSelectedSid] = useState<string>(project.templateSid)
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
+  
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("")
+  const debouncedSearch = useDebounce(search, 500)
+
+  // Query independente para a aba de edição
+  const { data: response, isLoading } = useTemplates({
+    page,
+    limit: 12,
+    ...(debouncedSearch ? { search: debouncedSearch } : {})
+  })
+  
+  const gridTemplates = response?.data ?? []
+  const meta = response?.meta
 
   const updateProject = useUpdateProject()
 
@@ -78,28 +95,54 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
               Selecione o novo template que será usado nas mensagens deste projeto.
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <Button variant="outline" size="sm" onClick={handleCancel} disabled={updateProject.isPending}>
-              <X className="mr-2 size-4" /> Cancelar
-            </Button>
-            <Button size="sm" onClick={handleSave} disabled={updateProject.isPending}>
-              {updateProject.isPending ? (
-                <Loader2 className="mr-2 size-4 animate-spin" />
-              ) : (
-                <Check className="mr-2 size-4" />
-              )}
-              Salvar Alteração
-            </Button>
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+            <div className="relative w-full sm:w-[250px]">
+              <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Pesquisar..."
+                className="pl-9 h-9"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setPage(1)
+                }}
+              />
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button variant="outline" size="sm" onClick={handleCancel} disabled={updateProject.isPending}>
+                <X className="mr-2 size-4" /> Cancelar
+              </Button>
+              <Button size="sm" onClick={handleSave} disabled={updateProject.isPending}>
+                {updateProject.isPending ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : (
+                  <Check className="mr-2 size-4" />
+                )}
+                Salvar
+              </Button>
+            </div>
           </div>
         </div>
 
-        {templates.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="flex flex-col items-center gap-3 py-6">
+                  <Skeleton className="h-40 w-full rounded-lg" />
+                  <Skeleton className="h-4 w-32" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : gridTemplates.length === 0 ? (
           <p className="text-sm text-muted-foreground py-8 text-center">
-            Nenhum template testado e aprovado está disponível.
+            Nenhum template encontrado.
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {templates.map((template) => {
+            {gridTemplates.map((template) => {
               const isSelected = tempSelectedSid === template.sid
               const typeConfig = getTypeConfig(template.type)
 
@@ -162,6 +205,38 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
                 </Card>
               )
             })}
+          </div>
+        )}
+
+        {meta && meta.totalPages > 1 && !isLoading && (
+          <div className="flex sm:flex-row flex-col items-center justify-between border-t border-border/50 pt-5 mt-2 gap-4">
+            <p className="text-sm text-muted-foreground text-center sm:text-left">
+              Mostrando <span className="font-medium">{(meta.page - 1) * meta.limit + 1}</span> a{' '}
+              <span className="font-medium">{Math.min(meta.page * meta.limit, meta.total)}</span>{' '}
+              de <span className="font-medium">{meta.total}</span> templates
+            </p>
+            <div className="flex items-center space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >
+                <ChevronLeft className="size-4 mr-1" />
+                Anterior
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+                disabled={page >= meta.totalPages}
+              >
+                Próximo
+                <ChevronRight className="size-4 ml-1" />
+              </Button>
+            </div>
           </div>
         )}
 

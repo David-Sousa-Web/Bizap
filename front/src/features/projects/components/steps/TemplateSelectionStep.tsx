@@ -105,7 +105,7 @@ export function TemplateSelectionStep() {
                     </span>
                   </div>
 
-                  <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 transition-all duration-200 group-hover:opacity-100">
+                  <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 transition-all duration-200 group-hover:opacity-100 bg-background/20">
                     <Button
                       type="button"
                       variant="secondary"

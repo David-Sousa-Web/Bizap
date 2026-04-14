@@ -7,7 +7,9 @@ async function main() {
   await app.listen({ port: env.PORT, host: '0.0.0.0' })
 
   console.log(`Server running on http://localhost:${env.PORT}`)
-  console.log(`Swagger docs: http://localhost:${env.PORT}/v1/docs`)
+  if (env.NODE_ENV !== 'production') {
+    console.log(`Swagger docs: http://localhost:${env.PORT}/v1/docs`)
+  }
 }
 
 main()

@@ -31,37 +31,43 @@ export function buildApp() {
   app.setValidatorCompiler(validatorCompiler)
   app.setSerializerCompiler(serializerCompiler)
 
-  app.register(fastifyCors, { origin: '*', methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], allowedHeaders: ['Content-Type', 'Authorization'] })
+  app.register(fastifyCors, {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
   app.register(fastifyMultipart, { limits: { fileSize: 5 * 1024 * 1024 } })
 
   app.register(fastifyJwt, { secret: env.JWT_SECRET })
 
-  app.register(fastifySwagger, {
-    openapi: {
-      info: {
-        title: 'Bizap API',
-        description: 'API para envio de mídias via WhatsApp/Twilio',
-        version: '1.0.0',
-      },
-      components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          },
-          apiKeyAuth: {
-            type: 'apiKey',
-            in: 'header',
-            name: 'x-api-key',
+  if (env.NODE_ENV !== 'production') {
+    app.register(fastifySwagger, {
+      openapi: {
+        info: {
+          title: 'Bizap API',
+          description: 'API para envio de midias via WhatsApp/Twilio',
+          version: '1.0.0',
+        },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+            },
+            apiKeyAuth: {
+              type: 'apiKey',
+              in: 'header',
+              name: 'x-api-key',
+            },
           },
         },
       },
-    },
-    transform: jsonSchemaTransform,
-  })
+      transform: jsonSchemaTransform,
+    })
 
-  app.register(fastifySwaggerUi, { routePrefix: '/v1/docs' })
+    app.register(fastifySwaggerUi, { routePrefix: '/v1/docs' })
+  }
 
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof ApplicationError) {
@@ -91,26 +97,29 @@ export function buildApp() {
     })
   })
 
-  app.register(async (v1App) => {
-    v1App.register(loginRoute)
+  app.register(
+    async (v1App) => {
+      v1App.register(loginRoute)
 
-    v1App.register(createProjectRoute)
-    v1App.register(listProjectsRoute)
-    v1App.register(getProjectRoute)
-    v1App.register(updateProjectRoute)
-    v1App.register(deleteProjectRoute)
-    v1App.register(updateFlowMessageRoute)
-    v1App.register(uploadProjectImageRoute)
+      v1App.register(createProjectRoute)
+      v1App.register(listProjectsRoute)
+      v1App.register(getProjectRoute)
+      v1App.register(updateProjectRoute)
+      v1App.register(deleteProjectRoute)
+      v1App.register(updateFlowMessageRoute)
+      v1App.register(uploadProjectImageRoute)
 
-    v1App.register(createNumberRoute)
-    v1App.register(listNumbersRoute)
+      v1App.register(createNumberRoute)
+      v1App.register(listNumbersRoute)
 
-    v1App.register(listTemplatesRoute)
+      v1App.register(listTemplatesRoute)
 
-    v1App.register(sendMediaRoute)
+      v1App.register(sendMediaRoute)
 
-    v1App.register(twilioWebhookRoute)
-  }, { prefix: '/v1' })
+      v1App.register(twilioWebhookRoute)
+    },
+    { prefix: '/v1' },
+  )
 
   return app
 }

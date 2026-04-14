@@ -61,7 +61,7 @@ export function buildApp() {
     transform: jsonSchemaTransform,
   })
 
-  app.register(fastifySwaggerUi, { routePrefix: '/docs' })
+  app.register(fastifySwaggerUi, { routePrefix: '/v1/docs' })
 
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof ApplicationError) {
@@ -91,24 +91,26 @@ export function buildApp() {
     })
   })
 
-  app.register(loginRoute)
+  app.register(async (v1App) => {
+    v1App.register(loginRoute)
 
-  app.register(createProjectRoute)
-  app.register(listProjectsRoute)
-  app.register(getProjectRoute)
-  app.register(updateProjectRoute)
-  app.register(deleteProjectRoute)
-  app.register(updateFlowMessageRoute)
-  app.register(uploadProjectImageRoute)
+    v1App.register(createProjectRoute)
+    v1App.register(listProjectsRoute)
+    v1App.register(getProjectRoute)
+    v1App.register(updateProjectRoute)
+    v1App.register(deleteProjectRoute)
+    v1App.register(updateFlowMessageRoute)
+    v1App.register(uploadProjectImageRoute)
 
-  app.register(createNumberRoute)
-  app.register(listNumbersRoute)
+    v1App.register(createNumberRoute)
+    v1App.register(listNumbersRoute)
 
-  app.register(listTemplatesRoute)
+    v1App.register(listTemplatesRoute)
 
-  app.register(sendMediaRoute)
+    v1App.register(sendMediaRoute)
 
-  app.register(twilioWebhookRoute)
+    v1App.register(twilioWebhookRoute)
+  }, { prefix: '/v1' })
 
   return app
 }

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { isAxiosError } from "axios"
 import { ArrowLeft, ArrowRight, Loader2, Check } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -118,7 +119,12 @@ export default function CreateProjectPage() {
 
       toast.success("Projeto criado com sucesso!")
       navigate("/projetos")
-    } catch {
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 409) {
+        toast.error("Já existe um projeto com esse nome. Escolha outro nome.")
+        setCurrentStep(0)
+        return
+      }
       toast.error("Erro ao criar o projeto. Tente novamente.")
     }
   }

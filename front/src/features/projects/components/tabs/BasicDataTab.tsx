@@ -43,7 +43,6 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
   } = useForm<EditProjectFormData>({
     resolver: zodResolver(editProjectSchema),
     defaultValues: {
-      name: project.name,
       phoneNumber: project.phoneNumber,
       agency: project.agency || "",
     },
@@ -138,15 +137,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
             {isEditing ? (
               <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 w-full">
                 <div className="pr-8">
-                  <Field data-invalid={!!errors.name}>
-                    <Input
-                      id="name"
-                      placeholder="Nome do Projeto *"
-                      className="text-2xl font-bold tracking-tight h-auto px-3 py-1.5 w-full bg-background"
-                      {...register("name")}
-                    />
-                    <FieldError>{errors.name?.message}</FieldError>
-                  </Field>
+                  <h2 className="text-2xl font-bold tracking-tight">{project.name}</h2>
                   <p className="text-sm text-muted-foreground mt-2 px-1 block">
                     ID: <span className="font-mono">{project.id}</span>
                   </p>

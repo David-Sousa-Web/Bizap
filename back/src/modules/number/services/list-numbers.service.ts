@@ -1,5 +1,10 @@
 import { ApplicationError } from '../../../utils/errors.js'
 import { prisma } from '../../../lib/prisma.js'
+import {
+  type ObservabilityContext,
+  setErrorContext,
+  setProjectContext,
+} from '../../../lib/wide-event.js'
 import type { NumberRepository } from '../repositories/number-repository.js'
 
 export async function listNumbersService(
@@ -9,12 +14,23 @@ export async function listNumbersService(
   limit: number,
   search: string | undefined,
   repository: NumberRepository,
+  observability: ObservabilityContext,
 ) {
+  setProjectContext(observability.wideEvent, {
+    projectId,
+  })
+
   const project = await prisma.project.findUnique({
     where: { id: projectId },
   })
 
   if (!project || project.userId !== userId) {
+    setErrorContext(observability.wideEvent, {
+      type: 'ApplicationError',
+      code: 'project_not_found',
+      message: 'Project not found',
+    })
+
     throw new ApplicationError('Project not found', 404)
   }
 

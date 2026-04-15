@@ -1,7 +1,17 @@
 import { twilioClient } from '../../../lib/twilio.js'
 import { prisma } from '../../../lib/prisma.js'
 import { getPresignedMediaUrl } from '../../../lib/s3.js'
-import { logger } from '../../../lib/logger.js'
+import {
+  buildErrorCode,
+  maskActorPhone,
+  type ObservabilityContext,
+  pushIntegrationEvent,
+  setErrorContext,
+  setMediaContext,
+  setNumberContext,
+  setProjectContext,
+  setWebhookContext,
+} from '../../../lib/wide-event.js'
 import { PrismaMediaRepository } from '../../media/repositories/prisma-media-repository.js'
 import {
   DECLINED_EXPIRATION_HOURS,
@@ -15,42 +25,101 @@ import {
 export async function twilioWebhookService(
   from: string,
   body: string,
+  observability: ObservabilityContext,
 ) {
   const phoneNumber = from.replace('whatsapp:', '')
+
+  setWebhookContext(observability.wideEvent, {
+    fromMasked: maskActorPhone(phoneNumber),
+    bodyLength: body.trim().length,
+  })
 
   const number = await prisma.number.findFirst({
     where: { number: phoneNumber },
   })
 
   if (!number) {
+    setErrorContext(observability.wideEvent, {
+      type: 'ApplicationError',
+      code: 'webhook_number_not_found',
+      message: 'Webhook number not found',
+    })
+
     return
   }
+
+  setNumberContext(observability.wideEvent, {
+    bizapId: number.id,
+    numberMasked: maskActorPhone(number.number),
+    numberName: number.name,
+  })
 
   const repository = new PrismaMediaRepository()
   const mediaRequest = await repository.findPendingByNumberId(number.id)
 
   if (!mediaRequest) {
+    setErrorContext(observability.wideEvent, {
+      type: 'ApplicationError',
+      code: 'pending_media_request_not_found',
+      message: 'No pending media request for webhook',
+    })
+
     return
   }
+
+  setMediaContext(observability.wideEvent, {
+    mediaRequestId: mediaRequest.id,
+    status: mediaRequest.status,
+    storage: 's3',
+  })
+  setWebhookContext(observability.wideEvent, {
+    previousStatus: mediaRequest.status,
+  })
 
   const project = await prisma.project.findUnique({
     where: { id: mediaRequest.projectId },
   })
 
   if (!project) {
+    setProjectContext(observability.wideEvent, {
+      projectId: mediaRequest.projectId,
+    })
+    setErrorContext(observability.wideEvent, {
+      type: 'ApplicationError',
+      code: 'project_not_found',
+      message: 'Project not found while processing webhook',
+    })
+
     return
   }
 
+  setProjectContext(observability.wideEvent, {
+    projectId: project.id,
+    projectName: project.name,
+    phoneNumberMasked: maskActorPhone(project.phoneNumber),
+  })
+
   const twilioFrom = `whatsapp:${project.phoneNumber}`
 
-  // Branch 1: User previously declined — any message within 24h re-sends the template
   if (mediaRequest.status === 'DECLINED') {
     const expirationMs = DECLINED_EXPIRATION_HOURS * 60 * 60 * 1000
     const isExpired = Date.now() - mediaRequest.updatedAt.getTime() > expirationMs
 
     if (isExpired) {
+      setWebhookContext(observability.wideEvent, {
+        replyCategory: 'decline',
+        nextStatus: mediaRequest.status,
+      })
+      setErrorContext(observability.wideEvent, {
+        type: 'ApplicationError',
+        code: 'decline_window_expired',
+        message: 'Decline reconfirmation window expired',
+      })
+
       return
     }
+
+    const startedAt = Date.now()
 
     try {
       await twilioClient.messages.create({
@@ -61,16 +130,32 @@ export async function twilioWebhookService(
 
       await repository.resetForReconfirmation(mediaRequest.id)
 
-      logger.info({
-        from,
-        mediaRequestId: mediaRequest.id,
-      }, 'Resent template after user declined')
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'resend_template',
+        outcome: 'success',
+        durationMs: Date.now() - startedAt,
+      })
+      setWebhookContext(observability.wideEvent, {
+        replyCategory: 'decline',
+        nextStatus: 'RECONFIRMATION_SENT',
+      })
+      setMediaContext(observability.wideEvent, {
+        status: 'RECONFIRMATION_SENT',
+      })
     } catch (error) {
-      logger.error({
-        err: error,
-        from,
-        mediaRequestId: mediaRequest.id,
-      }, 'Failed to resend template after decline')
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'resend_template',
+        outcome: 'error',
+        durationMs: Date.now() - startedAt,
+        code: buildErrorCode(error),
+      })
+      setErrorContext(observability.wideEvent, {
+        type: error instanceof Error ? error.name : 'ExternalServiceError',
+        code: 'twilio_reconfirmation_failed',
+        message: 'Failed to resend template after decline',
+      })
     }
 
     return
@@ -82,71 +167,130 @@ export async function twilioWebhookService(
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
 
-  // Branch 2: Valid confirmation — deliver media
   if (isValidMediaConfirmationReply(normalizedBody)) {
     await repository.updateStatus(mediaRequest.id, 'CONFIRMED')
+    setWebhookContext(observability.wideEvent, {
+      replyCategory: 'confirm',
+      nextStatus: 'MEDIA_SENT',
+    })
+    setMediaContext(observability.wideEvent, {
+      status: 'CONFIRMED',
+    })
 
     try {
       const presignedUrl = await getPresignedMediaUrl(mediaRequest.mediaUrl)
 
+      const messageStartedAt = Date.now()
       await twilioClient.messages.create({
         from: twilioFrom,
         to: from,
         body: project.flowMessage,
       })
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'send_flow_message',
+        outcome: 'success',
+        durationMs: Date.now() - messageStartedAt,
+      })
 
+      const mediaStartedAt = Date.now()
       await twilioClient.messages.create({
         from: twilioFrom,
         to: from,
         mediaUrl: [presignedUrl],
       })
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'send_media',
+        outcome: 'success',
+        durationMs: Date.now() - mediaStartedAt,
+      })
 
       await repository.updateStatus(mediaRequest.id, 'MEDIA_SENT')
+      setMediaContext(observability.wideEvent, {
+        status: 'MEDIA_SENT',
+      })
     } catch (error) {
-      logger.error({
-        err: error,
-        from,
-        mediaRequestId: mediaRequest.id,
-        projectId: mediaRequest.projectId,
-      }, 'Failed to send confirmed media reply')
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'send_confirmed_media',
+        outcome: 'error',
+        code: buildErrorCode(error),
+      })
+      setErrorContext(observability.wideEvent, {
+        type: error instanceof Error ? error.name : 'ExternalServiceError',
+        code: 'confirmed_media_delivery_failed',
+        message: 'Failed to send confirmed media reply',
+      })
       await repository.updateStatus(mediaRequest.id, 'FAILED')
+      setWebhookContext(observability.wideEvent, {
+        nextStatus: 'FAILED',
+      })
+      setMediaContext(observability.wideEvent, {
+        status: 'FAILED',
+      })
     }
 
     return
   }
 
-  // Branch 3: Decline reply
   if (isDeclineMediaConfirmationReply(normalizedBody)) {
-    if (mediaRequest.status === 'RECONFIRMATION_SENT') {
-      // Second chance already used — close silently
-      await repository.updateStatus(mediaRequest.id, 'INVALID_RESPONSE_LIMIT')
+    setWebhookContext(observability.wideEvent, {
+      replyCategory: 'decline',
+    })
 
-      logger.info({
-        from,
-        mediaRequestId: mediaRequest.id,
-      }, 'User declined on reconfirmation, closing request')
+    if (mediaRequest.status === 'RECONFIRMATION_SENT') {
+      await repository.updateStatus(mediaRequest.id, 'INVALID_RESPONSE_LIMIT')
+      setWebhookContext(observability.wideEvent, {
+        nextStatus: 'INVALID_RESPONSE_LIMIT',
+      })
+      setMediaContext(observability.wideEvent, {
+        status: 'INVALID_RESPONSE_LIMIT',
+      })
 
       return
     }
 
-    // First decline — give 24h window
     await repository.updateStatus(mediaRequest.id, 'DECLINED')
-
-    logger.info({
-      from,
-      mediaRequestId: mediaRequest.id,
-    }, 'User declined media delivery')
-
-    await twilioClient.messages.create({
-      from: twilioFrom,
-      to: from,
-      body: DECLINE_REPLY_MESSAGE,
+    setWebhookContext(observability.wideEvent, {
+      nextStatus: 'DECLINED',
     })
+    setMediaContext(observability.wideEvent, {
+      status: 'DECLINED',
+    })
+
+    const startedAt = Date.now()
+    try {
+      await twilioClient.messages.create({
+        from: twilioFrom,
+        to: from,
+        body: DECLINE_REPLY_MESSAGE,
+      })
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'send_decline_reply',
+        outcome: 'success',
+        durationMs: Date.now() - startedAt,
+      })
+    } catch (error) {
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'send_decline_reply',
+        outcome: 'error',
+        durationMs: Date.now() - startedAt,
+        code: buildErrorCode(error),
+      })
+      setErrorContext(observability.wideEvent, {
+        type: error instanceof Error ? error.name : 'ExternalServiceError',
+        code: 'decline_reply_send_failed',
+        message: 'Failed to send decline reply',
+      })
+      throw error
+    }
 
     return
   }
 
-  // Branch 4: Invalid reply
   const nextInvalidReplyCount = mediaRequest.invalidReplyCount + 1
   const shouldClose = nextInvalidReplyCount >= INVALID_REPLY_LIMIT
 
@@ -155,19 +299,43 @@ export async function twilioWebhookService(
     shouldClose ? 'INVALID_RESPONSE_LIMIT' : undefined,
   )
 
-  logger.warn({
-    from,
-    mediaRequestId: mediaRequest.id,
-    normalizedBody,
-    invalidReplyCount: updatedRequest.invalidReplyCount,
+  setWebhookContext(observability.wideEvent, {
+    replyCategory: 'unknown',
+    nextStatus: updatedRequest.status,
+  })
+  setMediaContext(observability.wideEvent, {
     status: updatedRequest.status,
-  }, 'Received invalid media confirmation reply')
+  })
 
   if (!shouldClose) {
-    await twilioClient.messages.create({
-      from: twilioFrom,
-      to: from,
-      body: INVALID_REPLY_MESSAGE,
-    })
+    const startedAt = Date.now()
+
+    try {
+      await twilioClient.messages.create({
+        from: twilioFrom,
+        to: from,
+        body: INVALID_REPLY_MESSAGE,
+      })
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'send_invalid_reply_prompt',
+        outcome: 'success',
+        durationMs: Date.now() - startedAt,
+      })
+    } catch (error) {
+      pushIntegrationEvent(observability.wideEvent, {
+        provider: 'twilio',
+        operation: 'send_invalid_reply_prompt',
+        outcome: 'error',
+        durationMs: Date.now() - startedAt,
+        code: buildErrorCode(error),
+      })
+      setErrorContext(observability.wideEvent, {
+        type: error instanceof Error ? error.name : 'ExternalServiceError',
+        code: 'invalid_reply_prompt_failed',
+        message: 'Failed to send invalid reply prompt',
+      })
+      throw error
+    }
   }
 }

@@ -1,4 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
+import { createObservabilityContext } from '../../../lib/wide-event.js'
 import { uploadProjectImageService } from '../services/upload-project-image.service.js'
 import { PrismaProjectRepository } from '../repositories/prisma-project-repository.js'
 import { ApplicationError } from '../../../utils/errors.js'
@@ -9,6 +10,10 @@ export async function uploadProjectImageController(
 ) {
   const userId = (request.user as { sub: string }).sub
   const repository = new PrismaProjectRepository()
+  const observability = createObservabilityContext(request, {
+    module: 'project',
+    operation: 'upload-image',
+  })
 
   const file = await request.file()
 
@@ -21,6 +26,7 @@ export async function uploadProjectImageController(
     userId,
     file,
     repository,
+    observability,
   )
 
   return reply.status(200).send({

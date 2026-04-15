@@ -1,3 +1,10 @@
+import { ApplicationError } from '../../../utils/errors.js'
+import {
+  buildErrorCode,
+  type ObservabilityContext,
+  pushIntegrationEvent,
+  setErrorContext,
+} from '../../../lib/wide-event.js'
 import { twilioClient } from '../../../lib/twilio.js'
 
 interface WhatsAppApproval {
@@ -38,8 +45,40 @@ function resolveEligibility(type: string, approved: boolean) {
   }
 }
 
-export async function listTemplatesService(page: number, limit: number, search?: string) {
-  const templates = await twilioClient.content.v1.contentAndApprovals.list()
+export async function listTemplatesService(
+  page: number,
+  limit: number,
+  search: string | undefined,
+  observability: ObservabilityContext,
+) {
+  let templates
+  const startedAt = Date.now()
+
+  try {
+    templates = await twilioClient.content.v1.contentAndApprovals.list()
+  } catch (error) {
+    pushIntegrationEvent(observability.wideEvent, {
+      provider: 'twilio',
+      operation: 'list_templates',
+      outcome: 'error',
+      durationMs: Date.now() - startedAt,
+      code: buildErrorCode(error),
+    })
+    setErrorContext(observability.wideEvent, {
+      type: error instanceof Error ? error.name : 'ExternalServiceError',
+      code: 'template_fetch_failed',
+      message: 'Failed to fetch templates',
+    })
+
+    throw new ApplicationError('Failed to fetch templates', 502)
+  }
+
+  pushIntegrationEvent(observability.wideEvent, {
+    provider: 'twilio',
+    operation: 'list_templates',
+    outcome: 'success',
+    durationMs: Date.now() - startedAt,
+  })
 
   const mapped = templates.map((template) => {
     const approvals = template.approvalRequests as ApprovalRequests | undefined

@@ -12,8 +12,9 @@ export function useUploadProjectImage() {
   return useMutation({
     mutationFn: ({ projectId, file }: UploadProjectImageParams) =>
       projectService.uploadImage(projectId, file),
-    onSuccess: () => {
+    onSuccess: (_, { projectId }) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
+      queryClient.invalidateQueries({ queryKey: ["project", projectId] })
     },
   })
 }

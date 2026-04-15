@@ -1,3 +1,4 @@
+import type { Readable } from 'node:stream'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { env } from '../env.js'
 
@@ -31,4 +32,30 @@ export async function getMediaBuffer(mediaUrl: string): Promise<Buffer> {
   }
 
   return Buffer.concat(chunks)
+}
+
+export async function getProjectImageStream(mediaUrl: string): Promise<{
+  body: Readable
+  contentType: string | undefined
+  contentLength: number | undefined
+}> {
+  const url = new URL(mediaUrl)
+  const key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname
+
+  const command = new GetObjectCommand({
+    Bucket: env.AWS_S3_BUCKET,
+    Key: key,
+  })
+
+  const response = await s3Client.send(command)
+
+  if (!response.Body) {
+    throw new Error('Empty response from S3')
+  }
+
+  return {
+    body: response.Body as Readable,
+    contentType: response.ContentType,
+    contentLength: response.ContentLength,
+  }
 }

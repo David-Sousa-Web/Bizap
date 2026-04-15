@@ -5,6 +5,7 @@ import { env } from '../../../env.js'
 import { ApplicationError } from '../../../utils/errors.js'
 import type { ProjectRepository } from '../repositories/project-repository.js'
 import type { MultipartFile } from '@fastify/multipart'
+import { transformImageUrl } from '../utils/transform-image-url.js'
 
 export async function uploadProjectImageService(
   projectId: string,
@@ -44,7 +45,7 @@ export async function uploadProjectImageService(
   return {
     id: updated.id,
     name: updated.name,
-    image: updated.image,
+    image: transformImageUrl(updated.image, updated.id, env.API_BASE_URL),
     phoneNumber: updated.phoneNumber,
     agency: updated.agency,
     templateSid: updated.templateSid,

@@ -1,6 +1,8 @@
 import { ApplicationError } from '../../../utils/errors.js'
 import type { ProjectRepository } from '../repositories/project-repository.js'
 import type { UpdateProjectBody } from '../schemas/project.schema.js'
+import { transformImageUrl } from '../utils/transform-image-url.js'
+import { env } from '../../../env.js'
 
 export async function updateProjectService(
   id: string,
@@ -23,7 +25,7 @@ export async function updateProjectService(
   return {
     id: updated.id,
     name: updated.name,
-    image: updated.image,
+    image: transformImageUrl(updated.image, updated.id, env.API_BASE_URL),
     phoneNumber: updated.phoneNumber,
     agency: updated.agency,
     templateSid: updated.templateSid,

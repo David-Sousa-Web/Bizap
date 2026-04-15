@@ -24,6 +24,7 @@ import { listTemplatesRoute } from './modules/template/routes/list-templates.rou
 import { sendMediaRoute } from './modules/media/routes/send-media.route.js'
 import { twilioWebhookRoute } from './modules/webhook/routes/twilio-webhook.route.js'
 import { uploadProjectImageRoute } from './modules/project/routes/upload-project-image.route.js'
+import { getProjectImageRoute } from './modules/project/routes/get-project-image.route.js'
 
 export function buildApp() {
   const app = fastify()
@@ -108,6 +109,7 @@ export function buildApp() {
       v1App.register(deleteProjectRoute)
       v1App.register(updateFlowMessageRoute)
       v1App.register(uploadProjectImageRoute)
+      v1App.register(getProjectImageRoute)
 
       v1App.register(createNumberRoute)
       v1App.register(listNumbersRoute)

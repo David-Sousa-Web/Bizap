@@ -1,5 +1,7 @@
 import { ApplicationError } from '../../../utils/errors.js'
 import type { ProjectRepository } from '../repositories/project-repository.js'
+import { transformImageUrl } from '../utils/transform-image-url.js'
+import { env } from '../../../env.js'
 
 export async function updateFlowMessageService(
   projectId: string,
@@ -22,7 +24,7 @@ export async function updateFlowMessageService(
   return {
     id: updated.id,
     name: updated.name,
-    image: updated.image,
+    image: transformImageUrl(updated.image, updated.id, env.API_BASE_URL),
     phoneNumber: updated.phoneNumber,
     agency: updated.agency,
     templateSid: updated.templateSid,

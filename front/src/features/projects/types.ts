@@ -25,7 +25,6 @@ export interface ProjectNumber {
 }
 
 export interface UpdateProjectPayload {
-  name?: string
   phoneNumber?: string
   agency?: string
   templateSid?: string

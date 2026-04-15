@@ -89,10 +89,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[180px]">
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault()
-                navigate(`/projetos/${project.id}`)
-              }}
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => navigate(`/projetos/${project.id}`)}
             >
               <Info className="mr-2 size-4" />
               Informações
@@ -101,28 +99,22 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault()
-                navigate(`/projetos/${project.id}?tab=template`)
-              }}
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => navigate(`/projetos/${project.id}?tab=template`)}
             >
               <LayoutTemplate className="mr-2 size-4" />
               Editar Template
             </DropdownMenuItem>
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault()
-                navigate(`/projetos/${project.id}?tab=mensagem`)
-              }}
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => navigate(`/projetos/${project.id}?tab=mensagem`)}
             >
               <MessageSquare className="mr-2 size-4" />
               Editar Mensagem
             </DropdownMenuItem>
             <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault()
-                navigate(`/projetos/${project.id}?tab=numeros`)
-              }}
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => navigate(`/projetos/${project.id}?tab=numeros`)}
             >
               <Users className="mr-2 size-4" />
               Ver Números
@@ -132,10 +124,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
             <DropdownMenuItem
               variant="destructive"
-              onSelect={(e) => {
-                e.preventDefault()
-                navigate(`/projetos/${project.id}?tab=avancado`)
-              }}
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => navigate(`/projetos/${project.id}?tab=avancado`)}
             >
               <Trash2 className="mr-2 size-4" />
               Excluir

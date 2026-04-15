@@ -57,8 +57,11 @@ model Number {
 enum MediaRequestStatus {
   PENDING
   TEMPLATE_SENT
+  RECONFIRMATION_SENT
+  DECLINED
   CONFIRMED
   MEDIA_SENT
+  INVALID_RESPONSE_LIMIT
   FAILED
 }
 
@@ -66,6 +69,8 @@ model MediaRequest {
   id        String             @id @default(uuid())
   mediaUrl  String             @map("media_url")
   status    MediaRequestStatus @default(PENDING)
+  invalidReplyCount Int        @default(0) @map("invalid_reply_count")
+  lastInvalidReplyAt DateTime? @map("last_invalid_reply_at")
   numberId  String             @map("number_id")
   projectId String             @map("project_id")
   createdAt DateTime           @default(now()) @map("created_at")

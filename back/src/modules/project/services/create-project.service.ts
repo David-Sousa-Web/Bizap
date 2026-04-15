@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { ApplicationError } from '../../../utils/errors.js'
+import { logger } from '../../../lib/logger.js'
 import { generateApiKey } from '../../../utils/generate-api-key.js'
 import type { ProjectRepository } from '../repositories/project-repository.js'
 import type { CreateProjectBody } from '../schemas/project.schema.js'
@@ -42,7 +43,7 @@ export async function createProjectService(
       throw new ApplicationError('Project name already exists', 409)
     }
 
-    console.error(error)
+    logger.error({ err: error, projectName: data.name, userId }, 'Failed to create project')
     throw new ApplicationError('Failed to create project', 500)
   }
 }

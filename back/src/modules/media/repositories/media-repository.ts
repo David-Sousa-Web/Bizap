@@ -8,5 +8,7 @@ export interface MediaRepository {
   }): Promise<MediaRequest>
   findById(id: string): Promise<MediaRequest | null>
   updateStatus(id: string, status: MediaRequestStatus): Promise<MediaRequest>
+  registerInvalidReply(id: string, status?: MediaRequestStatus): Promise<MediaRequest>
+  resetForReconfirmation(id: string): Promise<MediaRequest>
   findPendingByNumberId(numberId: string): Promise<MediaRequest | null>
 }

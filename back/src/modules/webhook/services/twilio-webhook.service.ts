@@ -1,5 +1,4 @@
 import { twilioClient } from '../../../lib/twilio.js'
-import { env } from '../../../env.js'
 import { prisma } from '../../../lib/prisma.js'
 import { getPresignedMediaUrl } from '../../../lib/s3.js'
 import { logger } from '../../../lib/logger.js'
@@ -34,6 +33,16 @@ export async function twilioWebhookService(
     return
   }
 
+  const project = await prisma.project.findUnique({
+    where: { id: mediaRequest.projectId },
+  })
+
+  if (!project) {
+    return
+  }
+
+  const twilioFrom = `whatsapp:${project.phoneNumber}`
+
   // Branch 1: User previously declined — any message within 24h re-sends the template
   if (mediaRequest.status === 'DECLINED') {
     const expirationMs = DECLINED_EXPIRATION_HOURS * 60 * 60 * 1000
@@ -43,17 +52,9 @@ export async function twilioWebhookService(
       return
     }
 
-    const project = await prisma.project.findUnique({
-      where: { id: mediaRequest.projectId },
-    })
-
-    if (!project) {
-      return
-    }
-
     try {
       await twilioClient.messages.create({
-        from: `whatsapp:${env.TWILIO_PHONE_NUMBER}`,
+        from: twilioFrom,
         to: from,
         contentSid: project.templateSid,
       })
@@ -85,25 +86,17 @@ export async function twilioWebhookService(
   if (isValidMediaConfirmationReply(normalizedBody)) {
     await repository.updateStatus(mediaRequest.id, 'CONFIRMED')
 
-    const project = await prisma.project.findUnique({
-      where: { id: mediaRequest.projectId },
-    })
-
-    if (!project) {
-      return
-    }
-
     try {
       const presignedUrl = await getPresignedMediaUrl(mediaRequest.mediaUrl)
 
       await twilioClient.messages.create({
-        from: `whatsapp:${env.TWILIO_PHONE_NUMBER}`,
+        from: twilioFrom,
         to: from,
         body: project.flowMessage,
       })
 
       await twilioClient.messages.create({
-        from: `whatsapp:${env.TWILIO_PHONE_NUMBER}`,
+        from: twilioFrom,
         to: from,
         mediaUrl: [presignedUrl],
       })
@@ -145,7 +138,7 @@ export async function twilioWebhookService(
     }, 'User declined media delivery')
 
     await twilioClient.messages.create({
-      from: `whatsapp:${env.TWILIO_PHONE_NUMBER}`,
+      from: twilioFrom,
       to: from,
       body: DECLINE_REPLY_MESSAGE,
     })
@@ -172,7 +165,7 @@ export async function twilioWebhookService(
 
   if (!shouldClose) {
     await twilioClient.messages.create({
-      from: `whatsapp:${env.TWILIO_PHONE_NUMBER}`,
+      from: twilioFrom,
       to: from,
       body: INVALID_REPLY_MESSAGE,
     })

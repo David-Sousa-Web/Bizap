@@ -55,7 +55,7 @@ export async function sendMediaService(
 
   try {
     await twilioClient.messages.create({
-      from: `whatsapp:${env.TWILIO_PHONE_NUMBER}`,
+      from: `whatsapp:${project.phoneNumber}`,
       to: `whatsapp:${number.number}`,
       contentSid: project.templateSid,
     })

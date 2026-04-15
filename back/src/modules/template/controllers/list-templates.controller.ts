@@ -1,4 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
+import { createObservabilityContext } from '../../../lib/wide-event.js'
 import { listTemplatesService } from '../services/list-templates.service.js'
 import type { PaginationQuery } from '../../../utils/pagination.js'
 
@@ -7,8 +8,12 @@ export async function listTemplatesController(
   reply: FastifyReply,
 ) {
   const { page, limit, search } = request.query
+  const observability = createObservabilityContext(request, {
+    module: 'template',
+    operation: 'list',
+  })
 
-  const result = await listTemplatesService(page, limit, search)
+  const result = await listTemplatesService(page, limit, search, observability)
 
   return reply.status(200).send({
     success: true,

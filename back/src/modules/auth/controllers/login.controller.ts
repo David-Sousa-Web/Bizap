@@ -1,4 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
+import { createObservabilityContext, setActorContext } from '../../../lib/wide-event.js'
 import { loginService } from '../services/login.service.js'
 import type { LoginBody } from '../schemas/auth.schema.js'
 
@@ -6,7 +7,14 @@ export async function loginController(
   request: FastifyRequest<{ Body: LoginBody }>,
   reply: FastifyReply,
 ) {
-  const user = await loginService(request.body)
+  const observability = createObservabilityContext(request, {
+    module: 'auth',
+    operation: 'login',
+  })
+
+  setActorContext(observability.wideEvent, { authType: 'password' })
+
+  const user = await loginService(request.body, observability)
 
   const token = await reply.jwtSign(
     { sub: user.id, email: user.email },

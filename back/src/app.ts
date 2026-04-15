@@ -10,6 +10,15 @@ import {
   jsonSchemaTransform,
 } from 'fastify-type-provider-zod'
 import { env } from './env.js'
+import { appLogger } from './lib/logger.js'
+import {
+  createWideEvent,
+  finalizeWideEvent,
+  getWideEventLogLevel,
+  setErrorContext,
+  setRequestOutcome,
+  setUnknownErrorContext,
+} from './lib/wide-event.js'
 import { ApplicationError } from './utils/errors.js'
 import { loginRoute } from './modules/auth/routes/login.route.js'
 import { createProjectRoute } from './modules/project/routes/create-project.route.js'
@@ -27,10 +36,29 @@ import { uploadProjectImageRoute } from './modules/project/routes/upload-project
 import { getProjectImageRoute } from './modules/project/routes/get-project-image.route.js'
 
 export function buildApp() {
-  const app = fastify()
+  const app = fastify({
+    loggerInstance: appLogger,
+    disableRequestLogging: true,
+  })
 
   app.setValidatorCompiler(validatorCompiler)
   app.setSerializerCompiler(serializerCompiler)
+
+  app.addHook('onRequest', async (request) => {
+    request.startTimeNs = process.hrtime.bigint()
+    request.wideEvent = createWideEvent(request)
+    request.observability = {
+      log: request.log,
+      wideEvent: request.wideEvent,
+    }
+  })
+
+  app.addHook('onResponse', async (request, reply) => {
+    const summary = finalizeWideEvent(request, reply.statusCode)
+    const level = getWideEventLogLevel(summary)
+
+    request.log[level](summary, 'Request summary')
+  })
 
   app.register(fastifyCors, {
     origin: '*',
@@ -70,8 +98,23 @@ export function buildApp() {
     app.register(fastifySwaggerUi, { routePrefix: '/v1/docs' })
   }
 
-  app.setErrorHandler((error, _request, reply) => {
+  app.setErrorHandler((error, request, reply) => {
+    const statusCode = error instanceof ApplicationError
+      ? error.statusCode
+      : (error as { validation?: unknown; statusCode?: number }).validation
+        ? 400
+        : 500
+
     if (error instanceof ApplicationError) {
+      setRequestOutcome(request.wideEvent, statusCode)
+      if (!request.wideEvent.error) {
+        setErrorContext(request.wideEvent, {
+          type: 'ApplicationError',
+          code: 'application_error',
+          message: error.message,
+        })
+      }
+
       return reply.status(error.statusCode).send({
         success: false,
         message: error.message,
@@ -82,6 +125,15 @@ export function buildApp() {
     const fastifyError = error as { validation?: unknown; message?: string }
 
     if (fastifyError.validation) {
+      setRequestOutcome(request.wideEvent, statusCode)
+      if (!request.wideEvent.error) {
+        setErrorContext(request.wideEvent, {
+          type: 'ValidationError',
+          code: 'validation_error',
+          message: fastifyError.message ?? 'Validation error',
+        })
+      }
+
       return reply.status(400).send({
         success: false,
         message: fastifyError.message ?? 'Validation error',
@@ -89,7 +141,14 @@ export function buildApp() {
       })
     }
 
-    console.error(error)
+    setRequestOutcome(request.wideEvent, statusCode)
+    if (!request.wideEvent.error) {
+      setUnknownErrorContext(request.wideEvent, error, {
+        type: 'InternalServerError',
+        message: 'Internal server error',
+        code: 'internal_server_error',
+      })
+    }
 
     return reply.status(500).send({
       success: false,

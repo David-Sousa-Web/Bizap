@@ -1,5 +1,6 @@
 import type { Readable } from 'node:stream'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { env } from '../env.js'
 
 export const s3Client = new S3Client({
@@ -10,9 +11,14 @@ export const s3Client = new S3Client({
   },
 })
 
-export async function getMediaBuffer(mediaUrl: string): Promise<Buffer> {
+function getS3KeyFromUrl(mediaUrl: string) {
   const url = new URL(mediaUrl)
-  const key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname
+
+  return url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname
+}
+
+export async function getMediaBuffer(mediaUrl: string): Promise<Buffer> {
+  const key = getS3KeyFromUrl(mediaUrl)
 
   const command = new GetObjectCommand({
     Bucket: env.AWS_S3_BUCKET,
@@ -39,8 +45,7 @@ export async function getProjectImageStream(mediaUrl: string): Promise<{
   contentType: string | undefined
   contentLength: number | undefined
 }> {
-  const url = new URL(mediaUrl)
-  const key = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname
+  const key = getS3KeyFromUrl(mediaUrl)
 
   const command = new GetObjectCommand({
     Bucket: env.AWS_S3_BUCKET,
@@ -58,4 +63,15 @@ export async function getProjectImageStream(mediaUrl: string): Promise<{
     contentType: response.ContentType,
     contentLength: response.ContentLength,
   }
+}
+
+export async function getPresignedMediaUrl(mediaUrl: string): Promise<string> {
+  const key = getS3KeyFromUrl(mediaUrl)
+
+  const command = new GetObjectCommand({
+    Bucket: env.AWS_S3_BUCKET,
+    Key: key,
+  })
+
+  return getSignedUrl(s3Client, command, { expiresIn: 60 * 60 })
 }

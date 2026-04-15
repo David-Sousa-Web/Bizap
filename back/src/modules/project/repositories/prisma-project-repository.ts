@@ -1,11 +1,12 @@
 import { prisma } from '../../../lib/prisma.js'
 import type { Project } from '@prisma/client'
 import type { ProjectRepository } from './project-repository.js'
-import type { CreateProjectBody, UpdateProjectBody } from '../schemas/project.schema.js'
+import type { CreateProjectData } from './project-repository.js'
+import type { UpdateProjectBody } from '../schemas/project.schema.js'
 import type { PaginatedResult } from '../../../utils/pagination.js'
 
 export class PrismaProjectRepository implements ProjectRepository {
-  async create(data: CreateProjectBody & { apiKey: string; userId: string }): Promise<Project> {
+  async create(data: CreateProjectData): Promise<Project> {
     return prisma.project.create({ data })
   }
 

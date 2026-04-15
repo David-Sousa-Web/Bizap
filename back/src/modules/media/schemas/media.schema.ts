@@ -1,9 +1,5 @@
 import { z } from 'zod'
 
-export const sendMediaBodySchema = z.object({
-  mediaUrl: z.string().url(),
-})
-
 export const sendMediaParamsSchema = z.object({
   projectId: z.string().uuid(),
   bizapId: z.string().uuid(),
@@ -21,5 +17,4 @@ export const sendMediaResponseSchema = z.object({
   }),
 })
 
-export type SendMediaBody = z.infer<typeof sendMediaBodySchema>
 export type SendMediaParams = z.infer<typeof sendMediaParamsSchema>

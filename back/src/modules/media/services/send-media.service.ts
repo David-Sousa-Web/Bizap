@@ -1,3 +1,7 @@
+import { randomUUID } from 'node:crypto'
+import { Upload } from '@aws-sdk/lib-storage'
+import type { MultipartFile } from '@fastify/multipart'
+import { s3Client } from '../../../lib/s3.js'
 import { ApplicationError } from '../../../utils/errors.js'
 import { twilioClient } from '../../../lib/twilio.js'
 import { env } from '../../../env.js'
@@ -7,7 +11,7 @@ import type { MediaRepository } from '../repositories/media-repository.js'
 export async function sendMediaService(
   projectId: string,
   bizapId: string,
-  mediaUrl: string,
+  file: MultipartFile,
   repository: MediaRepository,
 ) {
   const number = await prisma.number.findUnique({
@@ -25,6 +29,23 @@ export async function sendMediaService(
   if (!project) {
     throw new ApplicationError('Project not found', 404)
   }
+
+  const extension = file.filename.split('.').pop()?.toLowerCase() ?? 'bin'
+  const key = `bizap-media/${project.slug}/${randomUUID()}.${extension}`
+
+  const upload = new Upload({
+    client: s3Client,
+    params: {
+      Bucket: env.AWS_S3_BUCKET,
+      Key: key,
+      Body: file.file,
+      ContentType: file.mimetype,
+    },
+  })
+
+  await upload.done()
+
+  const mediaUrl = `https://${env.AWS_S3_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${key}`
 
   const mediaRequest = await repository.create({
     mediaUrl,

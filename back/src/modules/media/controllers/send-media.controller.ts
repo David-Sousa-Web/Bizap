@@ -1,18 +1,24 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import { sendMediaService } from '../services/send-media.service.js'
 import { PrismaMediaRepository } from '../repositories/prisma-media-repository.js'
-import type { SendMediaBody, SendMediaParams } from '../schemas/media.schema.js'
+import type { SendMediaParams } from '../schemas/media.schema.js'
+import { ApplicationError } from '../../../utils/errors.js'
 
 export async function sendMediaController(
-  request: FastifyRequest<{ Params: SendMediaParams; Body: SendMediaBody }>,
+  request: FastifyRequest<{ Params: SendMediaParams }>,
   reply: FastifyReply,
 ) {
   const repository = new PrismaMediaRepository()
+  const file = await request.file()
+
+  if (!file || file.fieldname !== 'file') {
+    throw new ApplicationError('Media file is required', 400)
+  }
 
   const mediaRequest = await sendMediaService(
     request.params.projectId,
     request.params.bizapId,
-    request.body.mediaUrl,
+    file,
     repository,
   )
 

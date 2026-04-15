@@ -1,6 +1,7 @@
 import { twilioClient } from '../../../lib/twilio.js'
 import { env } from '../../../env.js'
 import { prisma } from '../../../lib/prisma.js'
+import { getPresignedMediaUrl } from '../../../lib/s3.js'
 import { PrismaMediaRepository } from '../../media/repositories/prisma-media-repository.js'
 
 export async function twilioWebhookService(
@@ -42,6 +43,8 @@ export async function twilioWebhookService(
   }
 
   try {
+    const presignedUrl = await getPresignedMediaUrl(mediaRequest.mediaUrl)
+
     await twilioClient.messages.create({
       from: `whatsapp:${env.TWILIO_PHONE_NUMBER}`,
       to: from,
@@ -51,7 +54,7 @@ export async function twilioWebhookService(
     await twilioClient.messages.create({
       from: `whatsapp:${env.TWILIO_PHONE_NUMBER}`,
       to: from,
-      mediaUrl: [mediaRequest.mediaUrl],
+      mediaUrl: [presignedUrl],
     })
 
     await repository.updateStatus(mediaRequest.id, 'MEDIA_SENT')

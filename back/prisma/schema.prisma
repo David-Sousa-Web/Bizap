@@ -22,7 +22,8 @@ model User {
 
 model Project {
   id           String   @id @default(uuid())
-  name         String
+  name         String   @unique
+  slug         String   @unique
   image        String?
   phoneNumber  String   @map("phone_number")
   agency       String?

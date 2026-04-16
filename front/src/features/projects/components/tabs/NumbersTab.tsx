@@ -1,45 +1,75 @@
-import { useState } from "react"
-import { Users, Phone, Loader2 } from "lucide-react"
-import type { ProjectNumber } from "@/features/projects/types"
+import { useCallback, useState } from "react"
+import { Loader2, Phone, Plus, Users } from "lucide-react"
+
+import type { Project, ProjectNumber } from "@/features/projects/types"
 import { useProjectNumbers } from "@/features/projects/hooks/useProjectNumbers"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { NumbersTable } from "@/features/projects/components/numbers/NumbersTable"
+import { AddNumberDialog } from "@/features/projects/components/numbers/AddNumberDialog"
+import { SendMediaDialog } from "@/features/projects/components/numbers/SendMediaDialog"
 
 interface NumbersTabProps {
-  projectId: string
+  project: Project
 }
 
-export function NumbersTab({ projectId }: NumbersTabProps) {
+export function NumbersTab({ project }: NumbersTabProps) {
   const [page, setPage] = useState(1)
   const limit = 10
 
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [mediaTarget, setMediaTarget] = useState<ProjectNumber | null>(null)
+
   const { data: response, isLoading, isError } = useProjectNumbers({
-    projectId,
+    projectId: project.id,
     page,
     limit,
   })
 
-  // Destructure pagination and data
   const numbers: ProjectNumber[] = response?.data ?? []
   const totalPages = response?.meta?.totalPages ?? 1
   const total = response?.meta?.total ?? 0
 
+  const openAddDialog = useCallback(() => setIsAddOpen(true), [])
+  const handleAddDialogChange = useCallback((open: boolean) => setIsAddOpen(open), [])
+
+  const handleSendMedia = useCallback((target: ProjectNumber) => {
+    setMediaTarget(target)
+  }, [])
+
+  const handleMediaDialogChange = useCallback((open: boolean) => {
+    if (!open) setMediaTarget(null)
+  }, [])
+
   return (
     <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="size-5" />
-            Números Associados
-            {!isLoading && !isError && (
-              <span className="text-muted-foreground font-normal text-sm ml-2">
-                ({total} encontrado{total !== 1 ? "s" : ""})
-              </span>
-            )}
-          </CardTitle>
-          <CardDescription>
-            Contatos registrados neste projeto para atuar com a integração configurada.
-          </CardDescription>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-1.5">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="size-5" />
+              Números Associados
+              {!isLoading && !isError && (
+                <span className="text-muted-foreground font-normal text-sm ml-2">
+                  ({total} encontrado{total !== 1 ? "s" : ""})
+                </span>
+              )}
+            </CardTitle>
+            <CardDescription>
+              Contatos registrados neste projeto para atuar com a integração configurada.
+            </CardDescription>
+          </div>
+
+          <Button size="sm" onClick={openAddDialog} className="self-start sm:self-auto">
+            <Plus className="size-4" />
+            Adicionar número
+          </Button>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -55,61 +85,40 @@ export function NumbersTab({ projectId }: NumbersTabProps) {
             <div className="flex flex-col items-center justify-center p-12 text-center rounded-lg border border-dashed text-muted-foreground">
               <Phone className="size-10 mb-4 text-muted-foreground/50" />
               <h3 className="font-medium text-lg">Nenhum número registrado</h3>
-              <p className="text-sm mt-1 max-w-sm">
+              <p className="text-sm mt-1 mb-4 max-w-sm">
                 Ainda não há clientes ou colaboradores cadastrados para interagir neste projeto.
               </p>
+              <Button size="sm" onClick={openAddDialog}>
+                <Plus className="size-4" />
+                Adicionar primeiro número
+              </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              <div className="rounded-md border overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted">
-                    <tr className="border-b">
-                      <th className="h-10 px-4 text-left font-medium text-muted-foreground">Nome</th>
-                      <th className="h-10 px-4 text-left font-medium text-muted-foreground">Número</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {numbers.map((num) => (
-                      <tr key={num.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
-                        <td className="p-4 font-medium">{num.name}</td>
-                        <td className="p-4 tabular-nums">{num.number}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between border-t border-border/50 pt-4 px-1">
-                  <div className="text-sm text-muted-foreground">
-                    Página <span className="font-medium">{page}</span> de{" "}
-                    <span className="font-medium">{totalPages}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                    >
-                      Anterior
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                      disabled={page >= totalPages}
-                    >
-                      Próximo
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <NumbersTable
+              numbers={numbers}
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+              onSendMedia={handleSendMedia}
+            />
           )}
         </CardContent>
       </Card>
+
+      <AddNumberDialog
+        open={isAddOpen}
+        onOpenChange={handleAddDialogChange}
+        projectId={project.id}
+        apiKey={project.apiKey}
+      />
+
+      <SendMediaDialog
+        open={!!mediaTarget}
+        onOpenChange={handleMediaDialogChange}
+        projectId={project.id}
+        apiKey={project.apiKey}
+        number={mediaTarget}
+      />
     </div>
   )
 }

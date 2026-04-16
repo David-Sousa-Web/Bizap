@@ -96,7 +96,7 @@ export default function ProjectDetailsPage() {
             <FlowMessageTab project={project} templates={templates} />
           </TabsContent>
           <TabsContent value="numeros" className="m-0 border-0 p-0 focus-visible:ring-0">
-            <NumbersTab projectId={project.id} />
+            <NumbersTab project={project} />
           </TabsContent>
           <TabsContent value="avancado" className="m-0 border-0 p-0 focus-visible:ring-0">
             <AdvancedTab project={project} />

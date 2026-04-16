@@ -1,6 +1,6 @@
 import { api } from "@/lib/api"
-import type { PaginatedApiResponse, PaginationParams } from "@/types/api"
-import type { ProjectNumber } from "@/features/projects/types"
+import type { ApiResponse, PaginatedApiResponse, PaginationParams } from "@/types/api"
+import type { CreateNumberPayload, ProjectNumber } from "@/features/projects/types"
 
 async function listByProject(
   projectId: string,
@@ -13,6 +13,19 @@ async function listByProject(
   return response.data
 }
 
-export const numberService = Object.freeze({ listByProject })
+async function create(
+  projectId: string,
+  apiKey: string,
+  payload: CreateNumberPayload,
+): Promise<ApiResponse<ProjectNumber>> {
+  const response = await api.post<ApiResponse<ProjectNumber>>(
+    `/projects/${projectId}/numbers`,
+    payload,
+    { headers: { "x-api-key": apiKey } },
+  )
+  return response.data
+}
+
+export const numberService = Object.freeze({ listByProject, create })
 
 export type NumberService = typeof numberService

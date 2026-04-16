@@ -24,6 +24,19 @@ export interface ProjectNumber {
   projectId: string
 }
 
+export interface CreateNumberPayload {
+  name: string
+  number: string
+}
+
+export interface MediaRequest {
+  id: string
+  mediaUrl: string
+  status: string
+  numberId: string
+  projectId: string
+}
+
 export interface UpdateProjectPayload {
   phoneNumber?: string
   agency?: string

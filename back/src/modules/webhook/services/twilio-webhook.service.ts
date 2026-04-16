@@ -184,28 +184,16 @@ export async function twilioWebhookService(
     try {
       const presignedUrl = await getPresignedMediaUrl(mediaRequest.mediaUrl)
 
-      const messageStartedAt = Date.now()
-      await twilioClient.messages.create({
-        from: twilioFrom,
-        to: from,
-        body: project.flowMessage,
-      })
-      pushIntegrationEvent(observability.wideEvent, {
-        provider: 'twilio',
-        operation: 'send_flow_message',
-        outcome: 'success',
-        durationMs: Date.now() - messageStartedAt,
-      })
-
       const mediaStartedAt = Date.now()
       await twilioClient.messages.create({
         from: twilioFrom,
         to: from,
+        body: project.flowMessage,
         mediaUrl: [presignedUrl],
       })
       pushIntegrationEvent(observability.wideEvent, {
         provider: 'twilio',
-        operation: 'send_media',
+        operation: 'send_media_with_message',
         outcome: 'success',
         durationMs: Date.now() - mediaStartedAt,
       })

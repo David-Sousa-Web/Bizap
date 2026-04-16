@@ -1,7 +1,9 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +39,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate()
+  const [imageStatus, setImageStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('loading')
 
   return (
     <Card
@@ -47,10 +50,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex items-center gap-3">
           <Avatar size="lg" className="size-11 shrink-0">
             {project.image && (
-              <AvatarImage src={project.image} alt={project.name} />
+              <AvatarImage 
+                src={project.image} 
+                alt={project.name} 
+                onLoadingStatusChange={setImageStatus}
+              />
             )}
             <AvatarFallback className="text-[13px] font-semibold">
-              {getInitials(project.name)}
+              {project.image && imageStatus !== 'error' && imageStatus !== 'loaded' ? (
+                <Skeleton className="size-full rounded-full" />
+              ) : (
+                getInitials(project.name)
+              )}
             </AvatarFallback>
           </Avatar>
 

@@ -32,6 +32,8 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
   const [isEditing, setIsEditing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [imageKey, setImageKey] = useState(Date.now())
+
   const updateProject = useUpdateProject()
   const uploadImage = useUploadProjectImage()
 
@@ -75,6 +77,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
         projectId: project.id,
         file,
       })
+      setImageKey(Date.now())
       toast.success("Imagem atualizada com sucesso!")
     } catch {
       toast.error("Falha ao atualizar a imagem. Tente novamente.")
@@ -109,7 +112,11 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
           >
             <Avatar className="size-24 rounded-2xl ring-2 ring-primary/20">
               {project.image ? (
-                <AvatarImage src={project.image} alt={project.name} className="object-cover" />
+                <AvatarImage 
+                  src={`${project.image}${project.image.includes('?') ? '&' : '?'}v=${imageKey}`} 
+                  alt={project.name} 
+                  className="object-cover" 
+                />
               ) : null}
               <AvatarFallback className="text-3xl font-semibold rounded-2xl">
                 {getInitials(project.name)}

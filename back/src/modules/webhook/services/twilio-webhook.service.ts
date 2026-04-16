@@ -27,15 +27,19 @@ export async function twilioWebhookService(
   body: string,
   observability: ObservabilityContext,
 ) {
-  const phoneNumber = from.replace('whatsapp:', '')
+  const rawPhone = from.replace('whatsapp:', '')
+  const phoneWithPlus = rawPhone.startsWith('+') ? rawPhone : `+${rawPhone}`
+  const phoneWithoutPlus = rawPhone.replace('+', '')
 
   setWebhookContext(observability.wideEvent, {
-    fromMasked: maskActorPhone(phoneNumber),
+    fromMasked: maskActorPhone(rawPhone),
     bodyLength: body.trim().length,
   })
 
   const number = await prisma.number.findFirst({
-    where: { number: phoneNumber },
+    where: {
+      OR: [{ number: phoneWithPlus }, { number: phoneWithoutPlus }],
+    },
   })
 
   if (!number) {

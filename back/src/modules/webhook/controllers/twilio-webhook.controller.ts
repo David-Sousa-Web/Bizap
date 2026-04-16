@@ -14,9 +14,8 @@ export async function twilioWebhookController(
 
   await twilioWebhookService(From, Body, observability)
 
-  return reply.status(200).send({
-    success: true,
-    message: 'Webhook processed',
-    data: null,
-  })
+  return reply
+    .status(200)
+    .header('Content-Type', 'text/xml')
+    .send('<Response/>')
 }

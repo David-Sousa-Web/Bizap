@@ -1,5 +1,6 @@
 import fastify from 'fastify'
 import fastifyCors from '@fastify/cors'
+import fastifyFormbody from '@fastify/formbody'
 import fastifyMultipart from '@fastify/multipart'
 import fastifyJwt from '@fastify/jwt'
 import fastifySwagger from '@fastify/swagger'
@@ -65,6 +66,7 @@ export function buildApp() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
+  app.register(fastifyFormbody)
   app.register(fastifyMultipart, { limits: { fileSize: 5 * 1024 * 1024 } })
 
   app.register(fastifyJwt, { secret: env.JWT_SECRET })

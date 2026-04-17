@@ -51,6 +51,11 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
     setIsEditing(false)
   }
 
+  function handleStartEdit() {
+    setTempMessage(project.flowMessage)
+    setIsEditing(true)
+  }
+
   if (!selectedTemplate) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -115,12 +120,12 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
                 <p className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                   Conteúdo Configurado
                 </p>
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Button variant="outline" size="sm" onClick={handleStartEdit}>
                   <Pencil className="mr-2 size-3.5" /> Editar Texto
                 </Button>
               </div>
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-5 min-h-[200px]">
-                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700">
+              <div className="bg-input/30 border border-input rounded-xl p-5 min-h-[200px]">
+                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">
                   {project.flowMessage}
                 </p>
               </div>
@@ -138,19 +143,19 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
               <TemplateMockup template={selectedTemplate}>
                 {/* Simulated User Response */}
                 <div className="flex w-full justify-end mt-2">
-                  <div className="bg-[#dcf8c6] p-2.5 rounded-t-xl rounded-bl-xl rounded-br-sm shadow-sm max-w-[85%] text-[15px]">
-                    <p className="whitespace-pre-wrap text-slate-800">Interação do usuário</p>
-                    <div className="text-right text-[11px] text-emerald-700/60 mt-1">10:01</div>
+                  <div className="bg-[#dcf8c6] dark:bg-[#005c4b] p-2.5 rounded-t-xl rounded-bl-xl rounded-br-sm shadow-sm max-w-[85%] text-[15px]">
+                    <p className="whitespace-pre-wrap text-slate-800 dark:text-slate-100">Interação do usuário</p>
+                    <div className="text-right text-[11px] text-emerald-700/60 dark:text-emerald-200/60 mt-1">10:01</div>
                   </div>
                 </div>
 
                 {/* Simulated Bot Flow Message */}
                 <div className="flex flex-col gap-1 w-full mt-1.5 transition-all duration-300">
-                  <div className="bg-white p-3.5 rounded-t-xl rounded-br-xl rounded-bl-sm shadow-sm max-w-[90%] text-[15px]">
-                    <p className="whitespace-pre-wrap text-slate-700">
-                      {(isEditing ? tempMessage : project.flowMessage) || <span className="text-slate-400 italic">(Vazio)</span>}
+                  <div className="bg-white dark:bg-slate-800 p-3.5 rounded-t-xl rounded-br-xl rounded-bl-sm shadow-sm max-w-[90%] text-[15px]">
+                    <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-100">
+                      {(isEditing ? tempMessage : project.flowMessage) || <span className="text-slate-400 dark:text-slate-500 italic">(Vazio)</span>}
                     </p>
-                    <div className="text-right text-[11px] text-slate-400 mt-1">10:02</div>
+                    <div className="text-right text-[11px] text-slate-400 dark:text-slate-500 mt-1">10:02</div>
                   </div>
                 </div>
               </TemplateMockup>

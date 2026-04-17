@@ -255,10 +255,10 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
   ) : null;
 
   return (
-    <div className="flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300 border rounded-xl overflow-hidden bg-white">
+    <div className="flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300 border dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-transparent">
       <div className="flex flex-col md:flex-row">
         {/* Lado Esquerdo: Mockup Mobile */}
-        <div className="w-full md:w-5/12 p-6 flex flex-col justify-center items-center bg-slate-50 relative border-b md:border-b-0 md:border-r border-border/50 min-h-[500px]">
+        <div className="w-full md:w-5/12 p-6 flex flex-col justify-center items-center bg-slate-50 dark:bg-slate-900/50 relative border-b md:border-b-0 md:border-r border-border/50 min-h-[500px]">
           <h2 className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest mb-6 w-full text-center">
             Padrão Instalado
           </h2>
@@ -276,21 +276,21 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-3">
-                <span className="bg-slate-50 border border-slate-100 rounded-lg p-2.5 shadow-sm shrink-0 text-slate-700">
+                <span className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg p-2.5 shadow-sm shrink-0 text-slate-700 dark:text-slate-300">
                   {(() => {
                     const ConfigIcon = selectedTemplate ? getTypeConfig(selectedTemplate.type).icon : null;
-                    return ConfigIcon ? <ConfigIcon className="size-6" /> : <Puzzle className="size-6 text-slate-400" />;
+                    return ConfigIcon ? <ConfigIcon className="size-6" /> : <Puzzle className="size-6 text-slate-400 dark:text-slate-500" />;
                   })()}
                 </span>
                 <div>
-                  <h3 className="text-2xl font-bold tracking-tight text-gray-900 leading-none mb-1.5">
+                  <h3 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-slate-100 leading-none mb-1.5">
                     {selectedTemplate?.name}
                   </h3>
                   <p className="text-[13px] font-mono text-muted-foreground">{selectedTemplate?.sid}</p>
                 </div>
               </div>
               <div className="flex">
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 uppercase tracking-wider">
                   {typeInfo?.name || selectedTemplate?.type}
                 </span>
               </div>
@@ -308,19 +308,19 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
                   <h4 className="text-[12px] font-bold tracking-widest text-muted-foreground/80 uppercase">
                     Sobre este formato
                   </h4>
-                  <p className="text-[14.5px] text-gray-600 leading-relaxed max-w-xl">
+                  <p className="text-[14.5px] text-gray-600 dark:text-slate-300 leading-relaxed max-w-xl">
                     {typeInfo.desc}
                   </p>
                 </div>
 
-                <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-5 max-w-xl">
+                <div className="bg-blue-50/60 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-xl p-5 max-w-xl">
                   <div className="flex items-start gap-3">
-                    <Info className="size-5 text-blue-500 shrink-0 mt-0.5" />
+                    <Info className="size-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="text-[13px] font-bold text-blue-900 mb-1.5 uppercase tracking-wide">
+                      <h4 className="text-[13px] font-bold text-blue-900 dark:text-blue-300 mb-1.5 uppercase tracking-wide">
                         Melhores Práticas de UI/UX
                       </h4>
-                      <p className="text-[14px] text-blue-800/90 leading-relaxed">
+                      <p className="text-[14px] text-blue-800/90 dark:text-blue-200/80 leading-relaxed">
                         {typeInfo.details}
                       </p>
                     </div>
@@ -328,7 +328,7 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
                 </div>
               </>
             ) : (
-              <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl text-orange-800 text-sm max-w-xl">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/50 rounded-xl text-orange-800 dark:text-orange-300 text-sm max-w-xl">
                 Não há documentação detalhada disponível para este tipo de template específico.
               </div>
             )}

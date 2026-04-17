@@ -14,10 +14,8 @@ export function useUpdateFlowMessage() {
       data: UpdateFlowMessagePayload
     }) => projectService.updateFlowMessage(id, data),
     onSuccess: (response, variables) => {
-      // Atualiza o cache do projeto específico
-      queryClient.setQueryData(["projects", variables.id], response)
-      
-      // Invalida a listagem geral para refletir a mudança
+      queryClient.setQueryData(["project", variables.id], response)
+      queryClient.invalidateQueries({ queryKey: ["project", variables.id] })
       queryClient.invalidateQueries({ queryKey: ["projects"] })
     },
   })

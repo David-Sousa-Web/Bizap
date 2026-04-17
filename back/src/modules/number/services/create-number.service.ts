@@ -33,5 +33,6 @@ export async function createNumberService(
     name: number.name,
     number: number.number,
     projectId: number.projectId,
+    lastMediaRequestStatus: null,
   }
 }

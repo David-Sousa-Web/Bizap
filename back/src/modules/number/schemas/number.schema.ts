@@ -1,8 +1,11 @@
 import { z } from 'zod'
 
 export const createNumberBodySchema = z.object({
-  name: z.string().min(1),
-  number: z.string().min(1),
+  name: z.string().trim().min(1),
+  number: z
+    .string()
+    .trim()
+    .regex(/^55\d{11}$/, 'Number must be in format 55xxxxxxxxxxx'),
 })
 
 export const numberProjectIdParamSchema = z.object({

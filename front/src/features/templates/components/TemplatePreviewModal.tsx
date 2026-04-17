@@ -38,8 +38,8 @@ export function TemplatePreviewModal({
       <DialogContent className="sm:max-w-md md:max-w-4xl p-0 overflow-hidden">
         <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
           {/* Lado Esquerdo: Mockup Mobile (Fundo Claro) */}
-          <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-slate-50 relative">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 absolute top-6 left-1/2 -translate-x-1/2 md:relative md:top-auto md:left-auto md:translate-x-0">
+          <div className="w-full md:w-1/2 p-6 flex flex-col justify-center items-center bg-slate-50 dark:bg-slate-900/50 relative">
+            <h2 className="text-sm font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-4 absolute top-6 left-1/2 -translate-x-1/2 md:relative md:top-auto md:left-auto md:translate-x-0">
               Pré-visualização
             </h2>
             {displayTemplate ? (
@@ -52,22 +52,22 @@ export function TemplatePreviewModal({
           </div>
 
           {/* Lado Direito: Informações Contextuais (Fundo Branco) */}
-          <div className="w-full md:w-1/2 p-6 flex flex-col justify-center bg-white border-t md:border-t-0 md:border-l border-slate-100">
+          <div className="w-full md:w-1/2 p-6 flex flex-col justify-center bg-white dark:bg-transparent border-t md:border-t-0 md:border-l border-slate-100 dark:border-slate-800">
             <DialogHeader className="mb-6 text-left">
               <DialogTitle className="text-2xl font-bold flex items-center gap-3">
-                <span className="bg-slate-50 border border-slate-100 rounded-lg p-2 shadow-sm w-12 h-12 flex items-center justify-center shrink-0 text-slate-700">
+                <span className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg p-2 shadow-sm w-12 h-12 flex items-center justify-center shrink-0 text-slate-700 dark:text-slate-300">
                   {(() => {
                     const ConfigIcon = displayTemplate ? getTypeConfig(displayTemplate.type).icon : null;
-                    return ConfigIcon ? <ConfigIcon className="w-6 h-6" /> : <Puzzle className="w-6 h-6 text-slate-400" />;
+                    return ConfigIcon ? <ConfigIcon className="w-6 h-6" /> : <Puzzle className="w-6 h-6 text-slate-400 dark:text-slate-500" />;
                   })()}
                 </span>
-                <span className="text-gray-900">{typeInfo?.name || displayTemplate?.type}</span>
+                <span className="text-gray-900 dark:text-slate-100">{typeInfo?.name || displayTemplate?.type}</span>
               </DialogTitle>
-              <DialogDescription className="mt-2 text-sm">
-                Nome do Template: <strong className="text-gray-700">{displayTemplate?.name}</strong>
+              <DialogDescription className="mt-2 text-sm dark:text-slate-400">
+                Nome do Template: <strong className="text-gray-700 dark:text-slate-300">{displayTemplate?.name}</strong>
               </DialogDescription>
               <div className="mt-1">
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                   {displayTemplate?.type}
                 </span>
               </div>
@@ -77,22 +77,22 @@ export function TemplatePreviewModal({
               {typeInfo ? (
                 <>
                   <div>
-                    <h4 className="text-sm font-bold tracking-wide text-gray-400 uppercase mb-2">
+                    <h4 className="text-sm font-bold tracking-wide text-gray-400 dark:text-slate-500 uppercase mb-2">
                        Sobre este formato
                     </h4>
-                    <p className="text-sm text-gray-600 leading-relaxed">
+                    <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed">
                       {typeInfo.desc}
                     </p>
                   </div>
 
-                  <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4">
+                  <div className="bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-xl p-4">
                      <div className="flex items-start gap-3">
-                        <Info className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                        <Info className="w-5 h-5 text-blue-500 dark:text-blue-400 shrink-0 mt-0.5" />
                         <div>
-                          <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                          <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">
                             Melhores Práticas de UI/UX
                           </h4>
-                          <p className="text-sm text-blue-800/80 leading-relaxed">
+                          <p className="text-sm text-blue-800/80 dark:text-blue-200/80 leading-relaxed">
                             {typeInfo.details}
                           </p>
                         </div>
@@ -100,7 +100,7 @@ export function TemplatePreviewModal({
                   </div>
                 </>
               ) : (
-                <div className="p-4 bg-orange-50 border border-orange-100 rounded-xl text-orange-800 text-sm">
+                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/50 rounded-xl text-orange-800 dark:text-orange-300 text-sm">
                   Não há documentação detalhada disponível para este tipo de template específico.
                 </div>
               )}

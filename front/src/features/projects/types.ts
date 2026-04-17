@@ -17,11 +17,22 @@ export interface CreateProjectPayload {
   flowMessage: string
 }
 
+export type MediaRequestStatus =
+  | "PENDING"
+  | "TEMPLATE_SENT"
+  | "RECONFIRMATION_SENT"
+  | "CONFIRMED"
+  | "MEDIA_SENT"
+  | "DECLINED"
+  | "INVALID_RESPONSE_LIMIT"
+  | "FAILED"
+
 export interface ProjectNumber {
   id: string
   name: string
   number: string
   projectId: string
+  lastMediaRequestStatus: MediaRequestStatus | null
 }
 
 export interface CreateNumberPayload {

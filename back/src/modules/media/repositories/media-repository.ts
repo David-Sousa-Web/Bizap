@@ -7,7 +7,7 @@ export interface MediaRepository {
     projectId: string
   }): Promise<MediaRequest>
   findById(id: string): Promise<MediaRequest | null>
-  findActiveByPhoneNumber(phoneNumber: string): Promise<MediaRequest | null>
+  findActiveByPhoneNumber(phoneNumber: string): Promise<MediaRequest[]>
   updateStatus(id: string, status: MediaRequestStatus): Promise<MediaRequest>
   registerInvalidReply(id: string, status?: MediaRequestStatus): Promise<MediaRequest>
   resetForReconfirmation(id: string): Promise<MediaRequest>

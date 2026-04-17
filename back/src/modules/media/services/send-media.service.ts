@@ -60,21 +60,10 @@ export async function sendMediaService(
     numberName: number.name,
   })
 
-  const activeMediaRequest = await repository.findActiveByPhoneNumber(number.number)
-
-  if (activeMediaRequest) {
-    setMediaContext(observability.wideEvent, {
-      mediaRequestId: activeMediaRequest.id,
-      status: activeMediaRequest.status,
-    })
-    setErrorContext(observability.wideEvent, {
-      type: 'ApplicationError',
-      code: 'active_media_request_conflict',
-      message: 'An active media request already exists for this phone number',
-    })
-
-    throw new ApplicationError('An active media request already exists for this phone number', 409)
-  }
+  const activeMediaRequests = await repository.findActiveByPhoneNumber(number.number)
+  const shouldSkipTemplateSend = activeMediaRequests.some(
+    (activeMediaRequest) => activeMediaRequest.status === 'TEMPLATE_SENT',
+  )
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
@@ -144,6 +133,23 @@ export async function sendMediaService(
     numberId: bizapId,
     projectId,
   })
+
+  if (shouldSkipTemplateSend) {
+    await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
+
+    setMediaContext(observability.wideEvent, {
+      mediaRequestId: mediaRequest.id,
+      status: 'TEMPLATE_SENT',
+    })
+
+    return {
+      id: mediaRequest.id,
+      mediaUrl: mediaRequest.mediaUrl,
+      status: 'TEMPLATE_SENT',
+      numberId: mediaRequest.numberId,
+      projectId: mediaRequest.projectId,
+    }
+  }
 
   setMediaContext(observability.wideEvent, {
     mediaRequestId: mediaRequest.id,

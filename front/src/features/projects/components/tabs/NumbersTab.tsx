@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react"
-import { Loader2, Phone, Plus, Users } from "lucide-react"
+import { Loader2, Phone, Plus, RefreshCw, Users } from "lucide-react"
+
+import { cn } from "@/lib/utils"
 
 import type { Project, ProjectNumber } from "@/features/projects/types"
 import { useProjectNumbers } from "@/features/projects/hooks/useProjectNumbers"
@@ -26,11 +28,21 @@ export function NumbersTab({ project }: NumbersTabProps) {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [mediaTarget, setMediaTarget] = useState<ProjectNumber | null>(null)
 
-  const { data: response, isLoading, isError } = useProjectNumbers({
+  const {
+    data: response,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useProjectNumbers({
     projectId: project.id,
     page,
     limit,
   })
+
+  const handleRefresh = useCallback(() => {
+    refetch()
+  }, [refetch])
 
   const numbers: ProjectNumber[] = response?.data ?? []
   const totalPages = response?.meta?.totalPages ?? 1
@@ -66,10 +78,23 @@ export function NumbersTab({ project }: NumbersTabProps) {
             </CardDescription>
           </div>
 
-          <Button size="sm" onClick={openAddDialog} className="self-start sm:self-auto">
-            <Plus className="size-4" />
-            Adicionar número
-          </Button>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isLoading || isFetching}
+              title="Atualizar lista"
+              aria-label="Atualizar lista de números"
+            >
+              <RefreshCw className={cn("size-4", isFetching && "animate-spin")} />
+              <span className="hidden sm:inline">Atualizar</span>
+            </Button>
+            <Button size="sm" onClick={openAddDialog}>
+              <Plus className="size-4" />
+              Adicionar número
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (

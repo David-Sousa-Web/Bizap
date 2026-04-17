@@ -3,6 +3,7 @@ import { ImagePlus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import type { ProjectNumber } from "@/features/projects/types"
+import { MediaRequestStatusBadge } from "@/features/projects/components/numbers/MediaRequestStatusBadge"
 
 interface NumberRowProps {
   item: ProjectNumber
@@ -16,6 +17,9 @@ const NumberRow = memo(function NumberRow({ item, onSendMedia }: NumberRowProps)
     <tr className="border-b last:border-0 hover:bg-muted/50 transition-colors">
       <td className="p-4 font-medium">{item.name}</td>
       <td className="p-4 tabular-nums">{item.number}</td>
+      <td className="p-4 hidden sm:table-cell">
+        <MediaRequestStatusBadge status={item.lastMediaRequestStatus} />
+      </td>
       <td className="p-4 text-right">
         <Button
           variant="ghost"
@@ -55,6 +59,9 @@ export function NumbersTable({
             <tr className="border-b">
               <th className="h-10 px-4 text-left font-medium text-muted-foreground">Nome</th>
               <th className="h-10 px-4 text-left font-medium text-muted-foreground">Número</th>
+              <th className="h-10 px-4 text-left font-medium text-muted-foreground hidden sm:table-cell min-w-36">
+                Último envio
+              </th>
               <th className="h-10 px-4 text-right font-medium text-muted-foreground">Ações</th>
             </tr>
           </thead>

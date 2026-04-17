@@ -37,12 +37,17 @@ export async function listNumbersService(
   const result = await repository.findAllByProjectId(projectId, page, limit, search)
 
   return {
-    items: result.items.map((number) => ({
-      id: number.id,
-      name: number.name,
-      number: number.number,
-      projectId: number.projectId,
-    })),
+    items: result.items.map((number) => {
+      const latestMediaRequest = number.mediaRequests[0] ?? null
+
+      return {
+        id: number.id,
+        name: number.name,
+        number: number.number,
+        projectId: number.projectId,
+        lastMediaRequestStatus: latestMediaRequest?.status ?? null,
+      }
+    }),
     meta: result.meta,
   }
 }

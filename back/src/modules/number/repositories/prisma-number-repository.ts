@@ -1,6 +1,6 @@
 import { prisma } from '../../../lib/prisma.js'
 import type { Number as NumberModel } from '@prisma/client'
-import type { NumberRepository } from './number-repository.js'
+import type { NumberRepository, NumberWithLatestMediaRequest } from './number-repository.js'
 import type { CreateNumberBody } from '../schemas/number.schema.js'
 import type { PaginatedResult } from '../../../utils/pagination.js'
 
@@ -9,7 +9,12 @@ export class PrismaNumberRepository implements NumberRepository {
     return prisma.number.create({ data })
   }
 
-  async findAllByProjectId(projectId: string, page: number, limit: number, search?: string): Promise<PaginatedResult<NumberModel>> {
+  async findAllByProjectId(
+    projectId: string,
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<PaginatedResult<NumberWithLatestMediaRequest>> {
     const where = {
       projectId,
       ...(search && {
@@ -26,6 +31,12 @@ export class PrismaNumberRepository implements NumberRepository {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
+        include: {
+          mediaRequests: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
       }),
       prisma.number.count({ where }),
     ])

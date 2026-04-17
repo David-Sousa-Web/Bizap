@@ -14,6 +14,7 @@ const numberResponseDataSchema = z.object({
   name: z.string(),
   number: z.string(),
   projectId: z.string(),
+  lastMediaRequestStatus: z.string().nullable(),
 })
 
 export const singleNumberResponseSchema = z.object({

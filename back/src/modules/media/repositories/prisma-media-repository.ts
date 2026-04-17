@@ -3,6 +3,23 @@ import type { MediaRequest, MediaRequestStatus } from '@prisma/client'
 import type { MediaRepository } from './media-repository.js'
 
 export class PrismaMediaRepository implements MediaRepository {
+  async findActiveByPhoneNumber(phoneNumber: string): Promise<MediaRequest | null> {
+    const phoneWithPlus = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`
+    const phoneWithoutPlus = phoneNumber.replace('+', '')
+
+    return prisma.mediaRequest.findFirst({
+      where: {
+        status: { in: ['PENDING', 'TEMPLATE_SENT', 'DECLINED', 'RECONFIRMATION_SENT'] },
+        number: {
+          is: {
+            OR: [{ number: phoneWithPlus }, { number: phoneWithoutPlus }],
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+  }
+
   async create(data: {
     mediaUrl: string
     numberId: string

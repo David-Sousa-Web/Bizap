@@ -30,46 +30,52 @@ export async function twilioWebhookService(
   const rawPhone = from.replace('whatsapp:', '')
   const phoneWithPlus = rawPhone.startsWith('+') ? rawPhone : `+${rawPhone}`
   const phoneWithoutPlus = rawPhone.replace('+', '')
+  const phoneFilter = [{ number: phoneWithPlus }, { number: phoneWithoutPlus }]
 
   setWebhookContext(observability.wideEvent, {
     fromMasked: maskActorPhone(rawPhone),
     bodyLength: body.trim().length,
   })
 
-  const number = await prisma.number.findFirst({
+  const mediaRequestWithNumber = await prisma.mediaRequest.findFirst({
     where: {
-      OR: [{ number: phoneWithPlus }, { number: phoneWithoutPlus }],
+      status: { in: ['PENDING', 'TEMPLATE_SENT', 'DECLINED', 'RECONFIRMATION_SENT'] },
+      number: {
+        is: {
+          OR: phoneFilter,
+        },
+      },
     },
+    include: {
+      number: true,
+    },
+    orderBy: { createdAt: 'desc' },
   })
 
-  if (!number) {
+  if (!mediaRequestWithNumber) {
+    const number = await prisma.number.findFirst({
+      where: {
+        OR: phoneFilter,
+      },
+    })
+
     setErrorContext(observability.wideEvent, {
       type: 'ApplicationError',
-      code: 'webhook_number_not_found',
-      message: 'Webhook number not found',
+      code: number ? 'pending_media_request_not_found' : 'webhook_number_not_found',
+      message: number ? 'No pending media request for webhook' : 'Webhook number not found',
     })
 
     return
   }
+
+  const repository = new PrismaMediaRepository()
+  const { number, ...mediaRequest } = mediaRequestWithNumber
 
   setNumberContext(observability.wideEvent, {
     bizapId: number.id,
     numberMasked: maskActorPhone(number.number),
     numberName: number.name,
   })
-
-  const repository = new PrismaMediaRepository()
-  const mediaRequest = await repository.findPendingByNumberId(number.id)
-
-  if (!mediaRequest) {
-    setErrorContext(observability.wideEvent, {
-      type: 'ApplicationError',
-      code: 'pending_media_request_not_found',
-      message: 'No pending media request for webhook',
-    })
-
-    return
-  }
 
   setMediaContext(observability.wideEvent, {
     mediaRequestId: mediaRequest.id,

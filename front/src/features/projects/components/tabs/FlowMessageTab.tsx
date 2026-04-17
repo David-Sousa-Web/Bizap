@@ -51,6 +51,11 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
     setIsEditing(false)
   }
 
+  function handleStartEdit() {
+    setTempMessage(project.flowMessage)
+    setIsEditing(true)
+  }
+
   if (!selectedTemplate) {
     return (
       <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl border border-dashed text-muted-foreground animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -115,12 +120,12 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
                 <p className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                   Conteúdo Configurado
                 </p>
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Button variant="outline" size="sm" onClick={handleStartEdit}>
                   <Pencil className="mr-2 size-3.5" /> Editar Texto
                 </Button>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-xl p-5 min-h-[200px]">
-                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-slate-700 dark:text-slate-300">
+              <div className="bg-input/30 border border-input rounded-xl p-5 min-h-[200px]">
+                <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">
                   {project.flowMessage}
                 </p>
               </div>

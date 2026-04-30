@@ -23,6 +23,7 @@ export async function listProjectsService(
       templateSid: project.templateSid,
       flowMessage: project.flowMessage,
       apiKey: project.apiKey,
+      zabbixHostName: project.zabbixHostName,
     })),
     meta: result.meta,
   }

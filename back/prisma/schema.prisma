@@ -30,6 +30,7 @@ model Project {
   templateSid  String   @map("template_sid")
   flowMessage  String   @map("flow_message") @db.Text
   apiKey       String   @unique @map("api_key")
+  zabbixHostName String? @map("zabbix_host_name")
   userId       String   @map("user_id")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -37,6 +38,7 @@ model Project {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   numbers       Number[]
   mediaRequests MediaRequest[]
+  zabbixMetricEvents ZabbixMetricEvent[]
 
   @@map("projects")
 }
@@ -78,6 +80,30 @@ model MediaRequest {
 
   number  Number  @relation(fields: [numberId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  zabbixMetricEvents ZabbixMetricEvent[]
 
   @@map("media_requests")
+}
+
+enum ZabbixMetricEventType {
+  TEMPLATE_SENT
+  YES_REPLY
+  NO_REPLY
+  INVALID_REPLY
+  MEDIA_SENT
+}
+
+model ZabbixMetricEvent {
+  id             String                @id @default(uuid())
+  type           ZabbixMetricEventType
+  projectId      String                @map("project_id")
+  mediaRequestId String?               @map("media_request_id")
+  createdAt      DateTime              @default(now()) @map("created_at")
+
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  mediaRequest MediaRequest? @relation(fields: [mediaRequestId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, type])
+  @@index([mediaRequestId])
+  @@map("zabbix_metric_events")
 }

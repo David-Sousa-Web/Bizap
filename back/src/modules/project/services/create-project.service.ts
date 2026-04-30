@@ -59,6 +59,7 @@ export async function createProjectService(
       templateSid: project.templateSid,
       flowMessage: project.flowMessage,
       apiKey: project.apiKey,
+      zabbixHostName: project.zabbixHostName,
     }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

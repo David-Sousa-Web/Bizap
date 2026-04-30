@@ -15,6 +15,11 @@ const envSchema = z.object({
   AWS_REGION: z.string(),
   AWS_ACCESS_KEY_ID: z.string(),
   AWS_SECRET_ACCESS_KEY: z.string(),
+  ZABBIX_METRICS_ENABLED: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
+  ZABBIX_SERVER_HOST: z.string().default('localhost'),
+  ZABBIX_SERVER_PORT: z.coerce.number().int().positive().default(10051),
+  METRICS_TEMP_FILE: z.string().default(process.platform === 'win32' ? 'C:\\temp\\zabbix_bizap_metrics.txt' : '/tmp/zabbix_bizap_metrics.txt'),
+  ZABBIX_METRICS_CRON: z.string().default('* * * * *'),
 })
 
 export const env = envSchema.parse(process.env)

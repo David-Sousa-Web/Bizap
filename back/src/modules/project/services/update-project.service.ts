@@ -59,5 +59,6 @@ export async function updateProjectService(
     templateSid: updated.templateSid,
     flowMessage: updated.flowMessage,
     apiKey: updated.apiKey,
+    zabbixHostName: updated.zabbixHostName,
   }
 }

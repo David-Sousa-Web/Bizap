@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `zabbix_metric_events` MODIFY `type` ENUM('TEMPLATE_SENT', 'YES_REPLY', 'NO_REPLY', 'INVALID_REPLY', 'MEDIA_SENT') NOT NULL;

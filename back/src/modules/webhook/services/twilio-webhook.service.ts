@@ -13,6 +13,7 @@ import {
   setWebhookContext,
 } from '../../../lib/wide-event.js'
 import { PrismaMediaRepository } from '../../media/repositories/prisma-media-repository.js'
+import { recordZabbixMetricEvent } from '../../metrics/services/record-zabbix-metric-event.js'
 import {
   DECLINED_EXPIRATION_HOURS,
   DECLINE_REPLY_MESSAGE,
@@ -146,6 +147,11 @@ export async function twilioWebhookService(
         })
 
         await repository.resetForReconfirmation(mediaRequest.id)
+        await recordZabbixMetricEvent({
+          type: 'TEMPLATE_SENT',
+          projectId: project.id,
+          mediaRequestId: mediaRequest.id,
+        })
 
         pushIntegrationEvent(observability.wideEvent, {
           provider: 'twilio',
@@ -180,6 +186,12 @@ export async function twilioWebhookService(
 
     if (isValidMediaConfirmationReply(normalizedBody)) {
       await repository.updateStatus(mediaRequest.id, 'CONFIRMED')
+      await recordZabbixMetricEvent({
+        type: 'YES_REPLY',
+        projectId: project.id,
+        mediaRequestId: mediaRequest.id,
+      })
+
       setWebhookContext(observability.wideEvent, {
         replyCategory: 'confirm',
         nextStatus: 'MEDIA_SENT',
@@ -206,6 +218,12 @@ export async function twilioWebhookService(
         })
 
         await repository.updateStatus(mediaRequest.id, 'MEDIA_SENT')
+        await recordZabbixMetricEvent({
+          type: 'MEDIA_SENT',
+          projectId: project.id,
+          mediaRequestId: mediaRequest.id,
+        })
+
         setMediaContext(observability.wideEvent, {
           status: 'MEDIA_SENT',
         })
@@ -234,6 +252,12 @@ export async function twilioWebhookService(
     }
 
     if (isDeclineMediaConfirmationReply(normalizedBody)) {
+      await recordZabbixMetricEvent({
+        type: 'NO_REPLY',
+        projectId: project.id,
+        mediaRequestId: mediaRequest.id,
+      })
+
       setWebhookContext(observability.wideEvent, {
         replyCategory: 'decline',
       })
@@ -297,6 +321,11 @@ export async function twilioWebhookService(
       mediaRequest.id,
       shouldClose ? 'INVALID_RESPONSE_LIMIT' : undefined,
     )
+    await recordZabbixMetricEvent({
+      type: 'INVALID_REPLY',
+      projectId: project.id,
+      mediaRequestId: mediaRequest.id,
+    })
 
     setWebhookContext(observability.wideEvent, {
       replyCategory: 'unknown',

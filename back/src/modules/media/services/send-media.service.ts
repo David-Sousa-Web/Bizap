@@ -18,6 +18,7 @@ import {
   summarizeFileUpload,
 } from '../../../lib/wide-event.js'
 import type { MediaRepository } from '../repositories/media-repository.js'
+import { recordZabbixMetricEvent } from '../../metrics/services/record-zabbix-metric-event.js'
 
 export async function sendMediaService(
   projectId: string,
@@ -165,6 +166,12 @@ export async function sendMediaService(
     })
 
     await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
+    await recordZabbixMetricEvent({
+      type: 'TEMPLATE_SENT',
+      projectId,
+      mediaRequestId: mediaRequest.id,
+    })
+
     pushIntegrationEvent(observability.wideEvent, {
       provider: 'twilio',
       operation: 'send_template',

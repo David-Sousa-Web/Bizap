@@ -1,6 +1,7 @@
 import { buildApp } from './app.js'
 import { env } from './env.js'
 import { appLogger } from './lib/logger.js'
+import { startZabbixMetricsScheduler } from './modules/metrics/scheduler/zabbix-metrics-scheduler.js'
 
 async function main() {
   const app = buildApp()
@@ -20,6 +21,8 @@ async function main() {
       url: `http://localhost:${env.PORT}/v1/docs`,
     }, 'Swagger docs available')
   }
+
+  startZabbixMetricsScheduler()
 }
 
 main().catch((error) => {

@@ -6,12 +6,14 @@ export const createProjectBodySchema = z.object({
   agency: z.string().optional(),
   templateSid: z.string().min(1),
   flowMessage: z.string().min(1),
+  zabbixHostName: z.string().trim().min(1).optional(),
 })
 
 export const updateProjectBodySchema = z.object({
   phoneNumber: z.string().min(1).optional(),
   agency: z.string().optional(),
   templateSid: z.string().min(1).optional(),
+  zabbixHostName: z.string().trim().min(1).nullable().optional(),
 })
 
 export const updateFlowMessageBodySchema = z.object({
@@ -35,6 +37,7 @@ const projectResponseDataSchema = z.object({
   templateSid: z.string(),
   flowMessage: z.string(),
   apiKey: z.string(),
+  zabbixHostName: z.string().nullable(),
 })
 
 export const singleProjectResponseSchema = z.object({

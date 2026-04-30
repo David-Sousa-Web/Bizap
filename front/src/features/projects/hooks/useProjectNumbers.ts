@@ -18,5 +18,7 @@ export function useProjectNumbers({
       return numberService.listByProject(projectId, { page, limit })
     },
     enabled: !!projectId,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: false,
   })
 }

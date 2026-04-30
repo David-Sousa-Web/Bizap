@@ -44,9 +44,12 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
 
 
 
-function extractBodyText(body: Record<string, unknown> | null): string {
+function extractBodyText(body: Template["body"]): string {
   if (!body) return ""
-  if (typeof body.body === "string") return body.body
+  const record = body as Record<string, unknown>
+  if (typeof record.body === "string") return record.body
+  if (typeof record.title === "string") return record.title
+  if (typeof record.label === "string") return record.label
   return JSON.stringify(body)
 }
 

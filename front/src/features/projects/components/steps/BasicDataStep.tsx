@@ -57,6 +57,19 @@ export function BasicDataStep() {
             {...register("agency")}
           />
         </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="zabbixHostName">Host do Zabbix</Label>
+          <Input
+            id="zabbixHostName"
+            placeholder="Ex: bizap-cliente-xyz (opcional)"
+            {...register("zabbixHostName")}
+          />
+          <p className="text-xs text-muted-foreground">
+            Nome do host cadastrado no Zabbix para envio de métricas. Deixe em
+            branco se este projeto não terá monitoramento.
+          </p>
+        </div>
       </div>
     </div>
   )

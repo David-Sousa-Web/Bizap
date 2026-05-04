@@ -1,5 +1,12 @@
 import { useFormContext } from "react-hook-form"
-import { Pencil, Phone, Building2, FileText, MessageSquare } from "lucide-react"
+import {
+  Pencil,
+  Phone,
+  Building2,
+  FileText,
+  MessageSquare,
+  Activity,
+} from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -75,6 +82,12 @@ export function SummaryStep({ imageFile, onGoToStep }: SummaryStepProps) {
                   <span className="flex items-center gap-1">
                     <Building2 className="size-3.5 shrink-0" />
                     {values.agency}
+                  </span>
+                )}
+                {values.zabbixHostName && (
+                  <span className="flex items-center gap-1">
+                    <Activity className="size-3.5 shrink-0" />
+                    {values.zabbixHostName}
                   </span>
                 )}
               </div>

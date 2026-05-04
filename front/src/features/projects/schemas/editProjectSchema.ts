@@ -6,3 +6,9 @@ export const editProjectSchema = z.object({
 })
 
 export type EditProjectFormData = z.infer<typeof editProjectSchema>
+
+export const zabbixIntegrationSchema = z.object({
+  zabbixHostName: z.string().optional(),
+})
+
+export type ZabbixIntegrationFormData = z.infer<typeof zabbixIntegrationSchema>

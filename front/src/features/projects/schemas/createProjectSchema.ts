@@ -2,7 +2,7 @@ import { z } from "zod"
 
 export const createProjectSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  phoneNumber: z.string().min(1, "Telefone é obrigatório"),
+  phoneNumber: z.string().trim().regex(/^\+\d{8,15}$/, "Número de telefone inválido"),
   agency: z.string().optional(),
   templateSid: z.string().min(1, "Selecione um template"),
   flowMessage: z.string().min(1, "Mensagem de resposta é obrigatória"),

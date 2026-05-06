@@ -1,11 +1,13 @@
-import { useFormContext } from "react-hook-form"
+import { useFormContext, Controller } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PhoneInput } from "@/components/ui/phone-input"
 import type { CreateProjectFormData } from "@/features/projects/schemas/createProjectSchema"
 
 export function BasicDataStep() {
   const {
     register,
+    control,
     formState: { errors },
   } = useFormContext<CreateProjectFormData>()
 
@@ -37,10 +39,16 @@ export function BasicDataStep() {
           <Label htmlFor="phoneNumber">
             Telefone <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id="phoneNumber"
-            placeholder="Ex: +5511999999999"
-            {...register("phoneNumber")}
+          <Controller
+            control={control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <PhoneInput
+                id="phoneNumber"
+                aria-invalid={!!errors.phoneNumber}
+                {...field}
+              />
+            )}
           />
           {errors.phoneNumber && (
             <p className="text-sm text-destructive">

@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const editProjectSchema = z.object({
-  phoneNumber: z.string().min(1, "Telefone é obrigatório"),
+  phoneNumber: z.string().trim().regex(/^\+\d{8,15}$/, "Número de telefone inválido"),
   agency: z.string().optional(),
 })
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Building2, Phone, Pencil, Camera, Loader2, X, Check } from "lucide-react"
 import { toast } from "sonner"
@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { PhoneInput } from "@/components/ui/phone-input"
+import { formatPhone } from "@/utils/formatPhone"
 
 import type { Project } from "@/features/projects/types"
 import { useUpdateProject } from "@/features/projects/hooks/useUpdateProject"
@@ -39,6 +41,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -156,11 +159,16 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                       <FieldLabel htmlFor="phoneNumber" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <Phone className="size-4" /> Telefone (WhatsApp) <span className="text-destructive">*</span>
                       </FieldLabel>
-                      <Input
-                        id="phoneNumber"
-                        placeholder="+55 11 99999-9999"
-                        className="text-base font-semibold bg-background"
-                        {...register("phoneNumber")}
+                      <Controller
+                        control={control}
+                        name="phoneNumber"
+                        render={({ field }) => (
+                          <PhoneInput
+                            id="phoneNumber"
+                            aria-invalid={!!errors.phoneNumber}
+                            {...field}
+                          />
+                        )}
                       />
                       <FieldError>{errors.phoneNumber?.message}</FieldError>
                     </Field>
@@ -225,7 +233,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                     <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Phone className="size-4" /> Telefone (WhatsApp)
                     </span>
-                    <span className="text-base font-semibold">{project.phoneNumber}</span>
+                    <span className="text-base font-semibold">{formatPhone(project.phoneNumber)}</span>
                   </div>
 
                   <div className="flex flex-col gap-1.5">

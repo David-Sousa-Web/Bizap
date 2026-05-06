@@ -50,6 +50,7 @@ export default function CreateProjectPage() {
       agency: "",
       templateSid: "",
       flowMessage: "",
+      zabbixHostName: "",
     },
     mode: "onTouched",
   })
@@ -100,6 +101,7 @@ export default function CreateProjectPage() {
         agency: values.agency || undefined,
         templateSid: values.templateSid,
         flowMessage: values.flowMessage,
+        zabbixHostName: values.zabbixHostName?.trim() || undefined,
       }
 
       const response = await createProject.mutateAsync(payload)

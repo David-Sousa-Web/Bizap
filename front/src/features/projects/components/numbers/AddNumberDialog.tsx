@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Phone, User } from "lucide-react"
 import { toast } from "sonner"
@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { PhoneInput } from "@/components/ui/phone-input"
 
 import { useCreateNumber } from "@/features/projects/hooks/useCreateNumber"
 import {
@@ -40,6 +41,7 @@ export function AddNumberDialog({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setFocus,
@@ -110,18 +112,19 @@ export function AddNumberDialog({
             <FieldLabel htmlFor="number-phone" className="flex items-center gap-2 text-sm font-medium">
               <Phone className="size-4" /> Número <span className="text-destructive">*</span>
             </FieldLabel>
-            <Input
-              id="number-phone"
-              placeholder="+5511999999999"
-              inputMode="tel"
-              autoComplete="off"
-              disabled={isPending}
-              {...register("number")}
+            <Controller
+              control={control}
+              name="number"
+              render={({ field }) => (
+                <PhoneInput
+                  id="number-phone"
+                  aria-invalid={!!errors.number}
+                  disabled={isPending}
+                  {...field}
+                />
+              )}
             />
             <FieldError>{errors.number?.message}</FieldError>
-            <p className="text-xs text-muted-foreground">
-              Use o formato internacional E.164 (DDI + DDD + número), somente dígitos.
-            </p>
           </Field>
 
           <DialogFooter className="pt-2">

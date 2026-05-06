@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { AlertCircle, Pencil, X, Check, Loader2 } from "lucide-react"
+import { AlertCircle, Pencil, X, Check, Loader2, ImageIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -151,11 +151,23 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
 
                 {/* Simulated Bot Flow Message */}
                 <div className="flex flex-col gap-1 w-full mt-1.5 transition-all duration-300">
-                  <div className="bg-white dark:bg-slate-800 p-3.5 rounded-t-xl rounded-br-xl rounded-bl-sm shadow-sm max-w-[90%] text-[15px]">
-                    <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-100">
-                      {(isEditing ? tempMessage : project.flowMessage) || <span className="text-slate-400 dark:text-slate-500 italic">(Vazio)</span>}
-                    </p>
-                    <div className="text-right text-[11px] text-slate-400 dark:text-slate-500 mt-1">10:02</div>
+                  <div className="bg-white dark:bg-slate-800 rounded-t-xl rounded-br-xl rounded-bl-sm shadow-sm max-w-[90%] text-[15px] overflow-hidden">
+                    <div
+                      role="img"
+                      aria-label="Imagem placeholder"
+                      className="relative w-full h-24 flex items-center justify-center bg-[repeating-linear-gradient(45deg,#e2e8f0_0_8px,#f1f5f9_8px_16px)] dark:bg-[repeating-linear-gradient(45deg,#334155_0_8px,#1e293b_8px_16px)] border-b border-slate-200 dark:border-slate-700"
+                    >
+                      <ImageIcon className="w-7 h-7 text-slate-400 dark:text-slate-500" />
+                      <span className="absolute bottom-1 right-2 text-[9px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">
+                        Placeholder
+                      </span>
+                    </div>
+                    <div className="p-3.5">
+                      <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-100">
+                        {(isEditing ? tempMessage : project.flowMessage) || <span className="text-slate-400 dark:text-slate-500 italic">(Vazio)</span>}
+                      </p>
+                      <div className="text-right text-[11px] text-slate-400 dark:text-slate-500 mt-1">10:02</div>
+                    </div>
                   </div>
                 </div>
               </TemplateMockup>

@@ -7,6 +7,7 @@ export interface Project {
   templateSid: string
   flowMessage: string
   apiKey: string
+  zabbixHostName: string | null
 }
 
 export interface CreateProjectPayload {
@@ -15,6 +16,7 @@ export interface CreateProjectPayload {
   agency?: string
   templateSid: string
   flowMessage: string
+  zabbixHostName?: string
 }
 
 export type MediaRequestStatus =
@@ -52,6 +54,7 @@ export interface UpdateProjectPayload {
   phoneNumber?: string
   agency?: string
   templateSid?: string
+  zabbixHostName?: string | null
 }
 
 export interface UpdateFlowMessagePayload {

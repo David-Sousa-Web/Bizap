@@ -1,11 +1,13 @@
-import { useFormContext } from "react-hook-form"
+import { useFormContext, Controller } from "react-hook-form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PhoneInput } from "@/components/ui/phone-input"
 import type { CreateProjectFormData } from "@/features/projects/schemas/createProjectSchema"
 
 export function BasicDataStep() {
   const {
     register,
+    control,
     formState: { errors },
   } = useFormContext<CreateProjectFormData>()
 
@@ -37,10 +39,16 @@ export function BasicDataStep() {
           <Label htmlFor="phoneNumber">
             Telefone <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id="phoneNumber"
-            placeholder="Ex: +5511999999999"
-            {...register("phoneNumber")}
+          <Controller
+            control={control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <PhoneInput
+                id="phoneNumber"
+                aria-invalid={!!errors.phoneNumber}
+                {...field}
+              />
+            )}
           />
           {errors.phoneNumber && (
             <p className="text-sm text-destructive">
@@ -56,6 +64,19 @@ export function BasicDataStep() {
             placeholder="Ex: Agência XYZ (opcional)"
             {...register("agency")}
           />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="zabbixHostName">Host do Zabbix</Label>
+          <Input
+            id="zabbixHostName"
+            placeholder="Ex: bizap-cliente-xyz (opcional)"
+            {...register("zabbixHostName")}
+          />
+          <p className="text-xs text-muted-foreground">
+            Nome do host cadastrado no Zabbix para envio de métricas. Deixe em
+            branco se este projeto não terá monitoramento.
+          </p>
         </div>
       </div>
     </div>

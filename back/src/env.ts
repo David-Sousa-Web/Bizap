@@ -8,6 +8,7 @@ const envSchema = z.object({
   API_BASE_URL: z.string(),
   DATABASE_URL: z.string(),
   JWT_SECRET: z.string(),
+  ENCRYPTION_MASTER_KEY: z.string().min(1),
   TWILIO_ACCOUNT_SID: z.string(),
   TWILIO_AUTH_TOKEN: z.string(),
   TWILIO_PHONE_NUMBER: z.string(),

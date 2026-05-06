@@ -13,16 +13,9 @@ export class PrismaNumberRepository implements NumberRepository {
     projectId: string,
     page: number,
     limit: number,
-    search?: string,
   ): Promise<PaginatedResult<NumberWithLatestMediaRequest>> {
     const where = {
       projectId,
-      ...(search && {
-        OR: [
-          { name: { contains: search } },
-          { number: { contains: search } },
-        ],
-      }),
     }
 
     const [items, total] = await Promise.all([
@@ -50,6 +43,19 @@ export class PrismaNumberRepository implements NumberRepository {
         totalPages: Math.ceil(total / limit),
       },
     }
+  }
+
+  async findManyByProjectId(projectId: string): Promise<NumberWithLatestMediaRequest[]> {
+    return prisma.number.findMany({
+      where: { projectId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        mediaRequests: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+      },
+    })
   }
 
   async findById(id: string): Promise<NumberModel | null> {

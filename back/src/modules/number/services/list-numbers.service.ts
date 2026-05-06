@@ -5,7 +5,28 @@ import {
   setErrorContext,
   setProjectContext,
 } from '../../../lib/wide-event.js'
+import { encryptionService } from '../../../lib/encryption.js'
 import type { NumberRepository } from '../repositories/number-repository.js'
+
+type ListedNumber = {
+  id: string
+  name: string
+  number: string
+  projectId: string
+  lastMediaRequestStatus: string | null
+}
+
+function mapDecryptedNumber(number: Awaited<ReturnType<NumberRepository['findManyByProjectId']>>[number]): ListedNumber {
+  const latestMediaRequest = number.mediaRequests[0] ?? null
+
+  return {
+    id: number.id,
+    name: encryptionService.decrypt(number.name),
+    number: encryptionService.decrypt(number.number),
+    projectId: number.projectId,
+    lastMediaRequestStatus: latestMediaRequest?.status ?? null,
+  }
+}
 
 export async function listNumbersService(
   projectId: string,
@@ -34,20 +55,36 @@ export async function listNumbersService(
     throw new ApplicationError('Project not found', 404)
   }
 
-  const result = await repository.findAllByProjectId(projectId, page, limit, search)
+  const normalizedSearch = search?.trim().toLowerCase()
+
+  if (normalizedSearch) {
+    const allNumbers = await repository.findManyByProjectId(projectId)
+    const filteredItems = allNumbers
+      .map(mapDecryptedNumber)
+      .filter((number) => {
+        return (
+          number.name.toLowerCase().includes(normalizedSearch) ||
+          number.number.toLowerCase().includes(normalizedSearch)
+        )
+      })
+    const total = filteredItems.length
+    const start = (page - 1) * limit
+
+    return {
+      items: filteredItems.slice(start, start + limit),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    }
+  }
+
+  const result = await repository.findAllByProjectId(projectId, page, limit)
 
   return {
-    items: result.items.map((number) => {
-      const latestMediaRequest = number.mediaRequests[0] ?? null
-
-      return {
-        id: number.id,
-        name: number.name,
-        number: number.number,
-        projectId: number.projectId,
-        lastMediaRequestStatus: latestMediaRequest?.status ?? null,
-      }
-    }),
+    items: result.items.map(mapDecryptedNumber),
     meta: result.meta,
   }
 }

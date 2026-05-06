@@ -1,6 +1,7 @@
 import { twilioClient } from '../../../lib/twilio.js'
 import { prisma } from '../../../lib/prisma.js'
 import { getPresignedMediaUrl } from '../../../lib/s3.js'
+import { encryptionService } from '../../../lib/encryption.js'
 import {
   buildErrorCode,
   maskActorPhone,
@@ -31,7 +32,10 @@ export async function twilioWebhookService(
   const rawPhone = from.replace('whatsapp:', '')
   const phoneWithPlus = rawPhone.startsWith('+') ? rawPhone : `+${rawPhone}`
   const phoneWithoutPlus = rawPhone.replace('+', '')
-  const phoneFilter = [{ number: phoneWithPlus }, { number: phoneWithoutPlus }]
+  const phoneFilter = [
+    { number: encryptionService.encrypt(phoneWithPlus) },
+    { number: encryptionService.encrypt(phoneWithoutPlus) },
+  ]
 
   setWebhookContext(observability.wideEvent, {
     fromMasked: maskActorPhone(rawPhone),
@@ -78,11 +82,13 @@ export async function twilioWebhookService(
 
   for (const mediaRequestWithNumber of mediaRequestsWithNumber) {
     const { number, ...mediaRequest } = mediaRequestWithNumber
+    const decryptedNumberName = encryptionService.decrypt(number.name)
+    const decryptedNumber = encryptionService.decrypt(number.number)
 
     setNumberContext(observability.wideEvent, {
       bizapId: number.id,
-      numberMasked: maskActorPhone(number.number),
-      numberName: number.name,
+      numberMasked: maskActorPhone(decryptedNumber),
+      numberName: decryptedNumberName,
     })
 
     setMediaContext(observability.wideEvent, {

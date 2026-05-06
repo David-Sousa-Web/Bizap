@@ -17,7 +17,7 @@ export interface NumberRepository {
     projectId: string,
     page: number,
     limit: number,
-    search?: string,
   ): Promise<PaginatedResult<NumberWithLatestMediaRequest>>
+  findManyByProjectId(projectId: string): Promise<NumberWithLatestMediaRequest[]>
   findById(id: string): Promise<NumberModel | null>
 }

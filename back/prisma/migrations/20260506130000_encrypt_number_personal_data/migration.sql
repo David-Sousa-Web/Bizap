@@ -1,0 +1,3 @@
+ALTER TABLE `numbers`
+  MODIFY `name` TEXT NOT NULL,
+  MODIFY `number` TEXT NOT NULL;

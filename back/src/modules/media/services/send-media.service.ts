@@ -5,6 +5,7 @@ import { s3Client } from '../../../lib/s3.js'
 import { ApplicationError } from '../../../utils/errors.js'
 import { twilioClient } from '../../../lib/twilio.js'
 import { env } from '../../../env.js'
+import { encryptionService } from '../../../lib/encryption.js'
 import { prisma } from '../../../lib/prisma.js'
 import {
   buildErrorCode,
@@ -55,13 +56,16 @@ export async function sendMediaService(
     throw new ApplicationError('Number not found in this project', 404)
   }
 
+  const decryptedNumberName = encryptionService.decrypt(number.name)
+  const decryptedNumber = encryptionService.decrypt(number.number)
+
   setNumberContext(observability.wideEvent, {
     bizapId: number.id,
-    numberMasked: maskActorPhone(number.number),
-    numberName: number.name,
+    numberMasked: maskActorPhone(decryptedNumber),
+    numberName: decryptedNumberName,
   })
 
-  const activeMediaRequests = await repository.findActiveByPhoneNumber(number.number)
+  const activeMediaRequests = await repository.findActiveByPhoneNumber(decryptedNumber)
   const shouldSkipTemplateSend = activeMediaRequests.some(
     (activeMediaRequest) => activeMediaRequest.status === 'TEMPLATE_SENT',
   )
@@ -161,7 +165,7 @@ export async function sendMediaService(
   try {
     await twilioClient.messages.create({
       from: `whatsapp:${project.phoneNumber}`,
-      to: `whatsapp:${number.number}`,
+      to: `whatsapp:${decryptedNumber}`,
       contentSid: project.templateSid,
     })
 

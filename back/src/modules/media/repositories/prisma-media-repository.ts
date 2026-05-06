@@ -1,4 +1,5 @@
 import { prisma } from '../../../lib/prisma.js'
+import { encryptionService } from '../../../lib/encryption.js'
 import type { MediaRequest, MediaRequestStatus } from '@prisma/client'
 import type { MediaRepository } from './media-repository.js'
 
@@ -6,13 +7,17 @@ export class PrismaMediaRepository implements MediaRepository {
   async findActiveByPhoneNumber(phoneNumber: string): Promise<MediaRequest[]> {
     const phoneWithPlus = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`
     const phoneWithoutPlus = phoneNumber.replace('+', '')
+    const phoneFilter = [
+      { number: encryptionService.encrypt(phoneWithPlus) },
+      { number: encryptionService.encrypt(phoneWithoutPlus) },
+    ]
 
     return prisma.mediaRequest.findMany({
       where: {
         status: { in: ['PENDING', 'TEMPLATE_SENT', 'DECLINED', 'RECONFIRMATION_SENT'] },
         number: {
           is: {
-            OR: [{ number: phoneWithPlus }, { number: phoneWithoutPlus }],
+            OR: phoneFilter,
           },
         },
       },

@@ -4,6 +4,7 @@ import {
   setNumberContext,
   setProjectContext,
 } from '../../../lib/wide-event.js'
+import { encryptionService } from '../../../lib/encryption.js'
 import type { NumberRepository } from '../repositories/number-repository.js'
 import type { CreateNumberBody } from '../schemas/number.schema.js'
 
@@ -21,17 +22,21 @@ export async function createNumberService(
     numberMasked: maskActorPhone(data.number),
   })
 
-  const number = await repository.create({ ...data, projectId })
+  const number = await repository.create({
+    name: encryptionService.encrypt(data.name),
+    number: encryptionService.encrypt(data.number),
+    projectId,
+  })
 
   setNumberContext(observability.wideEvent, {
     bizapId: number.id,
-    numberMasked: maskActorPhone(number.number),
+    numberMasked: maskActorPhone(data.number),
   })
 
   return {
     id: number.id,
-    name: number.name,
-    number: number.number,
+    name: data.name,
+    number: data.number,
     projectId: number.projectId,
     lastMediaRequestStatus: null,
   }

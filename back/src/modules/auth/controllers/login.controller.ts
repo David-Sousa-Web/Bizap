@@ -17,7 +17,7 @@ export async function loginController(
   const user = await loginService(request.body, observability)
 
   const token = await reply.jwtSign(
-    { sub: user.id, email: user.email },
+    { sub: user.id, email: user.email, role: user.role },
     { expiresIn: '7d' },
   )
 
@@ -28,6 +28,7 @@ export async function loginController(
       token,
       email: user.email,
       name: user.name,
+      role: user.role,
     },
   })
 }

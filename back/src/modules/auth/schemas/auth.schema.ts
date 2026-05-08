@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const userRoleSchema = z.enum(['ADMIN', 'EDITOR', 'USER'])
+
 export const loginBodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -12,6 +14,7 @@ export const loginResponseSchema = z.object({
     token: z.string(),
     email: z.string().email(),
     name: z.string(),
+    role: userRoleSchema,
   }),
 })
 

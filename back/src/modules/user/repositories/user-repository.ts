@@ -1,13 +1,14 @@
-import type { User } from '@prisma/client'
+import type { User, UserRole } from '@prisma/client'
 import type { PaginatedResult } from '../../../utils/pagination.js'
 
 export type CreateUserData = {
   name: string
   email: string
   password: string
+  role?: UserRole
 }
 
-export type UpdateUserData = Partial<Pick<User, 'name' | 'email' | 'password'>>
+export type UpdateUserData = Partial<Pick<User, 'name' | 'email' | 'password' | 'role'>>
 
 export interface UserRepository {
   create(data: CreateUserData): Promise<User>

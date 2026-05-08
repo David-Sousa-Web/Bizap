@@ -1,4 +1,5 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
+import type { UserRole } from '@prisma/client'
 import { prisma } from '../lib/prisma.js'
 import {
   markUnauthorizedJwt,
@@ -13,7 +14,7 @@ export async function authJwt(request: FastifyRequest, reply: FastifyReply) {
   try {
     await request.jwtVerify()
 
-    const payload = request.user as { sub?: string; email?: string }
+    const payload = request.user as { sub?: string; email?: string; role?: UserRole }
     const userId = payload.sub
 
     setActorFromJwtPayload(request.wideEvent, payload)
@@ -25,7 +26,7 @@ export async function authJwt(request: FastifyRequest, reply: FastifyReply) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true },
+      select: { id: true, role: true },
     })
 
     if (!user) {
@@ -35,6 +36,11 @@ export async function authJwt(request: FastifyRequest, reply: FastifyReply) {
         message: 'Unauthorized',
         data: null,
       })
+    }
+
+    request.user = {
+      ...payload,
+      role: user.role,
     }
   } catch (error) {
     markUnauthorizedJwt(request.wideEvent)

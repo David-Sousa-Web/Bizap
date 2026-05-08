@@ -11,6 +11,7 @@ async function main() {
       email: 'admin@bizap.com',
       password,
       name: 'Admin',
+      role: 'ADMIN',
     },
   })
 

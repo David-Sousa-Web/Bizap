@@ -1,0 +1,3 @@
+ALTER TABLE `users` ADD COLUMN `role` ENUM('ADMIN', 'EDITOR', 'USER') NOT NULL DEFAULT 'USER';
+
+UPDATE `users` SET `role` = 'ADMIN';

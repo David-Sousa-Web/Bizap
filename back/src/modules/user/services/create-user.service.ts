@@ -21,6 +21,7 @@ export async function createUserService(
       name: data.name,
       email: data.email,
       password,
+      role: data.role ?? 'USER',
     })
 
     return presentUser(user)

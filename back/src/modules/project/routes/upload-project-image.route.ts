@@ -1,12 +1,14 @@
 import type { FastifyInstance } from 'fastify'
+import { UserRole } from '@prisma/client'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { authJwt } from '../../../middlewares/auth-jwt.js'
+import { requireRole } from '../../../middlewares/require-role.js'
 import { projectIdParamSchema, singleProjectResponseSchema } from '../schemas/project.schema.js'
 import { uploadProjectImageController } from '../controllers/upload-project-image.controller.js'
 
 export async function uploadProjectImageRoute(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post('/projects/:id/image', {
-    onRequest: [authJwt],
+    onRequest: [authJwt, requireRole(UserRole.ADMIN, UserRole.EDITOR)],
     schema: {
       tags: ['Projects'],
       summary: 'Upload project image to S3',

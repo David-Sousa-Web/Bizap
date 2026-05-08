@@ -1,12 +1,14 @@
 import type { FastifyInstance } from 'fastify'
+import { UserRole } from '@prisma/client'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { authJwt } from '../../../middlewares/auth-jwt.js'
+import { requireRole } from '../../../middlewares/require-role.js'
 import { projectIdParamSchema, deleteProjectResponseSchema } from '../schemas/project.schema.js'
 import { deleteProjectController } from '../controllers/delete-project.controller.js'
 
 export async function deleteProjectRoute(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().delete('/projects/:id', {
-    onRequest: [authJwt],
+    onRequest: [authJwt, requireRole(UserRole.ADMIN, UserRole.EDITOR)],
     schema: {
       tags: ['Projects'],
       summary: 'Delete a project',

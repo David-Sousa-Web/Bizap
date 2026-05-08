@@ -41,6 +41,7 @@ import { getUserRoute } from './modules/user/routes/get-user.route.js'
 import { updateUserRoute } from './modules/user/routes/update-user.route.js'
 import { deleteUserRoute } from './modules/user/routes/delete-user.route.js'
 import { updateOwnPasswordRoute } from './modules/user/routes/update-own-password.route.js'
+import { getDashboardRoute } from './modules/dashboard/routes/get-dashboard.route.js'
 
 export function buildApp() {
   const app = fastify({
@@ -168,6 +169,8 @@ export function buildApp() {
   app.register(
     async (v1App) => {
       v1App.register(loginRoute)
+
+      v1App.register(getDashboardRoute)
 
       v1App.register(createUserRoute)
       v1App.register(listUsersRoute)

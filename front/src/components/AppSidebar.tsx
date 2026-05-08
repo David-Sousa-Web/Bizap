@@ -1,11 +1,13 @@
-import { NavLink, useLocation } from "react-router-dom"
-import { useEffect } from "react"
+import { NavLink, useLocation, useNavigate } from "react-router-dom"
+import { useEffect, useMemo } from "react"
 import {
   ChevronsUpDown,
   FileText,
   FolderKanban,
   LayoutDashboard,
   LogOut,
+  UserCog,
+  Users,
 } from "lucide-react"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { useAuth } from "@/hooks/useAuth"
@@ -14,6 +16,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -30,21 +34,52 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { UserRoleBadge } from "@/features/users/components/UserRoleBadge"
+import type { UserRole } from "@/types/auth"
 
-const NAV_ITEMS = [
+interface NavItem {
+  label: string
+  path: string
+  icon: typeof LayoutDashboard
+  roles?: readonly UserRole[]
+}
+
+const NAV_ITEMS: readonly NavItem[] = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
   { label: "Projetos", path: "/projetos", icon: FolderKanban },
   { label: "Templates", path: "/templates", icon: FileText },
+  { label: "Usuários", path: "/usuarios", icon: Users, roles: ["ADMIN"] },
 ] as const
 
+function getInitials(name: string): string {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase() || "U"
+  )
+}
+
 export function AppSidebar() {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
+  const navigate = useNavigate()
   const { isMobile, setOpenMobile } = useSidebar()
   const { pathname } = useLocation()
 
   useEffect(() => {
     if (isMobile) setOpenMobile(false)
   }, [pathname, isMobile, setOpenMobile])
+
+  const visibleNavItems = useMemo(
+    () =>
+      NAV_ITEMS.filter(
+        (item) => !item.roles || (user && item.roles.includes(user.role)),
+      ),
+    [user],
+  )
 
   return (
     <Sidebar collapsible="icon">
@@ -73,7 +108,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
+              {visibleNavItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton asChild tooltip={item.label}>
                     <NavLink
@@ -104,10 +139,19 @@ export function AppSidebar() {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar size="sm">
-                    <AvatarFallback>U</AvatarFallback>
+                    <AvatarFallback>
+                      {user ? getInitials(user.name) : "U"}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Usuário</span>
+                    <span className="truncate font-semibold">
+                      {user?.name ?? "Usuário"}
+                    </span>
+                    {user && (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {user.email}
+                      </span>
+                    )}
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -116,9 +160,28 @@ export function AppSidebar() {
                 side={isMobile ? "bottom" : "right"}
                 align="end"
                 sideOffset={4}
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-lg"
               >
-                <DropdownMenuItem onClick={logout}>
+                {user && (
+                  <>
+                    <DropdownMenuLabel className="flex flex-col gap-2">
+                      <span className="text-sm font-semibold leading-none">
+                        {user.name}
+                      </span>
+                      <span className="text-xs font-normal text-muted-foreground break-all">
+                        {user.email}
+                      </span>
+                      <UserRoleBadge role={user.role} className="mt-1" />
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem onSelect={() => navigate("/perfil")}>
+                  <UserCog />
+                  Meu perfil
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={logout}>
                   <LogOut />
                   Sair
                 </DropdownMenuItem>

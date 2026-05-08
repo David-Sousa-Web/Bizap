@@ -7,11 +7,11 @@ import { MediaRequestStatusBadge } from "@/features/projects/components/numbers/
 
 interface NumberRowProps {
   item: ProjectNumber
-  onSendMedia: (item: ProjectNumber) => void
+  onSendMedia?: (item: ProjectNumber) => void
 }
 
 const NumberRow = memo(function NumberRow({ item, onSendMedia }: NumberRowProps) {
-  const handleClick = useCallback(() => onSendMedia(item), [item, onSendMedia])
+  const handleClick = useCallback(() => onSendMedia?.(item), [item, onSendMedia])
 
   return (
     <tr className="border-b last:border-0 hover:bg-muted/50 transition-colors">
@@ -21,16 +21,20 @@ const NumberRow = memo(function NumberRow({ item, onSendMedia }: NumberRowProps)
         <MediaRequestStatusBadge status={item.lastMediaRequestStatus} />
       </td>
       <td className="p-4 text-right">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleClick}
-          title="Enviar foto para este contato"
-          aria-label={`Enviar foto para ${item.name}`}
-        >
-          <ImagePlus className="size-4" />
-          <span className="hidden sm:inline">Enviar foto</span>
-        </Button>
+        {onSendMedia ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClick}
+            title="Enviar foto para este contato"
+            aria-label={`Enviar foto para ${item.name}`}
+          >
+            <ImagePlus className="size-4" />
+            <span className="hidden sm:inline">Enviar foto</span>
+          </Button>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
       </td>
     </tr>
   )
@@ -41,7 +45,7 @@ interface NumbersTableProps {
   page: number
   totalPages: number
   onPageChange: (page: number) => void
-  onSendMedia: (item: ProjectNumber) => void
+  onSendMedia?: (item: ProjectNumber) => void
 }
 
 export function NumbersTable({

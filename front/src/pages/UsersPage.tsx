@@ -1,15 +1,19 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  FolderKanban,
   Plus,
   RefreshCw,
   Search,
+  Users as UsersIcon,
 } from "lucide-react"
-import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Empty,
@@ -26,17 +30,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ProjectCard } from "@/features/projects/components/ProjectCard"
-import { ProjectCardSkeleton } from "@/features/projects/components/ProjectCardSkeleton"
-import { useProjects } from "@/features/projects/hooks/useProjects"
+import { useUsers } from "@/features/users/hooks/useUsers"
+import { UsersTable } from "@/features/users/components/UsersTable"
+import { UsersTableSkeleton } from "@/features/users/components/UsersTableSkeleton"
+import { UserFormDialog } from "@/features/users/components/UserFormDialog"
+import { DeleteUserDialog } from "@/features/users/components/DeleteUserDialog"
+import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { useDebounce } from "@/hooks/useDebounce"
-import { RoleGate } from "@/features/access/components/RoleGate"
+import type { User } from "@/features/users/types"
 
-export default function ProjectsPage() {
-  const navigate = useNavigate()
+type DialogState =
+  | { mode: "closed" }
+  | { mode: "create" }
+  | { mode: "edit"; user: User }
+
+export default function UsersPage() {
+  const currentUser = useCurrentUser()
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(12)
+  const [limit, setLimit] = useState(20)
+  const [dialog, setDialog] = useState<DialogState>({ mode: "closed" })
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
   const debouncedSearch = useDebounce(search)
 
@@ -45,13 +59,13 @@ export default function ProjectsPage() {
     isLoading,
     isError,
     refetch,
-  } = useProjects({
+  } = useUsers({
     page,
     limit,
     search: debouncedSearch || undefined,
   })
 
-  const projects = response?.data ?? []
+  const users = response?.data ?? []
   const meta = response?.meta
 
   function handleSearchChange(value: string) {
@@ -64,22 +78,30 @@ export default function ProjectsPage() {
     setPage(1)
   }
 
+  function handleCloseDialog() {
+    setDialog({ mode: "closed" })
+  }
+
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      handleCloseDialog()
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="w-full flex justify-between items-center gap-3">
-          <h1 className="text-2xl font-bold tracking-tight">Projetos</h1>
-          <RoleGate allow={["ADMIN", "EDITOR"]}>
-            <Button size="sm" onClick={() => navigate("/projetos/novo")}>
-              <Plus className="size-4" />
-              Novo Projeto
-            </Button>
-          </RoleGate>
+        <div className="flex w-full items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold tracking-tight">Usuários</h1>
+          <Button size="sm" onClick={() => setDialog({ mode: "create" })}>
+            <Plus className="size-4" />
+            Novo Usuário
+          </Button>
         </div>
         <div className="relative w-full sm:max-w-xs">
           <Search className="text-muted-foreground pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" />
           <Input
-            placeholder="Buscar projetos..."
+            placeholder="Buscar por nome ou e-mail..."
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-9"
@@ -87,18 +109,14 @@ export default function ProjectsPage() {
         </div>
       </div>
 
-      {isLoading && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <ProjectCardSkeleton />
-        </div>
-      )}
+      {isLoading && <UsersTableSkeleton />}
 
       {isError && (
         <Alert variant="destructive">
           <AlertCircle />
-          <AlertTitle>Erro ao carregar projetos</AlertTitle>
+          <AlertTitle>Erro ao carregar usuários</AlertTitle>
           <AlertDescription>
-            Não foi possível carregar a lista de projetos. Tente novamente mais
+            Não foi possível carregar a lista de usuários. Tente novamente mais
             tarde.
           </AlertDescription>
           <AlertAction>
@@ -110,35 +128,36 @@ export default function ProjectsPage() {
         </Alert>
       )}
 
-      {!isLoading && !isError && projects.length === 0 && (
+      {!isLoading && !isError && users.length === 0 && (
         <Empty className="border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <FolderKanban />
+              <UsersIcon />
             </EmptyMedia>
-            <EmptyTitle>Nenhum projeto encontrado</EmptyTitle>
+            <EmptyTitle>Nenhum usuário encontrado</EmptyTitle>
             <EmptyDescription>
               {debouncedSearch
-                ? "Nenhum projeto corresponde à sua busca."
-                : "Você ainda não possui projetos cadastrados."}
+                ? "Nenhum usuário corresponde à sua busca."
+                : "Cadastre o primeiro usuário para começar a colaborar."}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
       )}
 
-      {!isLoading && !isError && projects.length > 0 && (
+      {!isLoading && !isError && users.length > 0 && (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
+          <UsersTable
+            users={users}
+            currentUserEmail={currentUser.email}
+            onEdit={(user) => setDialog({ mode: "edit", user })}
+            onDelete={(user) => setUserToDelete(user)}
+          />
 
           {meta && (
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-muted-foreground text-sm">
                 Página {meta.page} de {meta.totalPages} ({meta.total}{" "}
-                {meta.total === 1 ? "projeto" : "projetos"})
+                {meta.total === 1 ? "usuário" : "usuários"})
               </p>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
@@ -153,10 +172,10 @@ export default function ProjectsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="6">6</SelectItem>
-                      <SelectItem value="12">12</SelectItem>
-                      <SelectItem value="24">24</SelectItem>
-                      <SelectItem value="48">48</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                      <SelectItem value="20">20</SelectItem>
+                      <SelectItem value="50">50</SelectItem>
+                      <SelectItem value="100">100</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -187,6 +206,27 @@ export default function ProjectsPage() {
           )}
         </>
       )}
+
+      {dialog.mode === "create" && (
+        <UserFormDialog
+          mode="create"
+          open
+          onOpenChange={handleOpenChange}
+        />
+      )}
+      {dialog.mode === "edit" && (
+        <UserFormDialog
+          mode="edit"
+          open
+          onOpenChange={handleOpenChange}
+          user={dialog.user}
+        />
+      )}
+
+      <DeleteUserDialog
+        user={userToDelete}
+        onClose={() => setUserToDelete(null)}
+      />
     </div>
   )
 }

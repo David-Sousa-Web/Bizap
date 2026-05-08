@@ -16,6 +16,8 @@ import type { Project } from "@/features/projects/types"
 import { useUpdateProject } from "@/features/projects/hooks/useUpdateProject"
 import { useUploadProjectImage } from "@/features/projects/hooks/useUploadProjectImage"
 import { editProjectSchema, type EditProjectFormData } from "@/features/projects/schemas/editProjectSchema"
+import { usePermissions } from "@/features/access/hooks/usePermissions"
+import { cn } from "@/lib/utils"
 
 interface BasicDataTabProps {
   project: Project
@@ -31,6 +33,7 @@ function getInitials(name: string): string {
 }
 
 export function BasicDataTab({ project }: BasicDataTabProps) {
+  const { canMutateProjects } = usePermissions()
   const [isEditing, setIsEditing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -95,7 +98,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
     <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
       <Card>
         <CardContent className="flex flex-col sm:flex-row items-start gap-6 p-6 relative">
-          {!isEditing && (
+          {!isEditing && canMutateProjects && (
             <Button
               variant="ghost"
               size="icon"
@@ -107,18 +110,28 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
             </Button>
           )}
 
-          {/* Avatar com Upload (Sempre clicável) */}
           <div
-            className="relative group cursor-pointer shrink-0"
-            onClick={() => fileInputRef.current?.click()}
-            title="Trocar imagem do projeto"
+            className={cn(
+              "relative group shrink-0",
+              canMutateProjects && "cursor-pointer",
+            )}
+            onClick={
+              canMutateProjects
+                ? () => fileInputRef.current?.click()
+                : undefined
+            }
+            title={
+              canMutateProjects
+                ? "Trocar imagem do projeto"
+                : "Imagem do projeto"
+            }
           >
             <Avatar className="size-24 rounded-2xl ring-2 ring-primary/20">
               {project.image ? (
-                <AvatarImage 
-                  src={`${project.image}${project.image.includes('?') ? '&' : '?'}v=${imageKey}`} 
-                  alt={project.name} 
-                  className="object-cover" 
+                <AvatarImage
+                  src={`${project.image}${project.image.includes('?') ? '&' : '?'}v=${imageKey}`}
+                  alt={project.name}
+                  className="object-cover"
                 />
               ) : null}
               <AvatarFallback className="text-3xl font-semibold rounded-2xl">
@@ -126,13 +139,15 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
               </AvatarFallback>
             </Avatar>
 
-            <div className="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              {uploadImage.isPending ? (
-                <Loader2 className="size-6 text-white animate-spin" />
-              ) : (
-                <Camera className="size-6 text-white" />
-              )}
-            </div>
+            {canMutateProjects && (
+              <div className="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                {uploadImage.isPending ? (
+                  <Loader2 className="size-6 text-white animate-spin" />
+                ) : (
+                  <Camera className="size-6 text-white" />
+                )}
+              </div>
+            )}
 
             <input
               type="file"
@@ -140,6 +155,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
               onChange={handleImageUpload}
               className="hidden"
               accept="image/*"
+              disabled={!canMutateProjects}
             />
           </div>
 

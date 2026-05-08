@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 
 import type { Project } from "@/features/projects/types"
+import { usePermissions } from "@/features/access/hooks/usePermissions"
 
 function getInitials(name: string): string {
   return name
@@ -39,6 +40,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const navigate = useNavigate()
+  const { canMutateProjects, canDeleteProjects } = usePermissions()
   const [imageStatus, setImageStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('loading')
 
   return (
@@ -107,22 +109,31 @@ export function ProjectCard({ project }: ProjectCardProps) {
               Informações
             </DropdownMenuItem>
 
-            <DropdownMenuSeparator />
+            {canMutateProjects && (
+              <>
+                <DropdownMenuSeparator />
 
-            <DropdownMenuItem
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => navigate(`/projetos/${project.id}?tab=template`)}
-            >
-              <LayoutTemplate className="mr-2 size-4" />
-              Editar Template
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => navigate(`/projetos/${project.id}?tab=mensagem`)}
-            >
-              <MessageSquare className="mr-2 size-4" />
-              Editar Mensagem
-            </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => e.stopPropagation()}
+                  onSelect={() =>
+                    navigate(`/projetos/${project.id}?tab=template`)
+                  }
+                >
+                  <LayoutTemplate className="mr-2 size-4" />
+                  Editar Template
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(e) => e.stopPropagation()}
+                  onSelect={() =>
+                    navigate(`/projetos/${project.id}?tab=mensagem`)
+                  }
+                >
+                  <MessageSquare className="mr-2 size-4" />
+                  Editar Mensagem
+                </DropdownMenuItem>
+              </>
+            )}
+
             <DropdownMenuItem
               onClick={(e) => e.stopPropagation()}
               onSelect={() => navigate(`/projetos/${project.id}?tab=numeros`)}
@@ -131,16 +142,22 @@ export function ProjectCard({ project }: ProjectCardProps) {
               Ver Números
             </DropdownMenuItem>
 
-            <DropdownMenuSeparator />
+            {canDeleteProjects && (
+              <>
+                <DropdownMenuSeparator />
 
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={(e) => e.stopPropagation()}
-              onSelect={() => navigate(`/projetos/${project.id}?tab=avancado`)}
-            >
-              <Trash2 className="mr-2 size-4" />
-              Excluir
-            </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={(e) => e.stopPropagation()}
+                  onSelect={() =>
+                    navigate(`/projetos/${project.id}?tab=avancado`)
+                  }
+                >
+                  <Trash2 className="mr-2 size-4" />
+                  Excluir
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

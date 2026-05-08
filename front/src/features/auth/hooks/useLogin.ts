@@ -14,8 +14,13 @@ export function useLogin() {
   return useMutation({
     mutationFn: (data: LoginFormData) => authService.login(data),
     onSuccess: (response) => {
-      if (response.data?.token) {
-        login(response.data.token)
+      const data = response.data
+      if (data?.token) {
+        login(data.token, {
+          name: data.name,
+          email: data.email,
+          role: data.role,
+        })
         navigate("/dashboard", { replace: true })
       }
     },

@@ -16,12 +16,14 @@ import { Button } from "@/components/ui/button"
 import { NumbersTable } from "@/features/projects/components/numbers/NumbersTable"
 import { AddNumberDialog } from "@/features/projects/components/numbers/AddNumberDialog"
 import { SendMediaDialog } from "@/features/projects/components/numbers/SendMediaDialog"
+import { usePermissions } from "@/features/access/hooks/usePermissions"
 
 interface NumbersTabProps {
   project: Project
 }
 
 export function NumbersTab({ project }: NumbersTabProps) {
+  const { canCreateNumbers, canSendMedia } = usePermissions()
   const [page, setPage] = useState(1)
   const limit = 10
 
@@ -90,10 +92,12 @@ export function NumbersTab({ project }: NumbersTabProps) {
               <RefreshCw className={cn("size-4", isFetching && "animate-spin")} />
               <span className="hidden sm:inline">Atualizar</span>
             </Button>
-            <Button size="sm" onClick={openAddDialog}>
-              <Plus className="size-4" />
-              Adicionar número
-            </Button>
+            {canCreateNumbers && (
+              <Button size="sm" onClick={openAddDialog}>
+                <Plus className="size-4" />
+                Adicionar número
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -113,10 +117,12 @@ export function NumbersTab({ project }: NumbersTabProps) {
               <p className="text-sm mt-1 mb-4 max-w-sm">
                 Ainda não há clientes ou colaboradores cadastrados para interagir neste projeto.
               </p>
-              <Button size="sm" onClick={openAddDialog}>
-                <Plus className="size-4" />
-                Adicionar primeiro número
-              </Button>
+              {canCreateNumbers && (
+                <Button size="sm" onClick={openAddDialog}>
+                  <Plus className="size-4" />
+                  Adicionar primeiro número
+                </Button>
+              )}
             </div>
           ) : (
             <NumbersTable
@@ -124,7 +130,7 @@ export function NumbersTab({ project }: NumbersTabProps) {
               page={page}
               totalPages={totalPages}
               onPageChange={setPage}
-              onSendMedia={handleSendMedia}
+              onSendMedia={canSendMedia ? handleSendMedia : undefined}
             />
           )}
         </CardContent>

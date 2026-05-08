@@ -12,11 +12,21 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/templates": "Templates",
   "/projetos": "Projetos",
+  "/projetos/novo": "Novo Projeto",
+  "/usuarios": "Usuários",
+  "/perfil": "Meu perfil",
+  "/sem-permissao": "Sem permissão",
+}
+
+function resolveTitle(pathname: string): string {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
+  if (pathname.startsWith("/projetos/")) return "Detalhes do Projeto"
+  return "Página"
 }
 
 export function AppHeader() {
   const { pathname } = useLocation()
-  const pageTitle = PAGE_TITLES[pathname] ?? "Página"
+  const pageTitle = resolveTitle(pathname)
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">

@@ -18,6 +18,7 @@ import { useDebounce } from "@/hooks/useDebounce"
 import type { Project } from "@/features/projects/types"
 import type { Template } from "@/features/templates/types"
 import { useUpdateProject } from "@/features/projects/hooks/useUpdateProject"
+import { usePermissions } from "@/features/access/hooks/usePermissions"
 
 interface TemplateTabProps {
   project: Project
@@ -25,6 +26,7 @@ interface TemplateTabProps {
 }
 
 export function TemplateTab({ project, templates }: TemplateTabProps) {
+  const { canMutateProjects } = usePermissions()
   const [isEditing, setIsEditing] = useState(false)
   const [tempSelectedSid, setTempSelectedSid] = useState<string>(project.templateSid)
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
@@ -78,14 +80,16 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
         <p className="text-sm mt-1 max-w-sm mb-6">
           O template configurado neste projeto (<strong>{project.templateSid}</strong>) não foi retornado pela API da Twilio.
         </p>
-        <Button onClick={() => setIsEditing(true)}>
-          <RefreshCw className="mr-2 size-4" /> Selecionar outro template
-        </Button>
+        {canMutateProjects && (
+          <Button onClick={() => setIsEditing(true)}>
+            <RefreshCw className="mr-2 size-4" /> Selecionar outro template
+          </Button>
+        )}
       </div>
     )
   }
 
-  if (isEditing) {
+  if (isEditing && canMutateProjects) {
     return (
       <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300 relative bg-card p-6 rounded-xl border">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
@@ -296,9 +300,11 @@ export function TemplateTab({ project, templates }: TemplateTabProps) {
               </div>
             </div>
 
-            <Button variant="outline" className="shrink-0" onClick={() => setIsEditing(true)}>
-              <RefreshCw className="mr-2 size-4" /> Trocar Template
-            </Button>
+            {canMutateProjects && (
+              <Button variant="outline" className="shrink-0" onClick={() => setIsEditing(true)}>
+                <RefreshCw className="mr-2 size-4" /> Trocar Template
+              </Button>
+            )}
           </div>
 
           <div className="space-y-6 mt-2 flex-grow">

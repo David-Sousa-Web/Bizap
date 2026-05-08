@@ -10,6 +10,7 @@ import { useUpdateFlowMessage } from "@/features/projects/hooks/useUpdateFlowMes
 
 import type { Project } from "@/features/projects/types"
 import type { Template } from "@/features/templates/types"
+import { usePermissions } from "@/features/access/hooks/usePermissions"
 
 interface FlowMessageTabProps {
   project: Project
@@ -17,6 +18,7 @@ interface FlowMessageTabProps {
 }
 
 export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
+  const { canMutateProjects } = usePermissions()
   const [isEditing, setIsEditing] = useState(false)
   const [tempMessage, setTempMessage] = useState(project.flowMessage)
 
@@ -82,7 +84,7 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Lado Esquerdo: Input de texto */}
         <div className="flex flex-col gap-5">
-          {isEditing ? (
+          {isEditing && canMutateProjects ? (
             <div className="flex flex-col gap-4 animate-in fade-in duration-300">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="flowMessage">
@@ -120,9 +122,11 @@ export function FlowMessageTab({ project, templates }: FlowMessageTabProps) {
                 <p className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                   Conteúdo Configurado
                 </p>
-                <Button variant="outline" size="sm" onClick={handleStartEdit}>
-                  <Pencil className="mr-2 size-3.5" /> Editar Texto
-                </Button>
+                {canMutateProjects && (
+                  <Button variant="outline" size="sm" onClick={handleStartEdit}>
+                    <Pencil className="mr-2 size-3.5" /> Editar Texto
+                  </Button>
+                )}
               </div>
               <div className="bg-input/30 border border-input rounded-xl p-5 min-h-[200px]">
                 <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-foreground">

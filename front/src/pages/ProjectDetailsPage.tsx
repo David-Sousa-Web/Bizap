@@ -10,12 +10,16 @@ import { FlowMessageTab } from "@/features/projects/components/tabs/FlowMessageT
 import { NumbersTab } from "@/features/projects/components/tabs/NumbersTab"
 import { AdvancedTab } from "@/features/projects/components/tabs/AdvancedTab"
 import { Skeleton } from "@/components/ui/skeleton"
+import { usePermissions } from "@/features/access/hooks/usePermissions"
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const activeTab = searchParams.get("tab") || "dados"
+  const { canMutateProjects } = usePermissions()
+  const requestedTab = searchParams.get("tab") || "dados"
+  const activeTab =
+    requestedTab === "avancado" && !canMutateProjects ? "dados" : requestedTab
 
   const { data: projectResponse, isLoading, isError } = useProject(id)
   const project = projectResponse?.data
@@ -70,9 +74,9 @@ export default function ProjectDetailsPage() {
         </div>
       </div>
 
-      <Tabs 
-        value={activeTab} 
-        onValueChange={(value) => setSearchParams({ tab: value })} 
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setSearchParams({ tab: value })}
         className="w-full"
       >
         <div className="flex items-center justify-between">
@@ -81,7 +85,9 @@ export default function ProjectDetailsPage() {
             <TabsTrigger value="template" className="py-2.5">Template</TabsTrigger>
             <TabsTrigger value="mensagem" className="py-2.5">Mensagem</TabsTrigger>
             <TabsTrigger value="numeros" className="py-2.5">Números</TabsTrigger>
-            <TabsTrigger value="avancado" className="py-2.5">Avançado</TabsTrigger>
+            {canMutateProjects && (
+              <TabsTrigger value="avancado" className="py-2.5">Avançado</TabsTrigger>
+            )}
           </TabsList>
         </div>
 
@@ -98,9 +104,11 @@ export default function ProjectDetailsPage() {
           <TabsContent value="numeros" className="m-0 border-0 p-0 focus-visible:ring-0">
             <NumbersTab project={project} />
           </TabsContent>
-          <TabsContent value="avancado" className="m-0 border-0 p-0 focus-visible:ring-0">
-            <AdvancedTab project={project} />
-          </TabsContent>
+          {canMutateProjects && (
+            <TabsContent value="avancado" className="m-0 border-0 p-0 focus-visible:ring-0">
+              <AdvancedTab project={project} />
+            </TabsContent>
+          )}
         </div>
       </Tabs>
     </div>

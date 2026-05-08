@@ -35,6 +35,12 @@ import { sendMediaRoute } from './modules/media/routes/send-media.route.js'
 import { twilioWebhookRoute } from './modules/webhook/routes/twilio-webhook.route.js'
 import { uploadProjectImageRoute } from './modules/project/routes/upload-project-image.route.js'
 import { getProjectImageRoute } from './modules/project/routes/get-project-image.route.js'
+import { createUserRoute } from './modules/user/routes/create-user.route.js'
+import { listUsersRoute } from './modules/user/routes/list-users.route.js'
+import { getUserRoute } from './modules/user/routes/get-user.route.js'
+import { updateUserRoute } from './modules/user/routes/update-user.route.js'
+import { deleteUserRoute } from './modules/user/routes/delete-user.route.js'
+import { updateOwnPasswordRoute } from './modules/user/routes/update-own-password.route.js'
 
 export function buildApp() {
   const app = fastify({
@@ -162,6 +168,13 @@ export function buildApp() {
   app.register(
     async (v1App) => {
       v1App.register(loginRoute)
+
+      v1App.register(createUserRoute)
+      v1App.register(listUsersRoute)
+      v1App.register(updateOwnPasswordRoute)
+      v1App.register(getUserRoute)
+      v1App.register(updateUserRoute)
+      v1App.register(deleteUserRoute)
 
       v1App.register(createProjectRoute)
       v1App.register(listProjectsRoute)

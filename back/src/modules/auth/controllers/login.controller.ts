@@ -24,6 +24,10 @@ export async function loginController(
   return reply.status(200).send({
     success: true,
     message: 'Login successful',
-    data: { token },
+    data: {
+      token,
+      email: user.email,
+      name: user.name,
+    },
   })
 }

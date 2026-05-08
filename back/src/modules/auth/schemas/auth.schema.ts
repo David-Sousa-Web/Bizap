@@ -10,6 +10,8 @@ export const loginResponseSchema = z.object({
   message: z.string(),
   data: z.object({
     token: z.string(),
+    email: z.string().email(),
+    name: z.string(),
   }),
 })
 

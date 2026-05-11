@@ -82,7 +82,6 @@ function buildDateWhere(from?: string, to?: string) {
 }
 
 export async function getDashboardService(
-  userId: string,
   query: DashboardQuery,
   observability: ObservabilityContext,
 ) {
@@ -102,10 +101,7 @@ export async function getDashboardService(
     throw new ApplicationError('Invalid date range', 400)
   }
 
-  const projectWhere = {
-    userId,
-    ...(query.projectId ? { id: query.projectId } : {}),
-  }
+  const projectWhere = query.projectId ? { id: query.projectId } : {}
 
   const projects = await prisma.project.findMany({
     where: projectWhere,

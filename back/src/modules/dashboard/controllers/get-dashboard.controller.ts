@@ -7,14 +7,12 @@ export async function getDashboardController(
   request: FastifyRequest<{ Querystring: DashboardQuery }>,
   reply: FastifyReply,
 ) {
-  const userId = (request.user as { sub: string }).sub
   const observability = createObservabilityContext(request, {
     module: 'dashboard',
     operation: 'get',
   })
 
   const dashboard = await getDashboardService(
-    userId,
     request.query,
     observability,
   )

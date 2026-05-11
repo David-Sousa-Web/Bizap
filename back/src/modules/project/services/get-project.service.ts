@@ -11,7 +11,6 @@ import { env } from '../../../env.js'
 
 export async function getProjectService(
   id: string,
-  userId: string,
   repository: ProjectRepository,
   observability: ObservabilityContext,
 ) {
@@ -22,16 +21,6 @@ export async function getProjectService(
   const project = await repository.findById(id)
 
   if (!project) {
-    setErrorContext(observability.wideEvent, {
-      type: 'ApplicationError',
-      code: 'project_not_found',
-      message: 'Project not found',
-    })
-
-    throw new ApplicationError('Project not found', 404)
-  }
-
-  if (project.userId !== userId) {
     setErrorContext(observability.wideEvent, {
       type: 'ApplicationError',
       code: 'project_not_found',

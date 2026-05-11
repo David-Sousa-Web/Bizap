@@ -8,7 +8,6 @@ export async function uploadProjectImageController(
   request: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply,
 ) {
-  const userId = (request.user as { sub: string }).sub
   const repository = new PrismaProjectRepository()
   const observability = createObservabilityContext(request, {
     module: 'project',
@@ -23,7 +22,6 @@ export async function uploadProjectImageController(
 
   const project = await uploadProjectImageService(
     request.params.id,
-    userId,
     file,
     repository,
     observability,

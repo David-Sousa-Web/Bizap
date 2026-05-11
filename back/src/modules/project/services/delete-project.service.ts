@@ -8,7 +8,6 @@ import type { ProjectRepository } from '../repositories/project-repository.js'
 
 export async function deleteProjectService(
   id: string,
-  userId: string,
   repository: ProjectRepository,
   observability: ObservabilityContext,
 ) {
@@ -19,16 +18,6 @@ export async function deleteProjectService(
   const project = await repository.findById(id)
 
   if (!project) {
-    setErrorContext(observability.wideEvent, {
-      type: 'ApplicationError',
-      code: 'project_not_found',
-      message: 'Project not found',
-    })
-
-    throw new ApplicationError('Project not found', 404)
-  }
-
-  if (project.userId !== userId) {
     setErrorContext(observability.wideEvent, {
       type: 'ApplicationError',
       code: 'project_not_found',

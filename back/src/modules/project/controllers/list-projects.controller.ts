@@ -8,7 +8,6 @@ export async function listProjectsController(
   request: FastifyRequest<{ Querystring: PaginationQuery }>,
   reply: FastifyReply,
 ) {
-  const userId = (request.user as { sub: string }).sub
   const { page, limit, search } = request.query
   const repository = new PrismaProjectRepository()
   const observability = createObservabilityContext(request, {
@@ -17,7 +16,6 @@ export async function listProjectsController(
   })
 
   const result = await listProjectsService(
-    userId,
     page,
     limit,
     search,

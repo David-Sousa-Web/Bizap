@@ -4,14 +4,13 @@ import { transformImageUrl } from '../utils/transform-image-url.js'
 import { env } from '../../../env.js'
 
 export async function listProjectsService(
-  userId: string,
   page: number,
   limit: number,
   search: string | undefined,
   repository: ProjectRepository,
   _observability: ObservabilityContext,
 ) {
-  const result = await repository.findAllByUserId(userId, page, limit, search)
+  const result = await repository.findAll(page, limit, search)
 
   return {
     items: result.items.map((project) => ({

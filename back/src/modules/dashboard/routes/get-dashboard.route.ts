@@ -11,7 +11,7 @@ export async function getDashboardRoute(app: FastifyInstance) {
     onRequest: [authJwt, requireRole(UserRole.ADMIN, UserRole.EDITOR, UserRole.USER)],
     schema: {
       tags: ['Dashboard'],
-      summary: 'Get dashboard metrics for the authenticated user',
+      summary: 'Get dashboard metrics for the platform',
       security: [{ bearerAuth: [] }],
       querystring: dashboardQuerySchema,
       response: { 200: dashboardResponseSchema },

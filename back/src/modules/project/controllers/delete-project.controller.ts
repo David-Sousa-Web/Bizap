@@ -7,14 +7,13 @@ export async function deleteProjectController(
   request: FastifyRequest<{ Params: { id: string } }>,
   reply: FastifyReply,
 ) {
-  const userId = (request.user as { sub: string }).sub
   const repository = new PrismaProjectRepository()
   const observability = createObservabilityContext(request, {
     module: 'project',
     operation: 'delete',
   })
 
-  await deleteProjectService(request.params.id, userId, repository, observability)
+  await deleteProjectService(request.params.id, repository, observability)
 
   return reply.status(200).send({
     success: true,

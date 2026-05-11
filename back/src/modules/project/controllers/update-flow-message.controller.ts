@@ -8,7 +8,6 @@ export async function updateFlowMessageController(
   request: FastifyRequest<{ Params: { projectId: string }; Body: UpdateFlowMessageBody }>,
   reply: FastifyReply,
 ) {
-  const userId = (request.user as { sub: string }).sub
   const repository = new PrismaProjectRepository()
   const observability = createObservabilityContext(request, {
     module: 'project',
@@ -17,7 +16,6 @@ export async function updateFlowMessageController(
 
   const project = await updateFlowMessageService(
     request.params.projectId,
-    userId,
     request.body.flowMessage,
     repository,
     observability,

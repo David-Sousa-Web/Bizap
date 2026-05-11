@@ -30,7 +30,6 @@ function mapDecryptedNumber(number: Awaited<ReturnType<NumberRepository['findMan
 
 export async function listNumbersService(
   projectId: string,
-  userId: string,
   page: number,
   limit: number,
   search: string | undefined,
@@ -45,7 +44,7 @@ export async function listNumbersService(
     where: { id: projectId },
   })
 
-  if (!project || project.userId !== userId) {
+  if (!project) {
     setErrorContext(observability.wideEvent, {
       type: 'ApplicationError',
       code: 'project_not_found',

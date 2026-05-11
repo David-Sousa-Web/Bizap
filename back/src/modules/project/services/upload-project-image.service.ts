@@ -16,7 +16,6 @@ import { transformImageUrl } from '../utils/transform-image-url.js'
 
 export async function uploadProjectImageService(
   projectId: string,
-  userId: string,
   file: MultipartFile,
   repository: ProjectRepository,
   observability: ObservabilityContext,
@@ -28,16 +27,6 @@ export async function uploadProjectImageService(
   const project = await repository.findById(projectId)
 
   if (!project) {
-    setErrorContext(observability.wideEvent, {
-      type: 'ApplicationError',
-      code: 'project_not_found',
-      message: 'Project not found',
-    })
-
-    throw new ApplicationError('Project not found', 404)
-  }
-
-  if (project.userId !== userId) {
     setErrorContext(observability.wideEvent, {
       type: 'ApplicationError',
       code: 'project_not_found',

@@ -12,7 +12,7 @@ export async function listProjectsRoute(app: FastifyInstance) {
     onRequest: [authJwt, requireRole(UserRole.ADMIN, UserRole.EDITOR, UserRole.USER)],
     schema: {
       tags: ['Projects'],
-      summary: 'List all projects for the authenticated user',
+      summary: 'List all projects in the platform',
       security: [{ bearerAuth: [] }],
       querystring: paginationQuerySchema,
       response: { 200: listProjectsResponseSchema },

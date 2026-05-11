@@ -14,9 +14,8 @@ export class PrismaProjectRepository implements ProjectRepository {
     return prisma.project.findUnique({ where: { id } })
   }
 
-  async findAllByUserId(userId: string, page: number, limit: number, search?: string): Promise<PaginatedResult<Project>> {
+  async findAll(page: number, limit: number, search?: string): Promise<PaginatedResult<Project>> {
     const where = {
-      userId,
       ...(search && {
         name: { contains: search },
       }),

@@ -120,7 +120,7 @@ export default function ProjectsPage() {
             <EmptyDescription>
               {debouncedSearch
                 ? "Nenhum projeto corresponde à sua busca."
-                : "Você ainda não possui projetos cadastrados."}
+                : "Nenhum projeto foi cadastrado na plataforma."}
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

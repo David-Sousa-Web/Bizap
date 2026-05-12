@@ -1,11 +1,42 @@
 import { z } from 'zod'
 
+const BRAZIL_COUNTRY_CODE = '55'
+const PHONE_ERROR_MESSAGE =
+  'Number must be in format +55DDDNXXXXXXXX, 55DDDNXXXXXXXX or DDDNXXXXXXXX'
+
+function normalizeBrazilPhoneNumber(value: string, ctx: z.RefinementCtx) {
+  if (value.startsWith('+') && !value.startsWith(`+${BRAZIL_COUNTRY_CODE}`)) {
+    ctx.addIssue({
+      code: 'custom',
+      message: PHONE_ERROR_MESSAGE,
+    })
+
+    return z.NEVER
+  }
+
+  const digits = value.replace(/\D/g, '')
+  const nationalNumber = digits.startsWith(BRAZIL_COUNTRY_CODE)
+    ? digits.slice(BRAZIL_COUNTRY_CODE.length)
+    : digits
+
+  if (!/^\d{11}$/.test(nationalNumber)) {
+    ctx.addIssue({
+      code: 'custom',
+      message: PHONE_ERROR_MESSAGE,
+    })
+
+    return z.NEVER
+  }
+
+  return `+${BRAZIL_COUNTRY_CODE}${nationalNumber}`
+}
+
 export const createNumberBodySchema = z.object({
   name: z.string().trim().min(1),
   number: z
     .string()
     .trim()
-    .regex(/^55\d{11}$/, 'Number must be in format 55xxxxxxxxxxx'),
+    .transform((value, ctx) => normalizeBrazilPhoneNumber(value, ctx)),
 })
 
 export const numberProjectIdParamSchema = z.object({

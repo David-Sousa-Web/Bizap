@@ -1,3 +1,7 @@
+# ============================================================================
+# SPA Fallback — todas as rotas que não correspondem a arquivos existentes
+# caem no index.html para o React Router resolver.
+# ============================================================================
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
@@ -6,4 +10,42 @@
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME} !-l
   RewriteRule . /index.html [L]
+</IfModule>
+
+# ============================================================================
+# Cache Control
+#
+# - index.html NUNCA pode ser cacheado: ele referencia os hashes dos chunks
+#   atuais e precisa ser sempre o mais recente após cada deploy. Caso contrário,
+#   o navegador continuaria pedindo chunks antigos (já removidos do servidor)
+#   e geraria o erro "Failed to fetch dynamically imported module".
+# - Os arquivos de /assets (js, css, fonts, imagens) já têm hash no nome
+#   gerado pelo Vite, portanto podem ser cacheados "para sempre" com segurança.
+# ============================================================================
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  <FilesMatch "\.(js|mjs|css|woff|woff2|ttf|otf|eot|png|jpg|jpeg|gif|svg|webp|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  ExpiresByType text/html "access plus 0 seconds"
+
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
 </IfModule>

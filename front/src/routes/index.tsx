@@ -1,24 +1,30 @@
 import { createBrowserRouter, Navigate } from "react-router-dom"
-import { lazy } from "react"
 import { ProtectedRoute } from "@/routes/ProtectedRoute"
 import { AppLayout } from "@/components/AppLayout"
 import { SuspenseWrapper } from "@/components/SuspenseWrapper"
+import { RouteErrorBoundary } from "@/components/RouteErrorBoundary"
 import { RoleProtectedRoute } from "@/features/access/components/RoleProtectedRoute"
+import { lazyWithRetry } from "@/lib/lazyWithRetry"
 
-const HomePage = lazy(() => import("@/pages/HomePage"))
-const LoginPage = lazy(() => import("@/pages/LoginPage"))
-const DashboardPage = lazy(() => import("@/pages/DashboardPage"))
-const TemplatesPage = lazy(() => import("@/pages/TemplatesPage"))
-const ProjectsPage = lazy(() => import("@/pages/ProjectsPage"))
-const CreateProjectPage = lazy(() => import("@/pages/CreateProjectPage"))
-const ProjectDetailsPage = lazy(() => import("@/pages/ProjectDetailsPage"))
-const UsersPage = lazy(() => import("@/pages/UsersPage"))
-const ProfilePage = lazy(() => import("@/pages/ProfilePage"))
-const ForbiddenPage = lazy(() => import("@/pages/ForbiddenPage"))
+const HomePage = lazyWithRetry(() => import("@/pages/HomePage"))
+const LoginPage = lazyWithRetry(() => import("@/pages/LoginPage"))
+const DashboardPage = lazyWithRetry(() => import("@/pages/DashboardPage"))
+const TemplatesPage = lazyWithRetry(() => import("@/pages/TemplatesPage"))
+const ProjectsPage = lazyWithRetry(() => import("@/pages/ProjectsPage"))
+const CreateProjectPage = lazyWithRetry(
+  () => import("@/pages/CreateProjectPage"),
+)
+const ProjectDetailsPage = lazyWithRetry(
+  () => import("@/pages/ProjectDetailsPage"),
+)
+const UsersPage = lazyWithRetry(() => import("@/pages/UsersPage"))
+const ProfilePage = lazyWithRetry(() => import("@/pages/ProfilePage"))
+const ForbiddenPage = lazyWithRetry(() => import("@/pages/ForbiddenPage"))
 
 export const router = createBrowserRouter([
   {
     path: "/",
+    errorElement: <RouteErrorBoundary />,
     element: (
       <SuspenseWrapper>
         <HomePage />
@@ -27,6 +33,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/login",
+    errorElement: <RouteErrorBoundary />,
     element: (
       <SuspenseWrapper>
         <LoginPage />
@@ -35,9 +42,11 @@ export const router = createBrowserRouter([
   },
   {
     element: <ProtectedRoute />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         element: <AppLayout />,
+        errorElement: <RouteErrorBoundary />,
         children: [
           {
             path: "/dashboard",

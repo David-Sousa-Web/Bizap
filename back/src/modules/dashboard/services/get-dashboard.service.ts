@@ -1,6 +1,7 @@
 import type { MediaRequestStatus, ZabbixMetricEventType } from '@prisma/client'
 import { prisma } from '../../../lib/prisma.js'
 import { env } from '../../../env.js'
+import { encryptionService } from '../../../lib/encryption.js'
 import type { ObservabilityContext } from '../../../lib/wide-event.js'
 import { setErrorContext, setProjectContext } from '../../../lib/wide-event.js'
 import { ApplicationError } from '../../../utils/errors.js'
@@ -79,6 +80,23 @@ function buildDateWhere(from?: string, to?: string) {
   }
 
   return Object.keys(createdAt).length > 0 ? { createdAt } : {}
+}
+
+function normalizeNumberKey(number: string) {
+  const trimmedNumber = number.trim()
+  const digits = trimmedNumber.replace(/\D/g, '')
+
+  if (digits.length === 0) {
+    return trimmedNumber
+  }
+
+  if (trimmedNumber.startsWith('+') && !digits.startsWith('55')) {
+    return `+${digits}`
+  }
+
+  const nationalNumber = digits.startsWith('55') ? digits.slice(2) : digits
+
+  return `55${nationalNumber}`
 }
 
 export async function getDashboardService(
@@ -166,19 +184,19 @@ export async function getDashboardService(
   const eventWhere = { ...projectFilter, ...dateWhere }
 
   const [
-    totalNumbers,
-    numberCountsByProject,
+    numbers,
     mediaStatusCounts,
     eventCounts,
     mediaStatusCountsByProject,
     eventCountsByProject,
     recentMediaRequests,
   ] = await Promise.all([
-    prisma.number.count({ where: projectFilter }),
-    prisma.number.groupBy({
-      by: ['projectId'],
+    prisma.number.findMany({
       where: projectFilter,
-      _count: { _all: true },
+      select: {
+        projectId: true,
+        number: true,
+      },
     }),
     prisma.mediaRequest.groupBy({
       by: ['status'],
@@ -230,8 +248,24 @@ export async function getDashboardService(
     replyMetrics[EVENT_FIELDS[item.type]] = item._count._all
   }
 
+  const uniqueNumbers = new Set<string>()
+  const uniqueNumbersByProjectId = new Map<string, Set<string>>()
+
+  for (const number of numbers) {
+    const numberKey = normalizeNumberKey(encryptionService.decrypt(number.number))
+    uniqueNumbers.add(`${number.projectId}:${numberKey}`)
+
+    const projectNumbers = uniqueNumbersByProjectId.get(number.projectId) ?? new Set<string>()
+    projectNumbers.add(numberKey)
+    uniqueNumbersByProjectId.set(number.projectId, projectNumbers)
+  }
+
+  const totalNumbers = uniqueNumbers.size
   const numberCountByProjectId = new Map(
-    numberCountsByProject.map((item) => [item.projectId, item._count._all]),
+    Array.from(uniqueNumbersByProjectId.entries()).map(([projectId, projectNumbers]) => [
+      projectId,
+      projectNumbers.size,
+    ]),
   )
   const mediaCountsByProjectId = new Map<string, MediaStatusCounts>()
   const eventCountsByProjectId = new Map<string, ReplyMetrics>()

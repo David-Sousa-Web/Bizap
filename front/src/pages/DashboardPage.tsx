@@ -144,6 +144,7 @@ export default function DashboardPage() {
             />
             <ReplyMetricsChart
               replyMetrics={dashboard?.replyMetrics}
+              totalMediaRequests={dashboard?.summary.totalMediaRequests}
               isLoading={isLoading}
             />
           </div>

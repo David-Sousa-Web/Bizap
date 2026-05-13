@@ -52,7 +52,7 @@ export function KpiGrid({ summary, isLoading = false }: KpiGridProps) {
         value={summary ? formatPercent(summary.confirmationRate) : "0%"}
         icon={ThumbsUp}
         tone="success"
-        hint="Sim ÷ Templates enviados"
+        hint="Confirmados ÷ Solicitações"
         isLoading={isLoading}
       />
       <KpiCard
@@ -60,7 +60,7 @@ export function KpiGrid({ summary, isLoading = false }: KpiGridProps) {
         value={summary ? formatPercent(summary.deliveryRate) : "0%"}
         icon={TrendingUp}
         tone="success"
-        hint="Mídias ÷ Templates enviados"
+        hint="Mídias entregues ÷ Solicitações"
         isLoading={isLoading}
       />
     </div>

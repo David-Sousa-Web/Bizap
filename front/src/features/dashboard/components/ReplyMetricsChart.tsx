@@ -19,6 +19,7 @@ import {
 
 interface ReplyMetricsChartProps {
   replyMetrics?: DashboardReplyMetrics
+  totalMediaRequests?: number
   isLoading?: boolean
 }
 
@@ -76,16 +77,17 @@ const METRICS: MetricRow[] = [
 
 export function ReplyMetricsChart({
   replyMetrics,
+  totalMediaRequests,
   isLoading = false,
 }: ReplyMetricsChartProps) {
-  const baseline = replyMetrics?.templateSent ?? 0
+  const baseline = totalMediaRequests ?? 0
 
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle>Métricas de resposta</CardTitle>
         <CardDescription>
-          Comparativo proporcional ao total de templates enviados.
+          Comparativo proporcional ao total de mídias solicitadas.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">

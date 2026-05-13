@@ -298,8 +298,8 @@ export async function getDashboardService(
       deliveredMedia: projectMediaStatus.MEDIA_SENT,
       failed: projectMediaStatus.FAILED,
       confirmationRate: calculateRate(
-        projectReplyMetrics.yesReply,
-        projectReplyMetrics.templateSent,
+        projectMediaStatus.CONFIRMED + projectMediaStatus.MEDIA_SENT,
+        totalMediaRequests,
       ),
     }
   })
@@ -319,7 +319,10 @@ export async function getDashboardService(
       totalMediaRequests,
       totalDeliveredMedia: mediaStatus.MEDIA_SENT,
       totalFailed: mediaStatus.FAILED,
-      confirmationRate: calculateRate(replyMetrics.yesReply, replyMetrics.templateSent),
+      confirmationRate: calculateRate(
+        mediaStatus.CONFIRMED + mediaStatus.MEDIA_SENT,
+        totalMediaRequests,
+      ),
       deliveryRate: calculateRate(mediaStatus.MEDIA_SENT, totalMediaRequests),
     },
     mediaStatus,

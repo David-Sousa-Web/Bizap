@@ -320,7 +320,7 @@ export async function getDashboardService(
       totalDeliveredMedia: mediaStatus.MEDIA_SENT,
       totalFailed: mediaStatus.FAILED,
       confirmationRate: calculateRate(replyMetrics.yesReply, replyMetrics.templateSent),
-      deliveryRate: calculateRate(replyMetrics.mediaSent, replyMetrics.templateSent),
+      deliveryRate: calculateRate(mediaStatus.MEDIA_SENT, totalMediaRequests),
     },
     mediaStatus,
     replyMetrics,

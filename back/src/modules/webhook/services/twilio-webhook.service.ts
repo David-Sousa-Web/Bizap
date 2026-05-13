@@ -80,6 +80,8 @@ export async function twilioWebhookService(
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
 
+  let replyEventRecorded = false
+
   for (const mediaRequestWithNumber of mediaRequestsWithNumber) {
     const { number, ...mediaRequest } = mediaRequestWithNumber
     const decryptedNumberName = encryptionService.decrypt(number.name)
@@ -192,11 +194,13 @@ export async function twilioWebhookService(
 
     if (isValidMediaConfirmationReply(normalizedBody)) {
       await repository.updateStatus(mediaRequest.id, 'CONFIRMED')
-      await recordZabbixMetricEvent({
-        type: 'YES_REPLY',
-        projectId: project.id,
-        mediaRequestId: mediaRequest.id,
-      })
+      if (!replyEventRecorded) {
+        await recordZabbixMetricEvent({
+          type: 'YES_REPLY',
+          projectId: project.id,
+        })
+        replyEventRecorded = true
+      }
 
       setWebhookContext(observability.wideEvent, {
         replyCategory: 'confirm',
@@ -258,11 +262,13 @@ export async function twilioWebhookService(
     }
 
     if (isDeclineMediaConfirmationReply(normalizedBody)) {
-      await recordZabbixMetricEvent({
-        type: 'NO_REPLY',
-        projectId: project.id,
-        mediaRequestId: mediaRequest.id,
-      })
+      if (!replyEventRecorded) {
+        await recordZabbixMetricEvent({
+          type: 'NO_REPLY',
+          projectId: project.id,
+        })
+        replyEventRecorded = true
+      }
 
       setWebhookContext(observability.wideEvent, {
         replyCategory: 'decline',
@@ -327,11 +333,13 @@ export async function twilioWebhookService(
       mediaRequest.id,
       shouldClose ? 'INVALID_RESPONSE_LIMIT' : undefined,
     )
-    await recordZabbixMetricEvent({
-      type: 'INVALID_REPLY',
-      projectId: project.id,
-      mediaRequestId: mediaRequest.id,
-    })
+    if (!replyEventRecorded) {
+      await recordZabbixMetricEvent({
+        type: 'INVALID_REPLY',
+        projectId: project.id,
+      })
+      replyEventRecorded = true
+    }
 
     setWebhookContext(observability.wideEvent, {
       replyCategory: 'unknown',

@@ -21,6 +21,7 @@ const envSchema = z.object({
   ZABBIX_SERVER_PORT: z.coerce.number().int().positive().default(10051),
   METRICS_TEMP_FILE: z.string().default(process.platform === 'win32' ? 'C:\\temp\\zabbix_bizap_metrics.txt' : '/tmp/zabbix_bizap_metrics.txt'),
   ZABBIX_METRICS_CRON: z.string().default('* * * * *'),
+  TEMPLATE_RETRY_ENABLED: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
   TEMPLATE_RETRY_CRON: z.string().default('0 9 * * *'),
 })
 

@@ -1,16 +1,14 @@
 import { prisma } from '../../../lib/prisma.js'
 import { encryptionService } from '../../../lib/encryption.js'
+import { buildPhoneNumberLookupVariants } from '../../../lib/phone-number.js'
 import type { MediaRequest, MediaRequestStatus } from '@prisma/client'
 import type { MediaRepository } from './media-repository.js'
 
 export class PrismaMediaRepository implements MediaRepository {
   async findActiveByPhoneNumber(phoneNumber: string): Promise<MediaRequest[]> {
-    const phoneWithPlus = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`
-    const phoneWithoutPlus = phoneNumber.replace('+', '')
-    const phoneFilter = [
-      { number: encryptionService.encrypt(phoneWithPlus) },
-      { number: encryptionService.encrypt(phoneWithoutPlus) },
-    ]
+    const phoneFilter = buildPhoneNumberLookupVariants(phoneNumber).map((lookupPhoneNumber) => ({
+      number: encryptionService.encrypt(lookupPhoneNumber),
+    }))
 
     return prisma.mediaRequest.findMany({
       where: {

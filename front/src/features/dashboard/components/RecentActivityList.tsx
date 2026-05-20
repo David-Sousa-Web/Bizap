@@ -20,7 +20,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { cn } from "@/lib/utils"
-import { mediaRequestStatusMap } from "@/features/projects/utils/mediaRequestStatus"
+import { getMediaRequestStatusDisplay } from "@/features/projects/utils/mediaRequestStatus"
 import type { DashboardActivityItem } from "@/features/dashboard/types"
 
 interface RecentActivityListProps {
@@ -74,7 +74,7 @@ export function RecentActivityList({
           <ScrollArea className="h-[480px]">
             <ul className="flex flex-col">
               {list.map((item) => {
-                const display = mediaRequestStatusMap[item.status]
+                const display = getMediaRequestStatusDisplay(item.status)
                 const Icon = display.icon
                 const updatedAt = new Date(item.updatedAt)
 

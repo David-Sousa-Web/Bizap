@@ -62,6 +62,18 @@ export const mediaRequestStatusMap: Record<MediaRequestStatus, MediaStatusDispla
     icon: AlertTriangle,
     tone: "border-destructive/30 bg-destructive/10 text-destructive",
   },
+  TEMPLATE_SEND_FAILED: {
+    label: "Falha no template",
+    description: "Não foi possível enviar o template do WhatsApp.",
+    icon: AlertTriangle,
+    tone: "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-400",
+  },
+  MEDIA_SEND_FAILED: {
+    label: "Falha no envio da mídia",
+    description: "Não foi possível enviar a mídia confirmada ao cliente.",
+    icon: AlertTriangle,
+    tone: "border-red-600/30 bg-red-600/10 text-red-700 dark:text-red-400",
+  },
   FAILED: {
     label: "Falhou",
     description: "Falha ao disparar o template ou processar a mídia.",
@@ -77,8 +89,16 @@ export const EMPTY_STATUS_DISPLAY: MediaStatusDisplay = {
   tone: "border-border text-muted-foreground bg-muted/40",
 }
 
+const UNKNOWN_STATUS_DISPLAY: MediaStatusDisplay = {
+  label: "Status desconhecido",
+  description: "Status não reconhecido pela interface. Atualize o sistema.",
+  icon: AlertTriangle,
+  tone: "border-muted-foreground/30 bg-muted text-muted-foreground",
+}
+
 export function getMediaRequestStatusDisplay(
   status: MediaRequestStatus | null,
 ): MediaStatusDisplay {
-  return status ? mediaRequestStatusMap[status] : EMPTY_STATUS_DISPLAY
+  if (!status) return EMPTY_STATUS_DISPLAY
+  return mediaRequestStatusMap[status] ?? UNKNOWN_STATUS_DISPLAY
 }

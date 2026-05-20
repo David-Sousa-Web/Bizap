@@ -27,6 +27,8 @@ export type MediaRequestStatus =
   | "MEDIA_SENT"
   | "DECLINED"
   | "INVALID_RESPONSE_LIMIT"
+  | "TEMPLATE_SEND_FAILED"
+  | "MEDIA_SEND_FAILED"
   | "FAILED"
 
 export interface ProjectNumber {

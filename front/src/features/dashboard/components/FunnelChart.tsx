@@ -27,6 +27,8 @@ const STATUS_ORDER: MediaRequestStatus[] = [
   "MEDIA_SENT",
   "DECLINED",
   "INVALID_RESPONSE_LIMIT",
+  "TEMPLATE_SEND_FAILED",
+  "MEDIA_SEND_FAILED",
   "FAILED",
 ]
 
@@ -38,6 +40,8 @@ const STATUS_COLORS: Record<MediaRequestStatus, string> = {
   MEDIA_SENT: "#059669",
   DECLINED: "#71717a",
   INVALID_RESPONSE_LIMIT: "#ef4444",
+  TEMPLATE_SEND_FAILED: "#f43f5e",
+  MEDIA_SEND_FAILED: "#dc2626",
   FAILED: "#ef4444",
 }
 

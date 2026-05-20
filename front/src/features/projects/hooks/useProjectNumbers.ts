@@ -10,12 +10,13 @@ export function useProjectNumbers({
   projectId,
   page,
   limit,
+  search,
 }: UseProjectNumbersOptions) {
   return useQuery({
-    queryKey: ["project-numbers", projectId, page, limit],
+    queryKey: ["project-numbers", projectId, page, limit, search],
     queryFn: () => {
       if (!projectId) throw new Error("Project ID is required")
-      return numberService.listByProject(projectId, { page, limit })
+      return numberService.listByProject(projectId, { page, limit, search })
     },
     enabled: !!projectId,
     refetchInterval: 5000,

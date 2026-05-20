@@ -7,6 +7,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import type { ProjectNumber } from "@/features/projects/types"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { MediaRequestStatusBadge } from "@/features/projects/components/numbers/MediaRequestStatusBadge"
 import { MediaRequestImage } from "@/features/projects/components/numbers/MediaRequestImage"
 import {
@@ -88,6 +95,22 @@ const NumberRow = memo(function NumberRow({
           <span>—</span>
         )}
       </td>
+      <td className="p-4 hidden md:table-cell text-muted-foreground text-xs">
+        {item.createdAt ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-help">
+                {formatRelativeDate(item.createdAt)}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              {formatDateBR(item.createdAt)}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <span>—</span>
+        )}
+      </td>
       <td className="p-4 text-right">
         <NumberRowActionsMenu
           number={item}
@@ -106,7 +129,9 @@ interface NumbersTableProps {
   projectId: string
   page: number
   totalPages: number
+  limit?: number
   onPageChange: (page: number) => void
+  onLimitChange?: (limit: number) => void
   onSendMedia?: (item: ProjectNumber) => void
   onResendTemplate?: (item: ProjectNumber) => void
   onResendMedia?: (item: ProjectNumber) => void
@@ -118,7 +143,9 @@ export function NumbersTable({
   projectId,
   page,
   totalPages,
+  limit = 10,
   onPageChange,
+  onLimitChange,
   onSendMedia,
   onResendTemplate,
   onResendMedia,
@@ -141,6 +168,9 @@ export function NumbersTable({
               <th className="h-10 px-4 text-left font-medium text-muted-foreground hidden md:table-cell min-w-36">
                 Atualizado
               </th>
+              <th className="h-10 px-4 text-left font-medium text-muted-foreground hidden md:table-cell min-w-36">
+                Criado em
+              </th>
               <th className="h-10 px-4 text-right font-medium text-muted-foreground">Ações</th>
             </tr>
           </thead>
@@ -160,11 +190,33 @@ export function NumbersTable({
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-border/50 pt-4 px-1">
-          <div className="text-sm text-muted-foreground">
-            Página <span className="font-medium">{page}</span> de{" "}
-            <span className="font-medium">{totalPages}</span>
+      {totalPages > 1 || (onLimitChange && numbers.length > 0) ? (
+        <div className="flex items-center justify-between border-t border-border/50 pt-4 px-1 flex-wrap gap-4">
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-muted-foreground">
+              Página <span className="font-medium">{page}</span> de{" "}
+              <span className="font-medium">{totalPages}</span>
+            </div>
+            
+            {onLimitChange && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Por página:</span>
+                <Select
+                  value={limit.toString()}
+                  onValueChange={(val) => onLimitChange(Number(val))}
+                >
+                  <SelectTrigger className="h-8 w-[70px]">
+                    <SelectValue placeholder={limit.toString()} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -185,7 +237,7 @@ export function NumbersTable({
             </Button>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

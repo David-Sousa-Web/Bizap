@@ -163,12 +163,19 @@ export async function sendMediaService(
 
   const twilioStartedAt = Date.now()
   try {
-    await twilioClient.messages.create({
+    const message = await twilioClient.messages.create({
       from: `whatsapp:${project.phoneNumber}`,
       to: `whatsapp:${decryptedNumber}`,
       contentSid: project.templateSid,
+      statusCallback: `${env.API_BASE_URL}/v1/webhook/twilio/status`,
     })
 
+    await repository.updateTemplateTracking(mediaRequest.id, {
+      twilioTemplateMessageSid: message.sid,
+      twilioTemplateMessageStatus: message.status ?? null,
+      twilioTemplateErrorCode: null,
+      twilioTemplateErrorMessage: null,
+    })
     await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
     await recordZabbixMetricEvent({
       type: 'TEMPLATE_SENT',

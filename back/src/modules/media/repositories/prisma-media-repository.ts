@@ -2,7 +2,7 @@ import { prisma } from '../../../lib/prisma.js'
 import { encryptionService } from '../../../lib/encryption.js'
 import { buildPhoneNumberLookupVariants } from '../../../lib/phone-number.js'
 import type { MediaRequest, MediaRequestStatus } from '@prisma/client'
-import type { MediaRepository } from './media-repository.js'
+import type { MediaRepository, TemplateTrackingData } from './media-repository.js'
 
 export class PrismaMediaRepository implements MediaRepository {
   async findActiveByPhoneNumber(phoneNumber: string): Promise<MediaRequest[]> {
@@ -35,10 +35,26 @@ export class PrismaMediaRepository implements MediaRepository {
     return prisma.mediaRequest.findUnique({ where: { id } })
   }
 
+  async findByTemplateMessageSid(messageSid: string): Promise<MediaRequest | null> {
+    return prisma.mediaRequest.findFirst({
+      where: { twilioTemplateMessageSid: messageSid },
+    })
+  }
+
   async updateStatus(id: string, status: MediaRequestStatus): Promise<MediaRequest> {
     return prisma.mediaRequest.update({
       where: { id },
       data: { status },
+    })
+  }
+
+  async updateTemplateTracking(
+    id: string,
+    data: TemplateTrackingData,
+  ): Promise<MediaRequest> {
+    return prisma.mediaRequest.update({
+      where: { id },
+      data,
     })
   }
 

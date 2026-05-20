@@ -3,6 +3,7 @@ import { prisma } from '../../../lib/prisma.js'
 import { getPresignedMediaUrl } from '../../../lib/s3.js'
 import { encryptionService } from '../../../lib/encryption.js'
 import { buildPhoneNumberLookupVariants } from '../../../lib/phone-number.js'
+import { env } from '../../../env.js'
 import {
   buildErrorCode,
   maskActorPhone,
@@ -194,12 +195,19 @@ export async function twilioWebhookService(
       const startedAt = Date.now()
 
       try {
-        await twilioClient.messages.create({
+        const message = await twilioClient.messages.create({
           from: twilioFrom,
           to: from,
           contentSid: project.templateSid,
+          statusCallback: `${env.API_BASE_URL}/v1/webhook/twilio/status`,
         })
 
+        await repository.updateTemplateTracking(mediaRequest.id, {
+          twilioTemplateMessageSid: message.sid,
+          twilioTemplateMessageStatus: message.status ?? null,
+          twilioTemplateErrorCode: null,
+          twilioTemplateErrorMessage: null,
+        })
         await repository.resetForReconfirmation(mediaRequest.id)
         await recordZabbixMetricEvent({
           type: 'TEMPLATE_SENT',

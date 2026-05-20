@@ -1,6 +1,7 @@
 import { prisma } from '../../../lib/prisma.js'
 import { twilioClient } from '../../../lib/twilio.js'
 import { encryptionService } from '../../../lib/encryption.js'
+import { env } from '../../../env.js'
 import {
   buildErrorCode,
   maskActorPhone,
@@ -74,12 +75,19 @@ export async function resendTemplateService(
   const startedAt = Date.now()
 
   try {
-    await twilioClient.messages.create({
+    const message = await twilioClient.messages.create({
       from: `whatsapp:${mediaRequest.project.phoneNumber}`,
       to: `whatsapp:${decryptedNumber}`,
       contentSid: mediaRequest.project.templateSid,
+      statusCallback: `${env.API_BASE_URL}/v1/webhook/twilio/status`,
     })
 
+    await repository.updateTemplateTracking(mediaRequest.id, {
+      twilioTemplateMessageSid: message.sid,
+      twilioTemplateMessageStatus: message.status ?? null,
+      twilioTemplateErrorCode: null,
+      twilioTemplateErrorMessage: null,
+    })
     const updatedRequest = await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
     await recordZabbixMetricEvent({
       type: 'TEMPLATE_SENT',

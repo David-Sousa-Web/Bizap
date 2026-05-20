@@ -82,6 +82,10 @@ model MediaRequest {
   status    MediaRequestStatus @default(PENDING)
   invalidReplyCount Int        @default(0) @map("invalid_reply_count")
   lastInvalidReplyAt DateTime? @map("last_invalid_reply_at")
+  twilioTemplateMessageSid String? @map("twilio_template_message_sid") @db.VarChar(64)
+  twilioTemplateMessageStatus String? @map("twilio_template_message_status") @db.VarChar(32)
+  twilioTemplateErrorCode String? @map("twilio_template_error_code") @db.VarChar(32)
+  twilioTemplateErrorMessage String? @map("twilio_template_error_message") @db.Text
   numberId  String             @map("number_id")
   projectId String             @map("project_id")
   createdAt DateTime           @default(now()) @map("created_at")
@@ -91,6 +95,7 @@ model MediaRequest {
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   zabbixMetricEvents ZabbixMetricEvent[]
 
+  @@index([twilioTemplateMessageSid])
   @@map("media_requests")
 }
 

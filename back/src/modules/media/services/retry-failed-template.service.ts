@@ -1,4 +1,5 @@
 import type { Prisma } from '@prisma/client'
+import { env } from '../../../env.js'
 import { encryptionService } from '../../../lib/encryption.js'
 import { twilioClient } from '../../../lib/twilio.js'
 import { recordZabbixMetricEvent } from '../../metrics/services/record-zabbix-metric-event.js'
@@ -13,17 +14,24 @@ type FailedTemplateMediaRequest = Prisma.MediaRequestGetPayload<{
 
 export async function retryFailedTemplateService(
   mediaRequest: FailedTemplateMediaRequest,
-  repository: Pick<MediaRepository, 'updateStatus'>,
+  repository: Pick<MediaRepository, 'updateStatus' | 'updateTemplateTracking'>,
 ) {
   const decryptedNumber = encryptionService.decrypt(mediaRequest.number.number)
 
   try {
-    await twilioClient.messages.create({
+    const message = await twilioClient.messages.create({
       from: `whatsapp:${mediaRequest.project.phoneNumber}`,
       to: `whatsapp:${decryptedNumber}`,
       contentSid: mediaRequest.project.templateSid,
+      statusCallback: `${env.API_BASE_URL}/v1/webhook/twilio/status`,
     })
 
+    await repository.updateTemplateTracking(mediaRequest.id, {
+      twilioTemplateMessageSid: message.sid,
+      twilioTemplateMessageStatus: message.status ?? null,
+      twilioTemplateErrorCode: null,
+      twilioTemplateErrorMessage: null,
+    })
     const updatedRequest = await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
     await recordZabbixMetricEvent({
       type: 'TEMPLATE_SENT',

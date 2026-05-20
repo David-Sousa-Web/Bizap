@@ -186,7 +186,7 @@ export async function sendMediaService(
       status: 'TEMPLATE_SENT',
     })
   } catch (error) {
-    await repository.updateStatus(mediaRequest.id, 'FAILED')
+    await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SEND_FAILED')
     pushIntegrationEvent(observability.wideEvent, {
       provider: 'twilio',
       operation: 'send_template',
@@ -195,7 +195,7 @@ export async function sendMediaService(
       code: buildErrorCode(error),
     })
     setMediaContext(observability.wideEvent, {
-      status: 'FAILED',
+      status: 'TEMPLATE_SEND_FAILED',
     })
     setErrorContext(observability.wideEvent, {
       type: error instanceof Error ? error.name : 'ExternalServiceError',

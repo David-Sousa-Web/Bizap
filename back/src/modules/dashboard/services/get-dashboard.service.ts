@@ -16,6 +16,8 @@ const MEDIA_STATUSES: MediaRequestStatus[] = [
   'CONFIRMED',
   'MEDIA_SENT',
   'INVALID_RESPONSE_LIMIT',
+  'TEMPLATE_SEND_FAILED',
+  'MEDIA_SEND_FAILED',
   'FAILED',
 ]
 
@@ -46,6 +48,8 @@ function createEmptyMediaStatusCounts(): MediaStatusCounts {
     CONFIRMED: 0,
     MEDIA_SENT: 0,
     INVALID_RESPONSE_LIMIT: 0,
+    TEMPLATE_SEND_FAILED: 0,
+    MEDIA_SEND_FAILED: 0,
     FAILED: 0,
   }
 }
@@ -66,6 +70,12 @@ function calculateRate(part: number, total: number) {
   }
 
   return Number((part / total).toFixed(4))
+}
+
+function calculateFailedMediaRequests(mediaStatus: MediaStatusCounts) {
+  return mediaStatus.FAILED
+    + mediaStatus.TEMPLATE_SEND_FAILED
+    + mediaStatus.MEDIA_SEND_FAILED
 }
 
 function buildDateWhere(from?: string, to?: string) {
@@ -296,7 +306,7 @@ export async function getDashboardService(
       totalNumbers: numberCountByProjectId.get(project.id) ?? 0,
       totalMediaRequests,
       deliveredMedia: projectMediaStatus.MEDIA_SENT,
-      failed: projectMediaStatus.FAILED,
+      failed: calculateFailedMediaRequests(projectMediaStatus),
       confirmationRate: calculateRate(
         projectMediaStatus.CONFIRMED + projectMediaStatus.MEDIA_SENT,
         totalMediaRequests,
@@ -318,7 +328,7 @@ export async function getDashboardService(
       totalNumbers,
       totalMediaRequests,
       totalDeliveredMedia: mediaStatus.MEDIA_SENT,
-      totalFailed: mediaStatus.FAILED,
+      totalFailed: calculateFailedMediaRequests(mediaStatus),
       confirmationRate: calculateRate(
         mediaStatus.CONFIRMED + mediaStatus.MEDIA_SENT,
         totalMediaRequests,
@@ -343,7 +353,7 @@ export async function getDashboardService(
         + mediaStatus.RECONFIRMATION_SENT,
       declinedRequests: mediaStatus.DECLINED,
       invalidResponseLimit: mediaStatus.INVALID_RESPONSE_LIMIT,
-      failedRequests: mediaStatus.FAILED,
+      failedRequests: calculateFailedMediaRequests(mediaStatus),
       projectsWithoutZabbixHost: projects.filter((project) => (
         !project.zabbixHostName || project.zabbixHostName.trim().length === 0
       )).length,

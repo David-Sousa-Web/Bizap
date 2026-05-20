@@ -8,6 +8,8 @@ const mediaRequestStatusSchema = z.enum([
   'CONFIRMED',
   'MEDIA_SENT',
   'INVALID_RESPONSE_LIMIT',
+  'TEMPLATE_SEND_FAILED',
+  'MEDIA_SEND_FAILED',
   'FAILED',
 ])
 
@@ -19,6 +21,8 @@ const mediaStatusCountsSchema = z.object({
   CONFIRMED: z.number(),
   MEDIA_SENT: z.number(),
   INVALID_RESPONSE_LIMIT: z.number(),
+  TEMPLATE_SEND_FAILED: z.number(),
+  MEDIA_SEND_FAILED: z.number(),
   FAILED: z.number(),
 })
 

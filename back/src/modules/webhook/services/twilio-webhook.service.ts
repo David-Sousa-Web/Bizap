@@ -187,6 +187,13 @@ export async function twilioWebhookService(
           code: 'twilio_reconfirmation_failed',
           message: 'Failed to resend template after decline',
         })
+        await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SEND_FAILED')
+        setWebhookContext(observability.wideEvent, {
+          nextStatus: 'TEMPLATE_SEND_FAILED',
+        })
+        setMediaContext(observability.wideEvent, {
+          status: 'TEMPLATE_SEND_FAILED',
+        })
       }
 
       continue
@@ -249,12 +256,12 @@ export async function twilioWebhookService(
           code: 'confirmed_media_delivery_failed',
           message: 'Failed to send confirmed media reply',
         })
-        await repository.updateStatus(mediaRequest.id, 'FAILED')
+        await repository.updateStatus(mediaRequest.id, 'MEDIA_SEND_FAILED')
         setWebhookContext(observability.wideEvent, {
-          nextStatus: 'FAILED',
+          nextStatus: 'MEDIA_SEND_FAILED',
         })
         setMediaContext(observability.wideEvent, {
-          status: 'FAILED',
+          status: 'MEDIA_SEND_FAILED',
         })
       }
 

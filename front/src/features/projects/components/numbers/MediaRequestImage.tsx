@@ -64,11 +64,13 @@ export function MediaRequestImage({
   }
 
   return (
-    <img
-      src={objectUrl}
-      alt={alt}
-      loading="lazy"
-      className={cn("object-cover", imgClassName)}
-    />
+    <div className={className}>
+      <img
+        src={objectUrl}
+        alt={alt}
+        loading="lazy"
+        className={cn("object-cover", imgClassName)}
+      />
+    </div>
   )
 }

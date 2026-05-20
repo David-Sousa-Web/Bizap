@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { mediaService } from "@/services/mediaService"
 
@@ -23,14 +23,14 @@ export function useMediaRequestImage({
 }: UseMediaRequestImageOptions): UseMediaRequestImageResult {
   const isReady = enabled && Boolean(projectId) && Boolean(mediaRequestId)
 
-  const { data, isLoading, isError } = useQuery({
+  const { data: blob, isLoading, isError } = useQuery({
     queryKey: ["media-request-image", projectId, mediaRequestId, updatedAt],
     queryFn: async () => {
       if (!projectId || !mediaRequestId) {
         throw new Error("projectId and mediaRequestId are required")
       }
       const { blob } = await mediaService.fetchMediaBlob(projectId, mediaRequestId)
-      return URL.createObjectURL(blob)
+      return blob
     },
     enabled: isReady,
     staleTime: 1000 * 60 * 30,
@@ -39,15 +39,22 @@ export function useMediaRequestImage({
     refetchOnWindowFocus: false,
   })
 
+  const [objectUrl, setObjectUrl] = useState<string | undefined>(undefined)
+
   useEffect(() => {
-    if (!data) return
-    return () => {
-      URL.revokeObjectURL(data)
+    if (!blob) {
+      setObjectUrl(undefined)
+      return
     }
-  }, [data])
+    const url = URL.createObjectURL(blob)
+    setObjectUrl(url)
+    return () => {
+      URL.revokeObjectURL(url)
+    }
+  }, [blob])
 
   return {
-    objectUrl: data,
+    objectUrl,
     isLoading: isReady && isLoading,
     isError,
   }

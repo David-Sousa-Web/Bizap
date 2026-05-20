@@ -40,7 +40,7 @@ export async function getMediaBuffer(mediaUrl: string): Promise<Buffer> {
   return Buffer.concat(chunks)
 }
 
-export async function getProjectImageStream(mediaUrl: string): Promise<{
+export async function getMediaStream(mediaUrl: string): Promise<{
   body: Readable
   contentType: string | undefined
   contentLength: number | undefined
@@ -63,6 +63,14 @@ export async function getProjectImageStream(mediaUrl: string): Promise<{
     contentType: response.ContentType,
     contentLength: response.ContentLength,
   }
+}
+
+export async function getProjectImageStream(mediaUrl: string): Promise<{
+  body: Readable
+  contentType: string | undefined
+  contentLength: number | undefined
+}> {
+  return getMediaStream(mediaUrl)
 }
 
 export async function getPresignedMediaUrl(mediaUrl: string): Promise<string> {

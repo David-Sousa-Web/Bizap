@@ -48,7 +48,10 @@ const numberResponseDataSchema = z.object({
   name: z.string(),
   number: z.string(),
   projectId: z.string(),
+  imageUrl: z.string().nullable(),
   lastMediaRequestStatus: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string().nullable(),
 })
 
 export const singleNumberResponseSchema = z.object({

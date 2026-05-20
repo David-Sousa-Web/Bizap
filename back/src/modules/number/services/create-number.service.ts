@@ -38,6 +38,9 @@ export async function createNumberService(
     name: data.name,
     number: data.number,
     projectId: number.projectId,
+    imageUrl: null,
     lastMediaRequestStatus: null,
+    createdAt: number.createdAt.toISOString(),
+    updatedAt: null,
   }
 }

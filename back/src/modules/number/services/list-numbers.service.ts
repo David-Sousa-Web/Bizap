@@ -1,5 +1,6 @@
 import { ApplicationError } from '../../../utils/errors.js'
 import { prisma } from '../../../lib/prisma.js'
+import { env } from '../../../env.js'
 import {
   type ObservabilityContext,
   setErrorContext,
@@ -13,7 +14,10 @@ type ListedNumber = {
   name: string
   number: string
   projectId: string
+  imageUrl: string | null
   lastMediaRequestStatus: string | null
+  createdAt: string
+  updatedAt: string | null
 }
 
 function mapDecryptedNumber(number: Awaited<ReturnType<NumberRepository['findManyByProjectId']>>[number]): ListedNumber {
@@ -24,7 +28,12 @@ function mapDecryptedNumber(number: Awaited<ReturnType<NumberRepository['findMan
     name: encryptionService.decrypt(number.name),
     number: encryptionService.decrypt(number.number),
     projectId: number.projectId,
+    imageUrl: latestMediaRequest
+      ? `${env.API_BASE_URL}/v1/projects/${number.projectId}/media-requests/${latestMediaRequest.id}/media`
+      : null,
     lastMediaRequestStatus: latestMediaRequest?.status ?? null,
+    createdAt: number.createdAt.toISOString(),
+    updatedAt: latestMediaRequest?.updatedAt.toISOString() ?? null,
   }
 }
 

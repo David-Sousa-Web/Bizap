@@ -20,6 +20,7 @@ import {
   DECLINE_REPLY_MESSAGE,
   INVALID_REPLY_LIMIT,
   INVALID_REPLY_MESSAGE,
+  NO_ACTIVE_MEDIA_REQUEST_MESSAGE,
   isDeclineMediaConfirmationReply,
   isValidMediaConfirmationReply,
 } from '../utils/media-confirmation.js'
@@ -62,6 +63,9 @@ export async function twilioWebhookService(
       where: {
         OR: phoneFilter,
       },
+      include: {
+        project: true,
+      },
     })
 
     setErrorContext(observability.wideEvent, {
@@ -69,6 +73,50 @@ export async function twilioWebhookService(
       code: number ? 'pending_media_request_not_found' : 'webhook_number_not_found',
       message: number ? 'No pending media request for webhook' : 'Webhook number not found',
     })
+
+    if (number) {
+      const decryptedNumberName = encryptionService.decrypt(number.name)
+      const decryptedNumber = encryptionService.decrypt(number.number)
+      const startedAt = Date.now()
+
+      setNumberContext(observability.wideEvent, {
+        bizapId: number.id,
+        numberMasked: maskActorPhone(decryptedNumber),
+        numberName: decryptedNumberName,
+      })
+      setProjectContext(observability.wideEvent, {
+        projectId: number.project.id,
+        projectName: number.project.name,
+        phoneNumberMasked: maskActorPhone(number.project.phoneNumber),
+      })
+
+      try {
+        await twilioClient.messages.create({
+          from: `whatsapp:${number.project.phoneNumber}`,
+          to: from,
+          body: NO_ACTIVE_MEDIA_REQUEST_MESSAGE,
+        })
+        pushIntegrationEvent(observability.wideEvent, {
+          provider: 'twilio',
+          operation: 'send_no_active_media_request_reply',
+          outcome: 'success',
+          durationMs: Date.now() - startedAt,
+        })
+      } catch (error) {
+        pushIntegrationEvent(observability.wideEvent, {
+          provider: 'twilio',
+          operation: 'send_no_active_media_request_reply',
+          outcome: 'error',
+          durationMs: Date.now() - startedAt,
+          code: buildErrorCode(error),
+        })
+        setErrorContext(observability.wideEvent, {
+          type: error instanceof Error ? error.name : 'ExternalServiceError',
+          code: 'no_active_media_request_reply_failed',
+          message: 'Failed to send no active media request reply',
+        })
+      }
+    }
 
     return
   }

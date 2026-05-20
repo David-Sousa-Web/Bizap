@@ -2,6 +2,8 @@ export const INVALID_REPLY_LIMIT = 2
 
 export const INVALID_REPLY_MESSAGE = 'Quando você quiser sua imagem mande sim ou não'
 
+export const NO_ACTIVE_MEDIA_REQUEST_MESSAGE = 'Ainda não processamos sua imagem ou você ainda não participou da ação. Aguarde ou participe da ação!'
+
 export const DECLINE_REPLY_MESSAGE = 'Claro, você tem 24 horas para enviar qualquer mensagem e receber sua imagem!'
 
 export const DECLINED_EXPIRATION_HOURS = 24

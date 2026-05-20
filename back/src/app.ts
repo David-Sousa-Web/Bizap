@@ -32,6 +32,8 @@ import { createNumberRoute } from './modules/number/routes/create-number.route.j
 import { listNumbersRoute } from './modules/number/routes/list-numbers.route.js'
 import { listTemplatesRoute } from './modules/template/routes/list-templates.route.js'
 import { sendMediaRoute } from './modules/media/routes/send-media.route.js'
+import { resendTemplateRoute } from './modules/media/routes/resend-template.route.js'
+import { sendMediaRequestMediaRoute } from './modules/media/routes/send-media-request-media.route.js'
 import { twilioWebhookRoute } from './modules/webhook/routes/twilio-webhook.route.js'
 import { uploadProjectImageRoute } from './modules/project/routes/upload-project-image.route.js'
 import { getProjectImageRoute } from './modules/project/routes/get-project-image.route.js'
@@ -194,6 +196,8 @@ export function buildApp() {
       v1App.register(listTemplatesRoute)
 
       v1App.register(sendMediaRoute)
+      v1App.register(resendTemplateRoute)
+      v1App.register(sendMediaRequestMediaRoute)
 
       v1App.register(twilioWebhookRoute)
     },

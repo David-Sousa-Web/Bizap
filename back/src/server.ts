@@ -1,6 +1,7 @@
 import { buildApp } from './app.js'
 import { env } from './env.js'
 import { appLogger } from './lib/logger.js'
+import { startTemplateRetryScheduler } from './modules/media/scheduler/template-retry-scheduler.js'
 import { startZabbixMetricsScheduler } from './modules/metrics/scheduler/zabbix-metrics-scheduler.js'
 
 async function main() {
@@ -23,6 +24,7 @@ async function main() {
   }
 
   startZabbixMetricsScheduler()
+  startTemplateRetryScheduler()
 }
 
 main().catch((error) => {

@@ -36,7 +36,10 @@ export interface ProjectNumber {
   name: string
   number: string
   projectId: string
+  imageUrl: string | null
   lastMediaRequestStatus: MediaRequestStatus | null
+  createdAt: string
+  updatedAt: string | null
 }
 
 export interface CreateNumberPayload {
@@ -47,7 +50,7 @@ export interface CreateNumberPayload {
 export interface MediaRequest {
   id: string
   mediaUrl: string
-  status: string
+  status: MediaRequestStatus
   numberId: string
   projectId: string
 }

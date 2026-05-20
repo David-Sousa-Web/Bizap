@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button"
 import { NumbersTable } from "@/features/projects/components/numbers/NumbersTable"
 import { AddNumberDialog } from "@/features/projects/components/numbers/AddNumberDialog"
 import { SendMediaDialog } from "@/features/projects/components/numbers/SendMediaDialog"
+import { ResendTemplateConfirmDialog } from "@/features/projects/components/numbers/ResendTemplateConfirmDialog"
+import { ResendMediaConfirmDialog } from "@/features/projects/components/numbers/ResendMediaConfirmDialog"
+import { MediaRequestPreviewDialog } from "@/features/projects/components/numbers/MediaRequestPreviewDialog"
 import { usePermissions } from "@/features/access/hooks/usePermissions"
 
 interface NumbersTabProps {
@@ -23,12 +26,23 @@ interface NumbersTabProps {
 }
 
 export function NumbersTab({ project }: NumbersTabProps) {
-  const { canCreateNumbers, canSendMedia } = usePermissions()
+  const {
+    canCreateNumbers,
+    canSendMedia,
+    canResendTemplate,
+    canSendMediaRequestMedia,
+    canViewMediaRequestMedia,
+  } = usePermissions()
   const [page, setPage] = useState(1)
   const limit = 10
 
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [mediaTarget, setMediaTarget] = useState<ProjectNumber | null>(null)
+  const [resendTemplateTarget, setResendTemplateTarget] =
+    useState<ProjectNumber | null>(null)
+  const [resendMediaTarget, setResendMediaTarget] =
+    useState<ProjectNumber | null>(null)
+  const [previewTarget, setPreviewTarget] = useState<ProjectNumber | null>(null)
 
   const {
     data: response,
@@ -59,6 +73,30 @@ export function NumbersTab({ project }: NumbersTabProps) {
 
   const handleMediaDialogChange = useCallback((open: boolean) => {
     if (!open) setMediaTarget(null)
+  }, [])
+
+  const handleResendTemplate = useCallback((target: ProjectNumber) => {
+    setResendTemplateTarget(target)
+  }, [])
+
+  const handleResendTemplateDialogChange = useCallback((open: boolean) => {
+    if (!open) setResendTemplateTarget(null)
+  }, [])
+
+  const handleResendMedia = useCallback((target: ProjectNumber) => {
+    setResendMediaTarget(target)
+  }, [])
+
+  const handleResendMediaDialogChange = useCallback((open: boolean) => {
+    if (!open) setResendMediaTarget(null)
+  }, [])
+
+  const handleViewMedia = useCallback((target: ProjectNumber) => {
+    setPreviewTarget(target)
+  }, [])
+
+  const handlePreviewDialogChange = useCallback((open: boolean) => {
+    if (!open) setPreviewTarget(null)
   }, [])
 
   return (
@@ -127,10 +165,18 @@ export function NumbersTab({ project }: NumbersTabProps) {
           ) : (
             <NumbersTable
               numbers={numbers}
+              projectId={project.id}
               page={page}
               totalPages={totalPages}
               onPageChange={setPage}
               onSendMedia={canSendMedia ? handleSendMedia : undefined}
+              onResendTemplate={canResendTemplate ? handleResendTemplate : undefined}
+              onResendMedia={
+                canSendMediaRequestMedia ? handleResendMedia : undefined
+              }
+              onViewMedia={
+                canViewMediaRequestMedia ? handleViewMedia : undefined
+              }
             />
           )}
         </CardContent>
@@ -149,6 +195,27 @@ export function NumbersTab({ project }: NumbersTabProps) {
         projectId={project.id}
         apiKey={project.apiKey}
         number={mediaTarget}
+      />
+
+      <ResendTemplateConfirmDialog
+        open={!!resendTemplateTarget}
+        onOpenChange={handleResendTemplateDialogChange}
+        projectId={project.id}
+        number={resendTemplateTarget}
+      />
+
+      <ResendMediaConfirmDialog
+        open={!!resendMediaTarget}
+        onOpenChange={handleResendMediaDialogChange}
+        projectId={project.id}
+        number={resendMediaTarget}
+      />
+
+      <MediaRequestPreviewDialog
+        open={!!previewTarget}
+        onOpenChange={handlePreviewDialogChange}
+        projectId={project.id}
+        number={previewTarget}
       />
     </div>
   )

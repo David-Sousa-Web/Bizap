@@ -12,6 +12,9 @@ export interface Permissions {
   canDeleteProjects: boolean
   canCreateNumbers: boolean
   canSendMedia: boolean
+  canResendTemplate: boolean
+  canSendMediaRequestMedia: boolean
+  canViewMediaRequestMedia: boolean
   canViewApiKey: boolean
 }
 
@@ -24,6 +27,7 @@ export function usePermissions(): Permissions {
     const isEditor = role === "EDITOR"
     const isUser = role === "USER"
     const canEditProjects = isAdmin || isEditor
+    const isAuthenticated = isAdmin || isEditor || isUser
 
     return {
       role,
@@ -35,6 +39,9 @@ export function usePermissions(): Permissions {
       canDeleteProjects: canEditProjects,
       canCreateNumbers: canEditProjects,
       canSendMedia: canEditProjects,
+      canResendTemplate: canEditProjects,
+      canSendMediaRequestMedia: canEditProjects,
+      canViewMediaRequestMedia: isAuthenticated,
       canViewApiKey: canEditProjects,
     }
   }, [user])

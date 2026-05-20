@@ -24,6 +24,8 @@ import { cn } from "@/lib/utils"
 
 import type { ProjectNumber } from "@/features/projects/types"
 import { useSendMedia } from "@/features/projects/hooks/useSendMedia"
+import { MediaRequestImage } from "@/features/projects/components/numbers/MediaRequestImage"
+import { extractMediaRequestIdFromImageUrl } from "@/features/projects/utils/mediaRequestStatus"
 
 interface SendMediaDialogProps {
   open: boolean
@@ -129,6 +131,10 @@ export function SendMediaDialog({
 
   if (!number) return null
 
+  const previousMediaRequestId = extractMediaRequestIdFromImageUrl(number.imageUrl)
+  const hasPreviousMedia =
+    number.imageUrl !== null && previousMediaRequestId !== null
+
   return (
     <Dialog open={open} onOpenChange={(next) => !isPending && onOpenChange(next)}>
       <DialogContent className="sm:max-w-lg">
@@ -151,6 +157,29 @@ export function SendMediaDialog({
               </span>
             </div>
           </div>
+
+          {hasPreviousMedia && (
+            <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+              <MediaRequestImage
+                projectId={projectId}
+                mediaRequestId={previousMediaRequestId}
+                updatedAt={number.updatedAt}
+                alt={`Mídia anterior de ${number.name}`}
+                className="flex size-12 items-center justify-center overflow-hidden rounded-md ring-1 ring-border shrink-0"
+                imgClassName="size-full object-cover"
+                enabled={open}
+              />
+              <div className="flex flex-col text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  Já existe uma mídia anterior
+                </span>
+                <span>
+                  Enviar uma nova foto criará uma nova solicitação e disparará o
+                  template novamente.
+                </span>
+              </div>
+            </div>
+          )}
 
           <input
             ref={inputRef}

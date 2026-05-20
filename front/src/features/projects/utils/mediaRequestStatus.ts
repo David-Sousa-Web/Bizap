@@ -102,3 +102,27 @@ export function getMediaRequestStatusDisplay(
   if (!status) return EMPTY_STATUS_DISPLAY
   return mediaRequestStatusMap[status] ?? UNKNOWN_STATUS_DISPLAY
 }
+
+export interface MediaStatusActions {
+  canResendTemplate: boolean
+  canResendMedia: boolean
+}
+
+export function getMediaRequestStatusActions(
+  status: MediaRequestStatus | null,
+): MediaStatusActions {
+  return {
+    canResendTemplate: status === "TEMPLATE_SEND_FAILED",
+    canResendMedia: status === "TEMPLATE_SENT" || status === "MEDIA_SEND_FAILED",
+  }
+}
+
+const MEDIA_REQUEST_ID_REGEX = /\/media-requests\/([^/]+)\/media(?:\?|$|\/)/
+
+export function extractMediaRequestIdFromImageUrl(
+  imageUrl: string | null,
+): string | null {
+  if (!imageUrl) return null
+  const match = imageUrl.match(MEDIA_REQUEST_ID_REGEX)
+  return match?.[1] ?? null
+}

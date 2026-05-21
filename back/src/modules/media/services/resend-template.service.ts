@@ -14,7 +14,6 @@ import {
   setProjectContext,
 } from '../../../lib/wide-event.js'
 import { ApplicationError } from '../../../utils/errors.js'
-import { recordZabbixMetricEvent } from '../../metrics/services/record-zabbix-metric-event.js'
 import type { MediaRepository } from '../repositories/media-repository.js'
 
 const RESEND_TEMPLATE_ALLOWED_STATUSES = new Set<MediaRequestStatus>([
@@ -98,15 +97,10 @@ export async function resendTemplateService(
     const updatedRequest = await prisma.mediaRequest.update({
       where: { id: mediaRequest.id },
       data: {
-        status: 'TEMPLATE_SENT',
+        status: 'PENDING',
         invalidReplyCount: 0,
         lastInvalidReplyAt: null,
       },
-    })
-    await recordZabbixMetricEvent({
-      type: 'TEMPLATE_SENT',
-      projectId: mediaRequest.projectId,
-      mediaRequestId: mediaRequest.id,
     })
 
     pushIntegrationEvent(observability.wideEvent, {
@@ -116,7 +110,7 @@ export async function resendTemplateService(
       durationMs: Date.now() - startedAt,
     })
     setMediaContext(observability.wideEvent, {
-      status: 'TEMPLATE_SENT',
+      status: 'PENDING',
     })
 
     return {

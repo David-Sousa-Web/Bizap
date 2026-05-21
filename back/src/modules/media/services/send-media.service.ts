@@ -19,7 +19,6 @@ import {
   summarizeFileUpload,
 } from '../../../lib/wide-event.js'
 import type { MediaRepository } from '../repositories/media-repository.js'
-import { recordZabbixMetricEvent } from '../../metrics/services/record-zabbix-metric-event.js'
 
 export async function sendMediaService(
   projectId: string,
@@ -66,8 +65,12 @@ export async function sendMediaService(
   })
 
   const activeMediaRequests = await repository.findActiveByPhoneNumber(decryptedNumber)
-  const shouldSkipTemplateSend = activeMediaRequests.some(
-    (activeMediaRequest) => activeMediaRequest.status === 'TEMPLATE_SENT',
+  const activeTemplateRequest = activeMediaRequests.find(
+    (activeMediaRequest) => (
+      activeMediaRequest.status === 'PENDING'
+      || activeMediaRequest.status === 'TEMPLATE_SENT'
+      || activeMediaRequest.status === 'RECONFIRMATION_SENT'
+    ),
   )
 
   const project = await prisma.project.findUnique({
@@ -139,18 +142,24 @@ export async function sendMediaService(
     projectId,
   })
 
-  if (shouldSkipTemplateSend) {
-    await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
+  if (activeTemplateRequest) {
+    await repository.updateTemplateTracking(mediaRequest.id, {
+      twilioTemplateMessageSid: activeTemplateRequest.twilioTemplateMessageSid,
+      twilioTemplateMessageStatus: activeTemplateRequest.twilioTemplateMessageStatus,
+      twilioTemplateErrorCode: activeTemplateRequest.twilioTemplateErrorCode,
+      twilioTemplateErrorMessage: activeTemplateRequest.twilioTemplateErrorMessage,
+    })
+    const updatedRequest = await repository.updateStatus(mediaRequest.id, activeTemplateRequest.status)
 
     setMediaContext(observability.wideEvent, {
       mediaRequestId: mediaRequest.id,
-      status: 'TEMPLATE_SENT',
+      status: updatedRequest.status,
     })
 
     return {
       id: mediaRequest.id,
       mediaUrl: mediaRequest.mediaUrl,
-      status: 'TEMPLATE_SENT',
+      status: updatedRequest.status,
       numberId: mediaRequest.numberId,
       projectId: mediaRequest.projectId,
     }
@@ -176,12 +185,6 @@ export async function sendMediaService(
       twilioTemplateErrorCode: null,
       twilioTemplateErrorMessage: null,
     })
-    await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
-    await recordZabbixMetricEvent({
-      type: 'TEMPLATE_SENT',
-      projectId,
-      mediaRequestId: mediaRequest.id,
-    })
 
     pushIntegrationEvent(observability.wideEvent, {
       provider: 'twilio',
@@ -190,7 +193,7 @@ export async function sendMediaService(
       durationMs: Date.now() - twilioStartedAt,
     })
     setMediaContext(observability.wideEvent, {
-      status: 'TEMPLATE_SENT',
+      status: mediaRequest.status,
     })
   } catch (error) {
     await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SEND_FAILED')
@@ -215,7 +218,7 @@ export async function sendMediaService(
   return {
     id: mediaRequest.id,
     mediaUrl: mediaRequest.mediaUrl,
-    status: 'TEMPLATE_SENT',
+    status: mediaRequest.status,
     numberId: mediaRequest.numberId,
     projectId: mediaRequest.projectId,
   }

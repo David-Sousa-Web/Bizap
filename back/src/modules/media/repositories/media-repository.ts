@@ -15,6 +15,7 @@ export interface MediaRepository {
   }): Promise<MediaRequest>
   findById(id: string): Promise<MediaRequest | null>
   findByTemplateMessageSid(messageSid: string): Promise<MediaRequest | null>
+  findManyByTemplateMessageSid(messageSid: string): Promise<MediaRequest[]>
   findActiveByPhoneNumber(phoneNumber: string): Promise<MediaRequest[]>
   updateStatus(id: string, status: MediaRequestStatus): Promise<MediaRequest>
   updateTemplateTracking(id: string, data: TemplateTrackingData): Promise<MediaRequest>

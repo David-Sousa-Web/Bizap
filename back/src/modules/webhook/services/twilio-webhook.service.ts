@@ -208,11 +208,12 @@ export async function twilioWebhookService(
           twilioTemplateErrorCode: null,
           twilioTemplateErrorMessage: null,
         })
-        await repository.resetForReconfirmation(mediaRequest.id)
-        await recordZabbixMetricEvent({
-          type: 'TEMPLATE_SENT',
-          projectId: project.id,
-          mediaRequestId: mediaRequest.id,
+        await prisma.mediaRequest.update({
+          where: { id: mediaRequest.id },
+          data: {
+            invalidReplyCount: 0,
+            lastInvalidReplyAt: null,
+          },
         })
 
         pushIntegrationEvent(observability.wideEvent, {
@@ -223,10 +224,10 @@ export async function twilioWebhookService(
         })
         setWebhookContext(observability.wideEvent, {
           replyCategory: 'decline',
-          nextStatus: 'RECONFIRMATION_SENT',
+          nextStatus: 'DECLINED',
         })
         setMediaContext(observability.wideEvent, {
-          status: 'RECONFIRMATION_SENT',
+          status: 'DECLINED',
         })
       } catch (error) {
         pushIntegrationEvent(observability.wideEvent, {

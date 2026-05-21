@@ -2,7 +2,6 @@ import type { Prisma } from '@prisma/client'
 import { env } from '../../../env.js'
 import { encryptionService } from '../../../lib/encryption.js'
 import { twilioClient } from '../../../lib/twilio.js'
-import { recordZabbixMetricEvent } from '../../metrics/services/record-zabbix-metric-event.js'
 import type { MediaRepository } from '../repositories/media-repository.js'
 
 type FailedTemplateMediaRequest = Prisma.MediaRequestGetPayload<{
@@ -32,12 +31,7 @@ export async function retryFailedTemplateService(
       twilioTemplateErrorCode: null,
       twilioTemplateErrorMessage: null,
     })
-    const updatedRequest = await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
-    await recordZabbixMetricEvent({
-      type: 'TEMPLATE_SENT',
-      projectId: mediaRequest.projectId,
-      mediaRequestId: mediaRequest.id,
-    })
+    const updatedRequest = await repository.updateStatus(mediaRequest.id, 'PENDING')
 
     return updatedRequest
   } catch (error) {

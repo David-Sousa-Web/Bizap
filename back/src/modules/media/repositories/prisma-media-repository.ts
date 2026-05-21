@@ -41,6 +41,13 @@ export class PrismaMediaRepository implements MediaRepository {
     })
   }
 
+  async findManyByTemplateMessageSid(messageSid: string): Promise<MediaRequest[]> {
+    return prisma.mediaRequest.findMany({
+      where: { twilioTemplateMessageSid: messageSid },
+      orderBy: { createdAt: 'asc' },
+    })
+  }
+
   async updateStatus(id: string, status: MediaRequestStatus): Promise<MediaRequest> {
     return prisma.mediaRequest.update({
       where: { id },

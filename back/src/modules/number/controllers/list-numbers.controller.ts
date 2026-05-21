@@ -2,13 +2,12 @@ import type { FastifyRequest, FastifyReply } from 'fastify'
 import { createObservabilityContext } from '../../../lib/wide-event.js'
 import { listNumbersService } from '../services/list-numbers.service.js'
 import { PrismaNumberRepository } from '../repositories/prisma-number-repository.js'
-import type { PaginationQuery } from '../../../utils/pagination.js'
+import type { ListNumbersQuery } from '../schemas/number.schema.js'
 
 export async function listNumbersController(
-  request: FastifyRequest<{ Params: { projectId: string }; Querystring: PaginationQuery }>,
+  request: FastifyRequest<{ Params: { projectId: string }; Querystring: ListNumbersQuery }>,
   reply: FastifyReply,
 ) {
-  const { page, limit, search } = request.query
   const repository = new PrismaNumberRepository()
   const observability = createObservabilityContext(request, {
     module: 'number',
@@ -17,9 +16,7 @@ export async function listNumbersController(
 
   const result = await listNumbersService(
     request.params.projectId,
-    page,
-    limit,
-    search,
+    request.query,
     repository,
     observability,
   )

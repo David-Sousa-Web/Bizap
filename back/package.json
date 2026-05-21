@@ -9,7 +9,7 @@
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "maintenance:mark-template-failures": "tsx scripts/mark-template-sent-as-failed.ts"
+    "maintenance:mark-template-failures": "node dist/scripts/mark-template-sent-as-failed.js"
   },
   "keywords": [],
   "author": "",

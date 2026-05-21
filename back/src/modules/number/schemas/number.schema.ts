@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { paginationQuerySchema } from '../../../utils/pagination.js'
 
 const BRAZIL_COUNTRY_CODE = '55'
 const PHONE_ERROR_MESSAGE =
@@ -43,6 +44,40 @@ export const numberProjectIdParamSchema = z.object({
   projectId: z.string().uuid(),
 })
 
+const mediaRequestStatusSchema = z.enum([
+  'PENDING',
+  'TEMPLATE_SENT',
+  'RECONFIRMATION_SENT',
+  'DECLINED',
+  'CONFIRMED',
+  'MEDIA_SENT',
+  'INVALID_RESPONSE_LIMIT',
+  'TEMPLATE_SEND_FAILED',
+  'MEDIA_SEND_FAILED',
+  'FAILED',
+])
+
+const dateQuerySchema = z.string().trim().refine(
+  (value) => !Number.isNaN(Date.parse(value)),
+  { message: 'Invalid date' },
+)
+
+export const listNumbersQuerySchema = paginationQuerySchema.extend({
+  id: z.string().uuid().optional(),
+  name: z.string().trim().optional(),
+  number: z.string().trim().optional(),
+  lastMediaRequestStatus: z.union([mediaRequestStatusSchema, z.literal('NONE')]).optional(),
+  hasMedia: z.enum(['true', 'false']).transform((value) => value === 'true').optional(),
+  createdAtFrom: dateQuerySchema.optional(),
+  createdAtTo: dateQuerySchema.optional(),
+  updatedAtFrom: dateQuerySchema.optional(),
+  updatedAtTo: dateQuerySchema.optional(),
+  sortBy: z
+    .enum(['id', 'name', 'number', 'lastMediaRequestStatus', 'hasMedia', 'createdAt', 'updatedAt'])
+    .default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+})
+
 const numberResponseDataSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -73,3 +108,4 @@ export const listNumbersResponseSchema = z.object({
 })
 
 export type CreateNumberBody = z.infer<typeof createNumberBodySchema>
+export type ListNumbersQuery = z.infer<typeof listNumbersQuerySchema>

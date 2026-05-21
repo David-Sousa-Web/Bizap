@@ -84,6 +84,13 @@ async function runTemplateRetryWorker() {
 }
 
 export function startTemplateRetryScheduler() {
+  if (!env.TEMPLATE_RETRY_ENABLED) {
+    appLogger.info({
+      event: 'media.template_retry.scheduler_disabled',
+    }, 'Template retry scheduler disabled')
+    return
+  }
+
   schedule(env.TEMPLATE_RETRY_CRON, runTemplateRetryWorker, {
     timezone: 'America/Sao_Paulo',
   })

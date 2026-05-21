@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises'
-import { prisma } from '../src/lib/prisma.js'
-import { encryptionService } from '../src/lib/encryption.js'
+import { prisma } from '../lib/prisma.js'
+import { encryptionService } from '../lib/encryption.js'
 
 type Result = {
   phone: string

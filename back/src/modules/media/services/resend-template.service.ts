@@ -1,3 +1,4 @@
+import type { MediaRequestStatus } from '@prisma/client'
 import { prisma } from '../../../lib/prisma.js'
 import { twilioClient } from '../../../lib/twilio.js'
 import { encryptionService } from '../../../lib/encryption.js'
@@ -15,6 +16,12 @@ import {
 import { ApplicationError } from '../../../utils/errors.js'
 import { recordZabbixMetricEvent } from '../../metrics/services/record-zabbix-metric-event.js'
 import type { MediaRepository } from '../repositories/media-repository.js'
+
+const RESEND_TEMPLATE_ALLOWED_STATUSES = new Set<MediaRequestStatus>([
+  'TEMPLATE_SEND_FAILED',
+  'INVALID_RESPONSE_LIMIT',
+])
+const RESEND_TEMPLATE_INVALID_STATUS_MESSAGE = 'Template can only be resent for template send failures or invalid response limits'
 
 export async function resendTemplateService(
   projectId: string,
@@ -62,14 +69,14 @@ export async function resendTemplateService(
     storage: 's3',
   })
 
-  if (mediaRequest.status !== 'TEMPLATE_SEND_FAILED') {
+  if (!RESEND_TEMPLATE_ALLOWED_STATUSES.has(mediaRequest.status)) {
     setErrorContext(observability.wideEvent, {
       type: 'ApplicationError',
       code: 'invalid_media_request_status',
-      message: 'Template can only be resent for template send failures',
+      message: RESEND_TEMPLATE_INVALID_STATUS_MESSAGE,
     })
 
-    throw new ApplicationError('Template can only be resent for template send failures', 400)
+    throw new ApplicationError(RESEND_TEMPLATE_INVALID_STATUS_MESSAGE, 400)
   }
 
   const startedAt = Date.now()
@@ -88,7 +95,14 @@ export async function resendTemplateService(
       twilioTemplateErrorCode: null,
       twilioTemplateErrorMessage: null,
     })
-    const updatedRequest = await repository.updateStatus(mediaRequest.id, 'TEMPLATE_SENT')
+    const updatedRequest = await prisma.mediaRequest.update({
+      where: { id: mediaRequest.id },
+      data: {
+        status: 'TEMPLATE_SENT',
+        invalidReplyCount: 0,
+        lastInvalidReplyAt: null,
+      },
+    })
     await recordZabbixMetricEvent({
       type: 'TEMPLATE_SENT',
       projectId: mediaRequest.projectId,

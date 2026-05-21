@@ -14,7 +14,7 @@ export async function resendTemplateRoute(app: FastifyInstance) {
     onRequest: [authJwt, requireRole(UserRole.ADMIN, UserRole.EDITOR)],
     schema: {
       tags: ['Media'],
-      summary: 'Resend template for a failed media request',
+      summary: 'Resend template for a failed media request or invalid response limit',
       security: [{ bearerAuth: [] }],
       params: mediaRequestActionParamsSchema,
       response: { 200: mediaRequestActionResponseSchema },

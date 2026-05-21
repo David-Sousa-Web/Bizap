@@ -1,13 +1,18 @@
-import { Filter, X } from "lucide-react";
+import { useState } from "react";
+import { Filter } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -39,15 +44,37 @@ export function NumbersFilters({
   onFiltersChange,
   onClearFilters,
 }: NumbersFiltersProps) {
+  const [open, setOpen] = useState(false);
+  const [localFilters, setLocalFilters] =
+    useState<NumbersFiltersState>(filters);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      setLocalFilters(filters);
+    }
+    setOpen(newOpen);
+  };
+
   const activeFiltersCount = Object.values(filters).filter((val) => {
     if (val === "all") return false;
     if (val === undefined) return false;
     return true;
   }).length;
 
+  const handleApply = () => {
+    onFiltersChange(localFilters);
+    setOpen(false);
+  };
+
+  const handleClear = () => {
+    onClearFilters();
+    setLocalFilters({});
+    setOpen(false);
+  };
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
         <Button variant="outline" className="relative h-9">
           <Filter className="h-4 w-4" />
           {/* Filtros */}
@@ -70,119 +97,109 @@ export function NumbersFilters({
             </div>
           )}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80" align="end">
-        <div className="grid gap-4">
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Filtros Avançados</DialogTitle>
+          <DialogDescription>
+            Refine a busca de números no projeto.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
           <div className="space-y-2">
-            <h4 className="font-medium leading-none">Filtros Avançados</h4>
-            <p className="text-sm text-muted-foreground">
-              Refine a busca de números no projeto.
-            </p>
-          </div>
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label>Status do Último Envio</Label>
-              <Select
-                value={filters.lastMediaRequestStatus || "all"}
-                onValueChange={(val) =>
-                  onFiltersChange({
-                    ...filters,
-                    lastMediaRequestStatus: val === "all" ? undefined : val,
-                  })
-                }
-              >
-                <SelectTrigger className="cursor-pointer">
-                  <SelectValue placeholder="Selecione um status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem className="cursor-pointer" value="all">
-                    Todos
-                  </SelectItem>
-                  <SelectItem className="cursor-pointer" value="NONE">
+            <Label>Status do Último Envio</Label>
+            <Select
+              value={localFilters.lastMediaRequestStatus || "all"}
+              onValueChange={(val) =>
+                setLocalFilters({
+                  ...localFilters,
+                  lastMediaRequestStatus: val === "all" ? undefined : val,
+                })
+              }
+            >
+              <SelectTrigger className="cursor-pointer">
+                <SelectValue placeholder="Selecione um status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem className="cursor-pointer" value="all">
+                  Todos
+                </SelectItem>
+                <SelectItem className="cursor-pointer" value="NONE">
+                  <MediaRequestStatusBadge
+                    status={null}
+                    className="pointer-events-none"
+                  />
+                </SelectItem>
+                {Object.entries(mediaRequestStatusMap).map(([key]) => (
+                  <SelectItem className="cursor-pointer" key={key} value={key}>
                     <MediaRequestStatusBadge
-                      status={null}
+                      status={key as MediaRequestStatus}
                       className="pointer-events-none"
                     />
                   </SelectItem>
-                  {Object.entries(mediaRequestStatusMap).map(([key]) => (
-                    <SelectItem
-                      className="cursor-pointer"
-                      key={key}
-                      value={key}
-                    >
-                      <MediaRequestStatusBadge
-                        status={key as MediaRequestStatus}
-                        className="pointer-events-none"
-                      />
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Possui Mídia?</Label>
-              <Select
-                value={filters.hasMedia || "all"}
-                onValueChange={(val: "true" | "false" | "all") =>
-                  onFiltersChange({
-                    ...filters,
-                    hasMedia: val === "all" ? undefined : val,
-                  })
-                }
-              >
-                <SelectTrigger className="cursor-pointer">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem className="cursor-pointer" value="all">
-                    Todos
-                  </SelectItem>
-                  <SelectItem className="cursor-pointer" value="true">
-                    Apenas com Mídia
-                  </SelectItem>
-                  <SelectItem className="cursor-pointer" value="false">
-                    Sem Mídia
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2 flex flex-col">
-              <Label>Data de Criação</Label>
-              <DatePickerWithRange
-                date={filters.createdAt}
-                onDateChange={(date) =>
-                  onFiltersChange({ ...filters, createdAt: date })
-                }
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-2 flex flex-col">
-              <Label>Data de Atualização</Label>
-              <DatePickerWithRange
-                date={filters.updatedAt}
-                onDateChange={(date) =>
-                  onFiltersChange({ ...filters, updatedAt: date })
-                }
-                className="w-full"
-              />
-            </div>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          {activeFiltersCount > 0 && (
-            <Button
-              variant="ghost"
-              className="w-full mt-2"
-              onClick={onClearFilters}
+          <div className="space-y-2">
+            <Label>Possui Mídia?</Label>
+            <Select
+              value={localFilters.hasMedia || "all"}
+              onValueChange={(val: "true" | "false" | "all") =>
+                setLocalFilters({
+                  ...localFilters,
+                  hasMedia: val === "all" ? undefined : val,
+                })
+              }
             >
-              <X className="mr-2 h-4 w-4" />
-              Limpar Filtros
-            </Button>
-          )}
+              <SelectTrigger className="cursor-pointer">
+                <SelectValue placeholder="Selecione" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem className="cursor-pointer" value="all">
+                  Todos
+                </SelectItem>
+                <SelectItem className="cursor-pointer" value="true">
+                  Apenas com Mídia
+                </SelectItem>
+                <SelectItem className="cursor-pointer" value="false">
+                  Sem Mídia
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2 flex flex-col">
+            <Label>Data de Criação</Label>
+            <DatePickerWithRange
+              date={localFilters.createdAt}
+              onDateChange={(date) =>
+                setLocalFilters({ ...localFilters, createdAt: date })
+              }
+              className="w-full"
+            />
+          </div>
+
+          <div className="space-y-2 flex flex-col">
+            <Label>Data de Atualização</Label>
+            <DatePickerWithRange
+              date={localFilters.updatedAt}
+              onDateChange={(date) =>
+                setLocalFilters({ ...localFilters, updatedAt: date })
+              }
+              className="w-full"
+            />
+          </div>
         </div>
-      </PopoverContent>
-    </Popover>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={handleClear}>
+            Limpar Filtros
+          </Button>
+          <Button onClick={handleApply}>Aplicar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

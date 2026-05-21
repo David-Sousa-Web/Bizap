@@ -6,7 +6,13 @@ import { buildErrorCode } from '../../../lib/wide-event.js'
 import { PrismaMediaRepository } from '../repositories/prisma-media-repository.js'
 import { retryFailedTemplateService } from '../services/retry-failed-template.service.js'
 
+const TEMPLATE_RETRY_ITEM_DELAY_MS = 20_000
+
 let isTemplateRetryRunning = false
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 async function runTemplateRetryWorker() {
   if (isTemplateRetryRunning) {
@@ -37,7 +43,7 @@ async function runTemplateRetryWorker() {
       },
     })
 
-    for (const mediaRequest of failedTemplateRequests) {
+    for (const [index, mediaRequest] of failedTemplateRequests.entries()) {
       const itemStartedAt = Date.now()
 
       try {
@@ -61,6 +67,10 @@ async function runTemplateRetryWorker() {
           projectId: mediaRequest.projectId,
           durationMs: Date.now() - itemStartedAt,
         }, 'Failed to resend template by worker')
+      }
+
+      if (index < failedTemplateRequests.length - 1) {
+        await sleep(TEMPLATE_RETRY_ITEM_DELAY_MS)
       }
     }
 

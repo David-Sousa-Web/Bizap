@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { DatePickerWithRange } from "@/components/ui/date-picker-with-range";
 import { mediaRequestStatusMap } from "@/features/projects/utils/mediaRequestStatus";
+import { MediaRequestStatusBadge } from "@/features/projects/components/numbers/MediaRequestStatusBadge";
+import type { MediaRequestStatus } from "@/features/projects/types";
 import { Badge } from "@/components/ui/badge";
 
 export interface NumbersFiltersState {
@@ -89,19 +91,31 @@ export function NumbersFilters({
                   })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="cursor-pointer">
                   <SelectValue placeholder="Selecione um status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="NONE">Sem envio (NONE)</SelectItem>
-                  {Object.entries(mediaRequestStatusMap).map(
-                    ([key, status]) => (
-                      <SelectItem key={key} value={key}>
-                        {status.label}
-                      </SelectItem>
-                    ),
-                  )}
+                  <SelectItem className="cursor-pointer" value="all">
+                    Todos
+                  </SelectItem>
+                  <SelectItem className="cursor-pointer" value="NONE">
+                    <MediaRequestStatusBadge
+                      status={null}
+                      className="pointer-events-none"
+                    />
+                  </SelectItem>
+                  {Object.entries(mediaRequestStatusMap).map(([key]) => (
+                    <SelectItem
+                      className="cursor-pointer"
+                      key={key}
+                      value={key}
+                    >
+                      <MediaRequestStatusBadge
+                        status={key as MediaRequestStatus}
+                        className="pointer-events-none"
+                      />
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -117,13 +131,19 @@ export function NumbersFilters({
                   })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="cursor-pointer">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="true">Apenas com Mídia</SelectItem>
-                  <SelectItem value="false">Sem Mídia</SelectItem>
+                  <SelectItem className="cursor-pointer" value="all">
+                    Todos
+                  </SelectItem>
+                  <SelectItem className="cursor-pointer" value="true">
+                    Apenas com Mídia
+                  </SelectItem>
+                  <SelectItem className="cursor-pointer" value="false">
+                    Sem Mídia
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

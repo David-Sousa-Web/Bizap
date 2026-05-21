@@ -1,30 +1,35 @@
-import { memo, useCallback } from "react"
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
+import { memo, useCallback } from "react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-import type { ProjectNumber } from "@/features/projects/types"
+import type { ProjectNumber } from "@/features/projects/types";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { MediaRequestStatusBadge } from "@/features/projects/components/numbers/MediaRequestStatusBadge"
-import { MediaRequestImage } from "@/features/projects/components/numbers/MediaRequestImage"
+} from "@/components/ui/select";
+import { MediaRequestStatusBadge } from "@/features/projects/components/numbers/MediaRequestStatusBadge";
+import { MediaRequestImage } from "@/features/projects/components/numbers/MediaRequestImage";
 import {
   NumberRowActionsMenu,
   type NumberRowActionsMenuProps,
-} from "@/features/projects/components/numbers/NumberRowActionsMenu"
-import { extractMediaRequestIdFromImageUrl } from "@/features/projects/utils/mediaRequestStatus"
-import { formatDateBR } from "@/utils/formatDate"
+} from "@/features/projects/components/numbers/NumberRowActionsMenu";
+import { extractMediaRequestIdFromImageUrl } from "@/features/projects/utils/mediaRequestStatus";
+import { formatDateBR } from "@/utils/formatDate";
 
-interface NumberRowProps
-  extends Omit<NumberRowActionsMenuProps, "number"> {
-  item: ProjectNumber
-  projectId: string
+interface NumberRowProps extends Omit<NumberRowActionsMenuProps, "number"> {
+  item: ProjectNumber;
+  projectId: string;
 }
 
 const NumberRow = memo(function NumberRow({
@@ -35,12 +40,12 @@ const NumberRow = memo(function NumberRow({
   onResendMedia,
   onViewMedia,
 }: NumberRowProps) {
-  const mediaRequestId = extractMediaRequestIdFromImageUrl(item.imageUrl)
-  const hasMedia = item.imageUrl !== null && mediaRequestId !== null
+  const mediaRequestId = extractMediaRequestIdFromImageUrl(item.imageUrl);
+  const hasMedia = item.imageUrl !== null && mediaRequestId !== null;
 
   const handleThumbnailClick = useCallback(() => {
-    if (hasMedia) onViewMedia?.(item)
-  }, [hasMedia, item, onViewMedia])
+    if (hasMedia) onViewMedia?.(item);
+  }, [hasMedia, item, onViewMedia]);
 
   return (
     <tr className="border-b last:border-0 hover:bg-muted/50 transition-colors">
@@ -93,24 +98,24 @@ const NumberRow = memo(function NumberRow({
         />
       </td>
     </tr>
-  )
-})
+  );
+});
 
 interface NumbersTableProps {
-  numbers: ProjectNumber[]
-  projectId: string
-  page: number
-  totalPages: number
-  limit?: number
-  sortBy?: string
-  sortOrder?: "asc" | "desc"
-  onPageChange: (page: number) => void
-  onLimitChange?: (limit: number) => void
-  onSortChange?: (column: string) => void
-  onSendMedia?: (item: ProjectNumber) => void
-  onResendTemplate?: (item: ProjectNumber) => void
-  onResendMedia?: (item: ProjectNumber) => void
-  onViewMedia?: (item: ProjectNumber) => void
+  numbers: ProjectNumber[];
+  projectId: string;
+  page: number;
+  totalPages: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  onPageChange: (page: number) => void;
+  onLimitChange?: (limit: number) => void;
+  onSortChange?: (column: string) => void;
+  onSendMedia?: (item: ProjectNumber) => void;
+  onResendTemplate?: (item: ProjectNumber) => void;
+  onResendMedia?: (item: ProjectNumber) => void;
+  onViewMedia?: (item: ProjectNumber) => void;
 }
 
 function SortableHeader({
@@ -121,16 +126,21 @@ function SortableHeader({
   onSortChange,
   className,
 }: {
-  label: string
-  column: string
-  sortBy?: string
-  sortOrder?: "asc" | "desc"
-  onSortChange?: (col: string) => void
-  className?: string
+  label: string;
+  column: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  onSortChange?: (col: string) => void;
+  className?: string;
 }) {
-  const isSorted = sortBy === column
+  const isSorted = sortBy === column;
   return (
-    <th className={cn("h-10 px-4 text-left font-medium text-muted-foreground", className)}>
+    <th
+      className={cn(
+        "h-10 px-4 text-left font-medium text-muted-foreground",
+        className,
+      )}
+    >
       <button
         type="button"
         onClick={() => onSortChange?.(column)}
@@ -148,7 +158,7 @@ function SortableHeader({
         )}
       </button>
     </th>
-  )
+  );
 }
 
 export function NumbersTable({
@@ -170,67 +180,71 @@ export function NumbersTable({
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-md border overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-muted">
-            <tr className="border-b">
-              <th className="h-10 px-3 text-left font-medium text-muted-foreground w-[64px]">
-                Foto
-              </th>
-              <SortableHeader
-                label="Nome"
-                column="name"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                onSortChange={onSortChange}
-              />
-              <SortableHeader
-                label="Número"
-                column="number"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                onSortChange={onSortChange}
-              />
-              <SortableHeader
-                label="Último envio"
-                column="lastMediaRequestStatus"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                onSortChange={onSortChange}
-                className="hidden sm:table-cell min-w-36"
-              />
-              <SortableHeader
-                label="Atualizado"
-                column="updatedAt"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                onSortChange={onSortChange}
-                className="hidden md:table-cell min-w-36"
-              />
-              <SortableHeader
-                label="Criado em"
-                column="createdAt"
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                onSortChange={onSortChange}
-                className="hidden md:table-cell min-w-36"
-              />
-              <th className="h-10 px-4 text-right font-medium text-muted-foreground">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {numbers.map((num) => (
-              <NumberRow
-                key={num.id}
-                item={num}
-                projectId={projectId}
-                onSendMedia={onSendMedia}
-                onResendTemplate={onResendTemplate}
-                onResendMedia={onResendMedia}
-                onViewMedia={onViewMedia}
-              />
-            ))}
-          </tbody>
-        </table>
+        <div className="max-h-[60dvh] overflow-y-auto">
+          <table className="w-full text-sm relative">
+            <thead className="bg-muted sticky top-0 z-10 shadow-sm">
+              <tr className="border-b">
+                <th className="h-10 px-3 text-left font-medium text-muted-foreground w-[64px]">
+                  Foto
+                </th>
+                <SortableHeader
+                  label="Nome"
+                  column="name"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSortChange={onSortChange}
+                />
+                <SortableHeader
+                  label="Número"
+                  column="number"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSortChange={onSortChange}
+                />
+                <SortableHeader
+                  label="Último envio"
+                  column="lastMediaRequestStatus"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSortChange={onSortChange}
+                  className="hidden sm:table-cell min-w-36"
+                />
+                <SortableHeader
+                  label="Atualizado"
+                  column="updatedAt"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSortChange={onSortChange}
+                  className="hidden md:table-cell min-w-36"
+                />
+                <SortableHeader
+                  label="Criado em"
+                  column="createdAt"
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onSortChange={onSortChange}
+                  className="hidden md:table-cell min-w-36"
+                />
+                <th className="h-10 px-4 text-right font-medium text-muted-foreground">
+                  Ações
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {numbers.map((num) => (
+                <NumberRow
+                  key={num.id}
+                  item={num}
+                  projectId={projectId}
+                  onSendMedia={onSendMedia}
+                  onResendTemplate={onResendTemplate}
+                  onResendMedia={onResendMedia}
+                  onViewMedia={onViewMedia}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {totalPages > 1 || (onLimitChange && numbers.length > 0) ? (
@@ -240,10 +254,12 @@ export function NumbersTable({
               Página <span className="font-medium">{page}</span> de{" "}
               <span className="font-medium">{totalPages}</span>
             </div>
-            
+
             {onLimitChange && (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Por página:</span>
+                <span className="text-sm text-muted-foreground">
+                  Por página:
+                </span>
                 <Select
                   value={limit.toString()}
                   onValueChange={(val) => onLimitChange(Number(val))}
@@ -265,6 +281,16 @@ export function NumbersTable({
             <Button
               variant="outline"
               size="sm"
+              onClick={() => onPageChange(1)}
+              disabled={page === 1}
+              className="hidden sm:flex"
+              title="Primeira página"
+            >
+              <ChevronsLeft className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => onPageChange(Math.max(1, page - 1))}
               disabled={page === 1}
             >
@@ -278,9 +304,19 @@ export function NumbersTable({
             >
               Próximo
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(totalPages)}
+              disabled={page >= totalPages}
+              className="hidden sm:flex"
+              title="Última página"
+            >
+              <ChevronsRight className="size-4" />
+            </Button>
           </div>
         </div>
       ) : null}
     </div>
-  )
+  );
 }

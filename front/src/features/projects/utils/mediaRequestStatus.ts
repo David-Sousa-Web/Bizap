@@ -112,7 +112,7 @@ export function getMediaRequestStatusActions(
   status: MediaRequestStatus | null,
 ): MediaStatusActions {
   return {
-    canResendTemplate: status === "TEMPLATE_SEND_FAILED",
+    canResendTemplate: status === "TEMPLATE_SEND_FAILED" || status === "INVALID_RESPONSE_LIMIT",
     canResendMedia: status === "TEMPLATE_SENT" || status === "MEDIA_SEND_FAILED",
   }
 }

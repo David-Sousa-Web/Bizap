@@ -1,11 +1,9 @@
 import { memo, useCallback } from "react"
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+
 import type { ProjectNumber } from "@/features/projects/types"
 import {
   Select,
@@ -21,7 +19,7 @@ import {
   type NumberRowActionsMenuProps,
 } from "@/features/projects/components/numbers/NumberRowActionsMenu"
 import { extractMediaRequestIdFromImageUrl } from "@/features/projects/utils/mediaRequestStatus"
-import { formatDateBR, formatRelativeDate } from "@/utils/formatDate"
+import { formatDateBR } from "@/utils/formatDate"
 
 interface NumberRowProps
   extends Omit<NumberRowActionsMenuProps, "number"> {
@@ -80,36 +78,10 @@ const NumberRow = memo(function NumberRow({
         <MediaRequestStatusBadge status={item.lastMediaRequestStatus} />
       </td>
       <td className="p-4 hidden md:table-cell text-muted-foreground text-xs">
-        {item.updatedAt ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-help">
-                {formatRelativeDate(item.updatedAt)}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              {formatDateBR(item.updatedAt)}
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <span>—</span>
-        )}
+        {item.updatedAt ? formatDateBR(item.updatedAt) : "—"}
       </td>
       <td className="p-4 hidden md:table-cell text-muted-foreground text-xs">
-        {item.createdAt ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-help">
-                {formatRelativeDate(item.createdAt)}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              {formatDateBR(item.createdAt)}
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <span>—</span>
-        )}
+        {item.createdAt ? formatDateBR(item.createdAt) : "—"}
       </td>
       <td className="p-4 text-right">
         <NumberRowActionsMenu
@@ -130,12 +102,53 @@ interface NumbersTableProps {
   page: number
   totalPages: number
   limit?: number
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
   onPageChange: (page: number) => void
   onLimitChange?: (limit: number) => void
+  onSortChange?: (column: string) => void
   onSendMedia?: (item: ProjectNumber) => void
   onResendTemplate?: (item: ProjectNumber) => void
   onResendMedia?: (item: ProjectNumber) => void
   onViewMedia?: (item: ProjectNumber) => void
+}
+
+function SortableHeader({
+  label,
+  column,
+  sortBy,
+  sortOrder,
+  onSortChange,
+  className,
+}: {
+  label: string
+  column: string
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
+  onSortChange?: (col: string) => void
+  className?: string
+}) {
+  const isSorted = sortBy === column
+  return (
+    <th className={cn("h-10 px-4 text-left font-medium text-muted-foreground", className)}>
+      <button
+        type="button"
+        onClick={() => onSortChange?.(column)}
+        className="flex items-center gap-1 hover:text-foreground transition-colors group"
+      >
+        {label}
+        {isSorted ? (
+          sortOrder === "desc" ? (
+            <ArrowDown className="size-3.5" />
+          ) : (
+            <ArrowUp className="size-3.5" />
+          )
+        ) : (
+          <ArrowUpDown className="size-3.5 opacity-0 group-hover:opacity-50 transition-opacity" />
+        )}
+      </button>
+    </th>
+  )
 }
 
 export function NumbersTable({
@@ -144,8 +157,11 @@ export function NumbersTable({
   page,
   totalPages,
   limit = 10,
+  sortBy,
+  sortOrder,
   onPageChange,
   onLimitChange,
+  onSortChange,
   onSendMedia,
   onResendTemplate,
   onResendMedia,
@@ -160,17 +176,44 @@ export function NumbersTable({
               <th className="h-10 px-3 text-left font-medium text-muted-foreground w-[64px]">
                 Foto
               </th>
-              <th className="h-10 px-4 text-left font-medium text-muted-foreground">Nome</th>
-              <th className="h-10 px-4 text-left font-medium text-muted-foreground">Número</th>
-              <th className="h-10 px-4 text-left font-medium text-muted-foreground hidden sm:table-cell min-w-36">
-                Último envio
-              </th>
-              <th className="h-10 px-4 text-left font-medium text-muted-foreground hidden md:table-cell min-w-36">
-                Atualizado
-              </th>
-              <th className="h-10 px-4 text-left font-medium text-muted-foreground hidden md:table-cell min-w-36">
-                Criado em
-              </th>
+              <SortableHeader
+                label="Nome"
+                column="name"
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={onSortChange}
+              />
+              <SortableHeader
+                label="Número"
+                column="number"
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={onSortChange}
+              />
+              <SortableHeader
+                label="Último envio"
+                column="lastMediaRequestStatus"
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={onSortChange}
+                className="hidden sm:table-cell min-w-36"
+              />
+              <SortableHeader
+                label="Atualizado"
+                column="updatedAt"
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={onSortChange}
+                className="hidden md:table-cell min-w-36"
+              />
+              <SortableHeader
+                label="Criado em"
+                column="createdAt"
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortChange={onSortChange}
+                className="hidden md:table-cell min-w-36"
+              />
               <th className="h-10 px-4 text-right font-medium text-muted-foreground">Ações</th>
             </tr>
           </thead>

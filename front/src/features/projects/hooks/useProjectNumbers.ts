@@ -1,22 +1,34 @@
 import { useQuery } from "@tanstack/react-query"
 import { numberService } from "@/services/numberService"
-import type { PaginationParams } from "@/types/api"
+import type { ListNumbersParams } from "@/types/api"
 
-interface UseProjectNumbersOptions extends PaginationParams {
+interface UseProjectNumbersOptions extends ListNumbersParams {
   projectId: string | undefined
 }
 
 export function useProjectNumbers({
   projectId,
-  page,
-  limit,
-  search,
+  ...params
 }: UseProjectNumbersOptions) {
   return useQuery({
-    queryKey: ["project-numbers", projectId, page, limit, search],
+    queryKey: [
+      "project-numbers",
+      projectId,
+      params.page,
+      params.limit,
+      params.search,
+      params.sortBy,
+      params.sortOrder,
+      params.lastMediaRequestStatus,
+      params.hasMedia,
+      params.createdAtFrom,
+      params.createdAtTo,
+      params.updatedAtFrom,
+      params.updatedAtTo,
+    ],
     queryFn: () => {
       if (!projectId) throw new Error("Project ID is required")
-      return numberService.listByProject(projectId, { page, limit, search })
+      return numberService.listByProject(projectId, params)
     },
     enabled: !!projectId,
     refetchInterval: 5000,

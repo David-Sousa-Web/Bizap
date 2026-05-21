@@ -17,6 +17,20 @@ export interface PaginationParams {
   search?: string
 }
 
+export interface ListNumbersParams extends PaginationParams {
+  id?: string
+  name?: string
+  number?: string
+  lastMediaRequestStatus?: string
+  hasMedia?: boolean
+  createdAtFrom?: string
+  createdAtTo?: string
+  updatedAtFrom?: string
+  updatedAtTo?: string
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
+}
+
 export interface PaginatedApiResponse<T> extends ApiResponse<T> {
   meta: PaginationMeta
 }

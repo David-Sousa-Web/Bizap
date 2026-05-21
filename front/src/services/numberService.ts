@@ -1,10 +1,10 @@
 import { api } from "@/lib/api"
-import type { ApiResponse, PaginatedApiResponse, PaginationParams } from "@/types/api"
+import type { ApiResponse, PaginatedApiResponse, ListNumbersParams } from "@/types/api"
 import type { CreateNumberPayload, ProjectNumber } from "@/features/projects/types"
 
 async function listByProject(
   projectId: string,
-  params?: PaginationParams,
+  params?: ListNumbersParams,
 ): Promise<PaginatedApiResponse<ProjectNumber[]>> {
   const response = await api.get<PaginatedApiResponse<ProjectNumber[]>>(
     `/projects/${projectId}/numbers`,

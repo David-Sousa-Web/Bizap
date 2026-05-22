@@ -1,37 +1,41 @@
-import { useParams, useNavigate, useSearchParams } from "react-router-dom"
-import { ArrowLeft, AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useProject } from "@/features/projects/hooks/useProject"
-import { useTemplates } from "@/features/templates/hooks/useTemplates"
-import { BasicDataTab } from "@/features/projects/components/tabs/BasicDataTab"
-import { TemplateTab } from "@/features/projects/components/tabs/TemplateTab"
-import { FlowMessageTab } from "@/features/projects/components/tabs/FlowMessageTab"
-import { NumbersTab } from "@/features/projects/components/tabs/NumbersTab"
-import { AdvancedTab } from "@/features/projects/components/tabs/AdvancedTab"
-import { Skeleton } from "@/components/ui/skeleton"
-import { usePermissions } from "@/features/access/hooks/usePermissions"
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useProject } from '@/features/projects/hooks/useProject';
+import { useTemplates } from '@/features/templates/hooks/useTemplates';
+import { BasicDataTab } from '@/features/projects/components/tabs/BasicDataTab';
+import { TemplateTab } from '@/features/projects/components/tabs/TemplateTab';
+import { FlowMessageTab } from '@/features/projects/components/tabs/FlowMessageTab';
+import { NumbersTab } from '@/features/projects/components/tabs/NumbersTab';
+import { AdvancedTab } from '@/features/projects/components/tabs/AdvancedTab';
+import { Skeleton } from '@/components/ui/skeleton';
+import { usePermissions } from '@/features/access/hooks/usePermissions';
 
 export default function ProjectDetailsPage() {
-  const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const { canMutateProjects } = usePermissions()
-  const requestedTab = searchParams.get("tab") || "dados"
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { canMutateProjects } = usePermissions();
+  const requestedTab = searchParams.get('tab') || 'dados';
   const activeTab =
-    requestedTab === "avancado" && !canMutateProjects ? "dados" : requestedTab
+    requestedTab === 'avancado' && !canMutateProjects ? 'dados' : requestedTab;
 
-  const { data: projectResponse, isLoading, isError } = useProject(id)
-  const project = projectResponse?.data
+  const { data: projectResponse, isLoading, isError } = useProject(id);
+  const project = projectResponse?.data;
 
-  const { data: templatesResponse } = useTemplates({ limit: 100 })
-  const templates = templatesResponse?.data ?? []
+  const { data: templatesResponse } = useTemplates({ limit: 100 });
+  const templates = templatesResponse?.data ?? [];
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/projetos")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/projetos')}
+          >
             <ArrowLeft className="size-4" />
             Voltar
           </Button>
@@ -39,7 +43,7 @@ export default function ProjectDetailsPage() {
         </div>
         <Skeleton className="h-[400px] w-full rounded-xl" />
       </div>
-    )
+    );
   }
 
   if (isError || !project) {
@@ -50,12 +54,12 @@ export default function ProjectDetailsPage() {
         <p className="text-sm mt-1 mb-6">
           Ocorreu um erro ao buscar o projeto ou ele não existe mais.
         </p>
-        <Button onClick={() => navigate("/projetos")} variant="outline">
+        <Button onClick={() => navigate('/projetos')} variant="outline">
           <ArrowLeft className="mr-2 size-4" />
           Voltar para Projetos
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -63,13 +67,21 @@ export default function ProjectDetailsPage() {
       {/* Header section */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/projetos")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/projetos')}
+          >
             <ArrowLeft className="size-4" />
             Voltar
           </Button>
           <div className="flex flex-col">
-            <h1 className="text-2xl font-bold tracking-tight">Detalhes do Projeto</h1>
-            <span className="text-sm text-muted-foreground">{project.name}</span>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Detalhes do Projeto
+            </h1>
+            <span className="text-sm text-muted-foreground">
+              {project.name}
+            </span>
           </div>
         </div>
       </div>
@@ -80,37 +92,62 @@ export default function ProjectDetailsPage() {
         className="w-full"
       >
         <div className="flex items-center justify-between">
-          <TabsList className="grid w-full grid-cols-2 lg:inline-flex lg:grid-cols-none lg:w-auto h-auto p-1 bg-muted/50 rounded-lg">
-            <TabsTrigger value="dados" className="py-2.5">Dados</TabsTrigger>
-            <TabsTrigger value="template" className="py-2.5">Template</TabsTrigger>
-            <TabsTrigger value="mensagem" className="py-2.5">Mensagem</TabsTrigger>
-            <TabsTrigger value="numeros" className="py-2.5">Números</TabsTrigger>
+          <TabsList className="flex w-full justify-start overflow-x-auto sm:justify-center lg:w-auto h-auto p-1 bg-muted/50 rounded-lg [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <TabsTrigger value="dados" className="py-2.5 shrink-0">
+              Dados
+            </TabsTrigger>
+            <TabsTrigger value="template" className="py-2.5 shrink-0">
+              Template
+            </TabsTrigger>
+            <TabsTrigger value="mensagem" className="py-2.5 shrink-0">
+              Mensagem
+            </TabsTrigger>
+            <TabsTrigger value="numeros" className="py-2.5 shrink-0">
+              Números
+            </TabsTrigger>
             {canMutateProjects && (
-              <TabsTrigger value="avancado" className="py-2.5">Avançado</TabsTrigger>
+              <TabsTrigger value="avancado" className="py-2.5 shrink-0">
+                Avançado
+              </TabsTrigger>
             )}
           </TabsList>
         </div>
 
         <div className="mt-6 w-full">
-          <TabsContent value="dados" className="m-0 border-0 p-0 focus-visible:ring-0">
+          <TabsContent
+            value="dados"
+            className="m-0 border-0 p-0 focus-visible:ring-0"
+          >
             <BasicDataTab project={project} />
           </TabsContent>
-          <TabsContent value="template" className="m-0 border-0 p-0 focus-visible:ring-0">
+          <TabsContent
+            value="template"
+            className="m-0 border-0 p-0 focus-visible:ring-0"
+          >
             <TemplateTab project={project} templates={templates} />
           </TabsContent>
-          <TabsContent value="mensagem" className="m-0 border-0 p-0 focus-visible:ring-0">
+          <TabsContent
+            value="mensagem"
+            className="m-0 border-0 p-0 focus-visible:ring-0"
+          >
             <FlowMessageTab project={project} templates={templates} />
           </TabsContent>
-          <TabsContent value="numeros" className="m-0 border-0 p-0 focus-visible:ring-0">
+          <TabsContent
+            value="numeros"
+            className="m-0 border-0 p-0 focus-visible:ring-0"
+          >
             <NumbersTab project={project} />
           </TabsContent>
           {canMutateProjects && (
-            <TabsContent value="avancado" className="m-0 border-0 p-0 focus-visible:ring-0">
+            <TabsContent
+              value="avancado"
+              className="m-0 border-0 p-0 focus-visible:ring-0"
+            >
               <AdvancedTab project={project} />
             </TabsContent>
           )}
         </div>
       </Tabs>
     </div>
-  )
+  );
 }

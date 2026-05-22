@@ -137,7 +137,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                 : 'Imagem do projeto'
             }
           >
-            <Avatar className="size-24  ring-2 ring-primary/20">
+            <Avatar className="size-24 ring-2 ring-primary/20">
               {project.image ? (
                 <AvatarImage
                   src={`${project.image}${project.image.includes('?') ? '&' : '?'}v=${imageKey}`}
@@ -145,7 +145,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                   className="object-cover"
                 />
               ) : null}
-              <AvatarFallback className="text-3xl font-semibold rounded-2xl">
+              <AvatarFallback className="text-3xl font-semibold">
                 {getInitials(project.name)}
               </AvatarFallback>
             </Avatar>

@@ -1,46 +1,57 @@
-import React, { useState, useRef } from "react"
-import { useForm, Controller } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Building2, Phone, Pencil, Camera, Loader2, X, Check } from "lucide-react"
-import { toast } from "sonner"
+import React, { useState, useRef } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Building2,
+  Phone,
+  Pencil,
+  Camera,
+  Loader2,
+  X,
+  Check,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Field, FieldError, FieldLabel } from "@/components/ui/field"
-import { PhoneInput } from "@/components/ui/phone-input"
-import { formatPhone } from "@/utils/formatPhone"
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { PhoneInput } from '@/components/ui/phone-input';
+import { formatPhone } from '@/utils/formatPhone';
 
-import type { Project } from "@/features/projects/types"
-import { useUpdateProject } from "@/features/projects/hooks/useUpdateProject"
-import { useUploadProjectImage } from "@/features/projects/hooks/useUploadProjectImage"
-import { editProjectSchema, type EditProjectFormData } from "@/features/projects/schemas/editProjectSchema"
-import { usePermissions } from "@/features/access/hooks/usePermissions"
-import { cn } from "@/lib/utils"
+import type { Project } from '@/features/projects/types';
+import { useUpdateProject } from '@/features/projects/hooks/useUpdateProject';
+import { useUploadProjectImage } from '@/features/projects/hooks/useUploadProjectImage';
+import {
+  editProjectSchema,
+  type EditProjectFormData,
+} from '@/features/projects/schemas/editProjectSchema';
+import { usePermissions } from '@/features/access/hooks/usePermissions';
+import { cn } from '@/lib/utils';
 
 interface BasicDataTabProps {
-  project: Project
+  project: Project;
 }
 
 function getInitials(name: string): string {
   return name
-    .split(" ")
+    .split(' ')
     .slice(0, 2)
     .map((word) => word[0])
-    .join("")
-    .toUpperCase()
+    .join('')
+    .toUpperCase();
 }
 
 export function BasicDataTab({ project }: BasicDataTabProps) {
-  const { canMutateProjects } = usePermissions()
-  const [isEditing, setIsEditing] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { canMutateProjects } = usePermissions();
+  const [isEditing, setIsEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [imageKey, setImageKey] = useState(Date.now())
+  const [imageKey, setImageKey] = useState(Date.now());
 
-  const updateProject = useUpdateProject()
-  const uploadImage = useUploadProjectImage()
+  const updateProject = useUpdateProject();
+  const uploadImage = useUploadProjectImage();
 
   const {
     register,
@@ -52,44 +63,44 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
     resolver: zodResolver(editProjectSchema),
     defaultValues: {
       phoneNumber: project.phoneNumber,
-      agency: project.agency || "",
+      agency: project.agency || '',
     },
-  })
+  });
 
   async function onSubmit(data: EditProjectFormData) {
     try {
       await updateProject.mutateAsync({
         id: project.id,
         data,
-      })
-      toast.success("Dados do projeto atualizados!")
-      setIsEditing(false)
+      });
+      toast.success('Dados do projeto atualizados!');
+      setIsEditing(false);
     } catch {
-      toast.error("Ocorreu um erro ao salvar as alterações. Tente novamente.")
+      toast.error('Ocorreu um erro ao salvar as alterações. Tente novamente.');
     }
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Por favor, selecione um arquivo de imagem.")
-      return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor, selecione um arquivo de imagem.');
+      return;
     }
 
     try {
       await uploadImage.mutateAsync({
         projectId: project.id,
         file,
-      })
-      setImageKey(Date.now())
-      toast.success("Imagem atualizada com sucesso!")
+      });
+      setImageKey(Date.now());
+      toast.success('Imagem atualizada com sucesso!');
     } catch {
-      toast.error("Falha ao atualizar a imagem. Tente novamente.")
+      toast.error('Falha ao atualizar a imagem. Tente novamente.');
     } finally {
       if (fileInputRef.current) {
-        fileInputRef.current.value = "" // reset
+        fileInputRef.current.value = ''; // reset
       }
     }
   }
@@ -112,8 +123,8 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
 
           <div
             className={cn(
-              "relative group shrink-0",
-              canMutateProjects && "cursor-pointer",
+              'relative group shrink-0',
+              canMutateProjects && 'cursor-pointer',
             )}
             onClick={
               canMutateProjects
@@ -122,11 +133,11 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
             }
             title={
               canMutateProjects
-                ? "Trocar imagem do projeto"
-                : "Imagem do projeto"
+                ? 'Trocar imagem do projeto'
+                : 'Imagem do projeto'
             }
           >
-            <Avatar className="size-24 rounded-2xl ring-2 ring-primary/20">
+            <Avatar className="size-24  ring-2 ring-primary/20">
               {project.image ? (
                 <AvatarImage
                   src={`${project.image}${project.image.includes('?') ? '&' : '?'}v=${imageKey}`}
@@ -140,7 +151,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
             </Avatar>
 
             {canMutateProjects && (
-              <div className="absolute inset-0 bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 {uploadImage.isPending ? (
                   <Loader2 className="size-6 text-white animate-spin" />
                 ) : (
@@ -161,9 +172,14 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
 
           <div className="flex flex-col gap-4 w-full pt-2">
             {isEditing ? (
-              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 w-full">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-8 w-full"
+              >
                 <div className="pr-8">
-                  <h2 className="text-2xl font-bold tracking-tight">{project.name}</h2>
+                  <h2 className="text-2xl font-bold tracking-tight">
+                    {project.name}
+                  </h2>
                   <p className="text-sm text-muted-foreground mt-2 px-1 block">
                     ID: <span className="font-mono">{project.id}</span>
                   </p>
@@ -171,9 +187,16 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-border/50 pt-6">
                   <div className="flex flex-col gap-1.5">
-                    <Field data-invalid={!!errors.phoneNumber} className="space-y-2">
-                      <FieldLabel htmlFor="phoneNumber" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                        <Phone className="size-4" /> Telefone (WhatsApp) <span className="text-destructive">*</span>
+                    <Field
+                      data-invalid={!!errors.phoneNumber}
+                      className="space-y-2"
+                    >
+                      <FieldLabel
+                        htmlFor="phoneNumber"
+                        className="text-sm font-medium text-muted-foreground flex items-center gap-2"
+                      >
+                        <Phone className="size-4" /> Telefone (WhatsApp){' '}
+                        <span className="text-destructive">*</span>
                       </FieldLabel>
                       <Controller
                         control={control}
@@ -192,14 +215,17 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
 
                   <div className="flex flex-col gap-1.5">
                     <Field data-invalid={!!errors.agency} className="space-y-2">
-                      <FieldLabel htmlFor="agency" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <FieldLabel
+                        htmlFor="agency"
+                        className="text-sm font-medium text-muted-foreground flex items-center gap-2"
+                      >
                         <Building2 className="size-4" /> Agência
                       </FieldLabel>
                       <Input
                         id="agency"
                         placeholder="Nome da agência"
                         className="text-base font-semibold bg-background"
-                        {...register("agency")}
+                        {...register('agency')}
                       />
                       <FieldError>{errors.agency?.message}</FieldError>
                     </Field>
@@ -211,8 +237,8 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      reset()
-                      setIsEditing(false)
+                      reset();
+                      setIsEditing(false);
                     }}
                     disabled={updateProject.isPending}
                     size="sm"
@@ -238,7 +264,9 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
             ) : (
               <div className="flex flex-col gap-8 w-full">
                 <div className="pr-8">
-                  <h2 className="text-2xl font-bold tracking-tight">{project.name}</h2>
+                  <h2 className="text-2xl font-bold tracking-tight">
+                    {project.name}
+                  </h2>
                   <p className="text-sm text-muted-foreground mt-1 cursor-text select-text block">
                     ID: <span className="font-mono">{project.id}</span>
                   </p>
@@ -249,7 +277,9 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                     <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <Phone className="size-4" /> Telefone (WhatsApp)
                     </span>
-                    <span className="text-base font-semibold">{formatPhone(project.phoneNumber)}</span>
+                    <span className="text-base font-semibold">
+                      {formatPhone(project.phoneNumber)}
+                    </span>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
@@ -257,7 +287,7 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
                       <Building2 className="size-4" /> Agência
                     </span>
                     <span className="text-base font-semibold">
-                      {project.agency ? project.agency : "Não informada"}
+                      {project.agency ? project.agency : 'Não informada'}
                     </span>
                   </div>
                 </div>
@@ -267,5 +297,5 @@ export function BasicDataTab({ project }: BasicDataTabProps) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
